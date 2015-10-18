@@ -1,0 +1,56 @@
+// ECE571 Project: PDP8 Simulator
+// memory_utils.pkg
+
+package memory_utils;
+	`define WORDS_PER_PAGE 128
+	`define PAGES 32
+	`define INVALID 0
+	`define VALID 1
+	`define DATA_READ 0
+	`define INSTRUCTION_FETCH 1
+
+	typedef word logic [11:0];
+
+	typedef struct packed {
+		word data;
+		logic valid;
+	} memory_element;
+
+	memory_element [PAGES * WORDS_PER_PAGE] memory;
+	integer memory_trace_file;
+
+	function init_mem();
+		for(int i =0; i < PAGES * WORDS_PER_PAGE; i++) begin
+			memory[i].valid = 1'b0;
+		end
+	endfunction
+
+	function print_valid_memory();
+		$display("******************************PRINTING VALID MEMORY**************************\n");
+		$display("Address    Contents\n");
+		$display("-------    --------\n");
+
+		for(int i = 0; i < PAGES * WORDS_PER_PAGE; i++) begin
+			if(memory[i].valid === 1'b1) begin
+				$display("%o        %o\n", i, memory[i].data);
+			end //if
+		end //for
+	endfunction
+
+	function trace_init();
+		automatic string tracefile_name = "memory_trace.txt";
+		memory_trace_file = $fopen(tracefile_name, "w");
+
+		if(memory_trace_file == 0) begin
+			$display("Memory trace file failed to open");
+		end
+		else begin
+			$display("Memory trace file opened sucessfully");
+		end
+	endfunction
+
+	function trace_close();
+		$fclose(memory_trace_file);
+	endfunction
+endpackage
+
