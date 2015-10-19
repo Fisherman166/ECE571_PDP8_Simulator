@@ -17,14 +17,14 @@ module memory_controller(
 	output word read_data
 );
 
-	always_ff @(address, write_data, read_enable, write_enable) begin
+	always_ff @(read_enable, write_enable) begin
 		if( (read_enable === 1'b1) && (write_enable === 1'b1) ) begin
 			`ifdef SIMULATION
 				$display("memory controller ERROR: read enable and write enable high");
 			`endif
 			read_data <= read_data;
 		end
-		else if(read_enable === 1'b1) begin
+		else if(read_enable === 1'b1) begin 
 			read_data <= read_memory(address, read_type);
 		end
 		else begin
@@ -40,10 +40,10 @@ module memory_controller(
 			`ifdef SIMULATION
 				$display("Attempting to read from invalid address %04o", address);
 			`endif
-			retval <= 12'h0;
+			retval = 12'h0;
 		end
 		else if( (read_type === DATA_READ) || (read_type === INSTRUCTION_FETCH) ) begin
-			retval = memory[address];
+			retval = memory[address].data;
 
 			`ifdef SIMULATION
 				if(read_type === DATA_READ) $fdisplay(memory_trace_file, "DR %04o\n", address);
@@ -54,7 +54,7 @@ module memory_controller(
 			`ifdef SIMULATION	
 				$fdisplay(memory_trace_file, "Read type not recongized at address %04o\n", address);
 			`endif
-			retval <= 12'h0;
+			retval = 12'h0;
 		end
 
 		return retval;

@@ -8,6 +8,7 @@ package memory_utils;
 	localparam VALID = 1;
 	localparam DATA_READ = 0;
 	localparam INSTRUCTION_FETCH = 1;
+    localparam WORDSIZE = 12;
 
 	typedef logic [11:0] word;
 
@@ -19,25 +20,25 @@ package memory_utils;
 	memory_element [PAGES * WORDS_PER_PAGE] memory;
 	integer memory_trace_file;
 
-	function init_mem();
+	function void init_mem();
 		for(int i =0; i < PAGES * WORDS_PER_PAGE; i++) begin
 			memory[i].valid = 1'b0;
 		end
 	endfunction
 
-	function print_valid_memory();
+	function void print_valid_memory();
 		$display("******************************PRINTING VALID MEMORY**************************\n");
 		$display("Address    Contents\n");
 		$display("-------    --------\n");
 
 		for(int i = 0; i < PAGES * WORDS_PER_PAGE; i++) begin
 			if(memory[i].valid === 1'b1) begin
-				$display("%o        %o\n", i, memory[i].data);
+				$display("%04o        %04o\n", i, memory[i].data);
 			end //if
 		end //for
 	endfunction
 
-	function trace_init();
+	function void trace_init();
 		automatic string tracefile_name = "memory_trace.txt";
 		memory_trace_file = $fopen(tracefile_name, "w");
 
@@ -49,7 +50,7 @@ package memory_utils;
 		end
 	endfunction
 
-	function trace_close();
+	function void trace_close();
 		$fclose(memory_trace_file);
 	endfunction
 endpackage
