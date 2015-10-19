@@ -27,7 +27,7 @@ module memory_controller(
 		else if(read_enable === 1'b1) begin
 			read_data <= read_memory(address, read_type);
 		end
-		else
+		else begin
 			write_memory(address, write_data);
 			read_data <= read_data;
 		end
@@ -42,11 +42,11 @@ module memory_controller(
 			`endif
 			retval <= 12'h0;
 		end
-		else if( (read_type === READ_DATA) || (read_type === INSTRUCTION_FETCH) ) begin
+		else if( (read_type === DATA_READ) || (read_type === INSTRUCTION_FETCH) ) begin
 			retval = memory[address];
 
 			`ifdef SIMULATION
-				if(read_type === READ_DATA) $fdisplay(memory_trace_file, "DR %04o\n", address);
+				if(read_type === DATA_READ) $fdisplay(memory_trace_file, "DR %04o\n", address);
 				else $fdisplay(memory_trace_file, "IF %04o\n", address);
 			`endif
 		end
@@ -60,7 +60,7 @@ module memory_controller(
 		return retval;
 	endfunction
 
-	function write_memory(word address, word data);
+	function void write_memory(word address, word data);
 		`ifdef SIMULATION
 			$fdisplay(memory_trace_file, "DW %04o\n", address);
 		`endif
@@ -69,4 +69,6 @@ module memory_controller(
 		memory[address].valid = 1'b1;
 	endfunction
 endmodule
+
+`endif
 
