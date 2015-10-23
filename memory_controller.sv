@@ -36,17 +36,17 @@ module memory_controller(
 	function word read_memory(word address, logic read_type);
 		word retval;
 		
-		if(memory[address].valid === INVALID) begin
+		if(memory[address].valid === `INVALID) begin
 			`ifdef SIMULATION
 				$display("Attempting to read from invalid address %04o", address);
 			`endif
 			retval = 12'h0;
 		end
-		else if( (read_type === DATA_READ) || (read_type === INSTRUCTION_FETCH) ) begin
+		else if( (read_type === `DATA_READ) || (read_type === `INSTRUCTION_FETCH) ) begin
 			retval = memory[address].data;
 
 			`ifdef SIMULATION
-				if(read_type === DATA_READ) $fdisplay(memory_trace_file, "DR %04o\n", address);
+				if(read_type === `DATA_READ) $fdisplay(memory_trace_file, "DR %04o\n", address);
 				else $fdisplay(memory_trace_file, "IF %04o\n", address);
 			`endif
 		end

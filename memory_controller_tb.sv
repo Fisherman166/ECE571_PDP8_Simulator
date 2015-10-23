@@ -43,7 +43,7 @@ module memory_controller_tb();
 
     task read_from_memory(input word address_to_read);
         address = address_to_read;
-        read_type = DATA_READ;
+        read_type = `DATA_READ;
         read_enable = 1'b1;
         #1;
         read_enable = 1'b0;

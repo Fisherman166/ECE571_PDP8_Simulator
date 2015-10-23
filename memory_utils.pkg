@@ -1,14 +1,15 @@
 // ECE571 Project: PDP8 Simulator
 // memory_utils.pkg
 
+`define WORDS_PER_PAGE 128
+`define PAGES 32
+`define INVALID 0
+`define VALID 1
+`define DATA_READ 0
+`define INSTRUCTION_FETCH 1
+`define WORDSIZE 12
+
 package memory_utils;
-    localparam WORDS_PER_PAGE = 128;
-    localparam PAGES = 32;
-	localparam INVALID = 0;
-	localparam VALID = 1;
-	localparam DATA_READ = 0;
-	localparam INSTRUCTION_FETCH = 1;
-    localparam WORDSIZE = 12;
 
 	typedef logic [11:0] word;
 
@@ -17,11 +18,11 @@ package memory_utils;
 		logic valid;
 	} memory_element;
 
-	memory_element [PAGES * WORDS_PER_PAGE] memory;
+	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
 	integer memory_trace_file;
 
 	function void init_mem();
-		for(int i =0; i < PAGES * WORDS_PER_PAGE; i++) begin
+		for(int i =0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
 			memory[i].valid = 1'b0;
 		end
 	endfunction
@@ -31,7 +32,7 @@ package memory_utils;
 		$display("Address    Contents\n");
 		$display("-------    --------\n");
 
-		for(int i = 0; i < PAGES * WORDS_PER_PAGE; i++) begin
+		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
 			if(memory[i].valid === 1'b1) begin
 				$display("%04o        %04o\n", i, memory[i].data);
 			end //if
