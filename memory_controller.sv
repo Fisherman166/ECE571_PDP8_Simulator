@@ -11,29 +11,49 @@ import memory_utils::*;
 module memory_controller(
 	input word address,
 	input word write_data,
+    input logic clk,
 	input logic read_enable,
 	input logic read_type,
 	input logic write_enable,
-	output word read_data
+	output word read_data,
+    output logic operation_done
 );
+    states current_state = IDLE;
+    states next_state;
 
-	always_ff @(read_enable, write_enable) begin
-		if( (read_enable === 1'b1) && (write_enable === 1'b1) ) begin
-			`ifdef SIMULATION
-				$display("memory controller ERROR: read enable and write enable high");
-			`endif
-			read_data <= read_data;
-		end
-		else if(read_enable === 1'b1) begin 
-			read_data <= read_memory(address, read_type);
-		end
-		else begin
-			write_memory(address, write_data);
-			read_data <= read_data;
-		end
-	end
+    always_ff @(posedge clk) begin
+        current_state <= next_state;
+        //FIXME - this display is needed for some reason
+        //otherwise current_state never updates to next_state
+        $display("no idea = %b", next_state);
+    end
 
-	function word read_memory(word address, logic read_type);
+    //Next state logic
+    always_comb begin
+        unique case (current_state)
+            IDLE: if(write_enable) next_state = WRITE;
+                  else if(read_enable) next_state = READ;
+                  else next_state = IDLE;
+            READ: next_state = DONE;
+            WRITE: next_state = DONE;
+            DONE: next_state = IDLE;
+        endcase
+    end
+
+    //Output logic
+    always_comb begin
+        read_data = read_data;
+        operation_done = 1'b0;
+
+        unique case (current_state)
+            IDLE: operation_done = 1'b0;
+            READ: read_data = read_memory(address, read_type);
+            WRITE: write_memory(address, write_data);
+            DONE: operation_done = 1'b1;
+        endcase
+    end
+
+	function word read_memory(input word address, input logic read_type);
 		word retval;
 		
 		if(memory[address].valid === `INVALID) begin
@@ -46,13 +66,13 @@ module memory_controller(
 			retval = memory[address].data;
 
 			`ifdef SIMULATION
-				if(read_type === `DATA_READ) $fdisplay(memory_trace_file, "DR %04o\n", address);
+				if(read_type === `DATA_READ) $fdisplay(memory_trace_file, "DR %04o", address);
 				else $fdisplay(memory_trace_file, "IF %04o\n", address);
 			`endif
 		end
 		else begin
 			`ifdef SIMULATION	
-				$fdisplay(memory_trace_file, "Read type not recongized at address %04o\n", address);
+				$fdisplay(memory_trace_file, "Read type not recongized at address %04o", address);
 			`endif
 			retval = 12'h0;
 		end
@@ -60,9 +80,9 @@ module memory_controller(
 		return retval;
 	endfunction
 
-	function void write_memory(word address, word data);
+	function void write_memory(input word address, input word data);
 		`ifdef SIMULATION
-			$fdisplay(memory_trace_file, "DW %04o\n", address);
+			$fdisplay(memory_trace_file, "DW %04o", address);
 		`endif
 
 		memory[address].data = data;

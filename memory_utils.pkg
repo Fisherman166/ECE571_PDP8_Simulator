@@ -18,6 +18,11 @@ package memory_utils;
 		logic valid;
 	} memory_element;
 
+    typedef enum logic [3:0] {IDLE =    4'b0001,
+                              READ =    4'b0010,
+                              WRITE =   4'b0100,
+                              DONE =    4'b1000} states;
+
 	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
 	integer memory_trace_file;
 
