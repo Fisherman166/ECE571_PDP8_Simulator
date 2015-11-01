@@ -1,6 +1,9 @@
 // ECE571 Project: PDP8 Simulator
 // memory_utils.pkg
 
+`ifndef MEMORY_UTILS
+`define MEMORY_UTILS
+
 `define WORDS_PER_PAGE 128
 `define PAGES 32
 `define INVALID 0
@@ -60,4 +63,8 @@ package memory_utils;
 		$fclose(memory_trace_file);
 	endfunction
 endpackage
+
+import memory_utils::*;
+
+`endif
 

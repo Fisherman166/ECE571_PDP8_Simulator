@@ -2,6 +2,7 @@
 // memory_controller_tb.sv
 
 `include "memory_controller.sv"
+`include "memory_utils.pkg"
 
 `define SIMULATION
 

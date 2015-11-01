@@ -6,8 +6,6 @@
 
 `include "memory_utils.pkg"
 
-import memory_utils::*;
-
 module memory_controller(
 	input word address,
 	input word write_data,
