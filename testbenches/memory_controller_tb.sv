@@ -1,8 +1,8 @@
 //ECE571 Project: PDP8 Simulator
 // memory_controller_tb.sv
 
-`include "memory_controller.sv"
-`include "memory_utils.pkg"
+`include "../src/memory_controller.sv"
+`include "../src/memory_utils.pkg"
 
 `define SIMULATION
 
@@ -16,6 +16,7 @@ module memory_controller_tb();
     logic write_enable = 1'b0;
     word read_data;
     logic operation_done;
+    logic error_flag = 1'b0;
 
     memory_controller controller1(
         .address(address),
@@ -39,6 +40,7 @@ module memory_controller_tb();
         if(inputs.was_read && (inputs.data !== read_data)) begin
             $display("Expected to read = %04o from address %04o, actually read =%04o",
                      inputs.data, inputs.address, read_data);
+            error_flag = 1'b1;
         end
     end
 
@@ -98,6 +100,9 @@ module memory_controller_tb();
 
         print_valid_memory();
         trace_close();
+
+        if(error_flag === 1'b1) $display("Test FAILED. See above errors");
+        else $display("Test PASSED.");
         $finish;
     end
 endmodule

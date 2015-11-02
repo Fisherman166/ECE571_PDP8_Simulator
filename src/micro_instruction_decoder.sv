@@ -1,6 +1,9 @@
 // ECE571 Project: PDP8 Simulator
 // micro_instruction_decoder.sv
 
+`ifndef MICRO_INSTRUCTION_DECODER
+`define MICRO_INSTRUCTION_DECODER
+
 `include "memory_utils.pkg"
 
 `define INSTRUCTION_SIZE 9
@@ -195,7 +198,7 @@ module micro_instruction_decoder(
         endcase
     end
 
-    //Group2 OR instruction
+    //Group2 OR instructions
     always_comb begin
         automatic logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SMA,
                                                                      group2_instruction_bits.SZA,
@@ -223,9 +226,42 @@ module micro_instruction_decoder(
         else skip_or = 1'b0;
     end
 
+    //Group2 AND instructions
+    always_comb begin
+        automatic logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SPA,
+                                                                     group2_instruction_bits.SNA,
+                                                                     group2_instruction_bits.SZL};
+
+        if(group_select[2:1] === `AND_INSTRUCTION) begin
+            case(instructions_dectected)
+                3'b000: skip_and = 1'b1;
+                3'b001: if(l_reg === 1'b0) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b010: if(ac_reg !== '0) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b011: if( (ac_reg !== '0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b100: if(ac_reg[11] === 1'b0) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b101: if( (ac_reg[11] === 1'b0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b110: if( (ac_reg[11] === 1'b0) && (ac_reg !== '0) ) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+                3'b111: if( (ac_reg[11] === 1'b0) && (ac_reg !== '0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                        else skip_and = 1'b0;
+               default: skip_and = 1'b0;
+            endcase
+        end
+        else skip_and = 1'b0;
+    end
+
+    assign skip = skip_or | skip_and;
+
     function void set_group_output_flags(input logic [`GROUP_FLAG_SIZE-1:0] group_flags);
         {micro_g1, group2_or_select, group2_and_select, micro_g3} = group_flags;
     endfunction
 
 endmodule
+
+`endif
 

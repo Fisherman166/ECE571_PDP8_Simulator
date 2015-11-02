@@ -21,9 +21,6 @@ module memory_controller(
 
     always_ff @(posedge clk) begin
         current_state <= next_state;
-        //FIXME - this display is needed for some reason
-        //otherwise current_state never updates to next_state
-        $display("no idea = %b", next_state);
     end
 
     //Next state logic
