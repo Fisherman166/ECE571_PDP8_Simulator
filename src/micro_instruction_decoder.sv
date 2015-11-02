@@ -6,6 +6,7 @@
 `define INSTRUCTION_SIZE 9
 `define SELECT_SIZE 3
 `define ACCUMLATOR_AND_LINK_SIZE 13
+`define GROUP_FLAG_SIZE 4
 `define NUM_BLOCKS 4
 
 //Group 1 instruction bits
@@ -25,6 +26,12 @@
 `define SPA_BIT 6
 `define SNA_BIT 5
 `define SZL_BIT 4
+
+//For group output bits
+`define GROUP1_FLAG_OUTPUT `GROUP_FLAG_SIZE'b1000
+`define GROUP2_OR_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0100
+`define GROUP2_AND_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0010
+`define GROUP3_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0001
 
 module micro_instruction_decoder(
     input logic [`INSTRUCTION_SIZE-1:0] i_reg,
@@ -64,15 +71,12 @@ module micro_instruction_decoder(
         logic SZL;
     } group2_instruction_bits;
 
-    struct packed {
-        logic [`SELECT_SIZE-1:0] or_select;
-        logic [`SELECT_SIZE-1:0] and_select;
-        logic skip_or;
-        logic skip_and;
-    } group2_select_bits;
-
-    //For intermediate calculation in shifts
     logic [`ACCUMLATOR_AND_LINK_SIZE-1:0] link_and_accumulator;
+    logic [`SELECT_SIZE-1:0] group_select;
+    logic [`SELECT_SIZE-1:0] or_select;
+    logic [`SELECT_SIZE-1:0] and_select;
+    logic skip_or;
+    logic skip_and;
 
     //Decode instruction register
     always_comb begin
@@ -84,7 +88,33 @@ module micro_instruction_decoder(
         group1_instruction_bits.RAL = i_reg[`RAL_BIT];
         group1_instruction_bits.BSW = i_reg[`BSW_BIT];
         group1_instruction_bits.IAC = i_reg[`IAC_BIT];
+
+        group2_instruction_bits.SMA = i_reg[`SMA_BIT];
+        group2_instruction_bits.SZA = i_reg[`SZA_BIT];
+        group2_instruction_bits.SNL = i_reg[`SNL_BIT];
+        group2_instruction_bits.SPA = i_reg[`SPA_BIT];
+        group2_instruction_bits.SNA = i_reg[`SNA_BIT];
+        group2_instruction_bits.SZL = i_reg[`SZL_BIT];
+
+        //Grabs the bits needed to figure out what group the instruction
+        //is in
+        group_select = {i_reg[8], i_reg[3], i_reg[0]};
     end
+
+
+    //Set group output bit to the selected group
+    always_comb begin
+        unique case(group_select)
+            `SELECT_SIZE'b0??: set_group_output_flags(`GROUP1_FLAG_OUTPUT);
+            `SELECT_SIZE'b100: set_group_output_flags(`GROUP2_OR_FLAG_OUTPUT);
+            `SELECT_SIZE'b110: set_group_output_flags(`GROUP2_AND_FLAG_OUTPUT);
+            `SELECT_SIZE'b1?1: set_group_output_flags(`GROUP3_FLAG_OUTPUT);
+        endcase
+    end
+
+    function void set_group_output_flags(input logic [`GROUP_FLAG_SIZE-1:0] group_flags);
+        {micro_g1, or_select, and_select, micro_g3} = group_flags;
+    endfunction
 
 endmodule
 
