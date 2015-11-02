@@ -33,6 +33,13 @@
 `define GROUP2_AND_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0010
 `define GROUP3_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0001
 
+//For shift case statement
+`define BYTE_SWAP `SELECT_SIZE'b001
+`define LEFT_SHIFT1 `SELECT_SIZE'b010
+`define LEFT_SHIFT2 `SELECT_SIZE'b011
+`define RIGHT_SHIFT1 `SELECT_SIZE'b100
+`define RIGHT_SHIFT2 `SELECT_SIZE'b101
+
 module micro_instruction_decoder(
     input logic [`INSTRUCTION_SIZE-1:0] i_reg,
     input word ac_reg,
@@ -59,7 +66,6 @@ module micro_instruction_decoder(
         logic RAL;
         logic BSW;
         logic IAC;
-        logic [`SELECT_SIZE-1:0] shift_and_swap_selection;
     } group1_instruction_bits;
 
     struct packed {
@@ -73,8 +79,9 @@ module micro_instruction_decoder(
 
     logic [`ACCUMLATOR_AND_LINK_SIZE-1:0] link_and_accumulator;
     logic [`SELECT_SIZE-1:0] group_select;
-    logic [`SELECT_SIZE-1:0] or_select;
-    logic [`SELECT_SIZE-1:0] and_select;
+    logic [`SELECT_SIZE-1:0] group2_or_select;
+    logic [`SELECT_SIZE-1:0] group2_and_select;
+    logic [`SELECT_SIZE-1:0] group1_block3_select;
     logic skip_or;
     logic skip_and;
 
@@ -101,7 +108,6 @@ module micro_instruction_decoder(
         group_select = {i_reg[8], i_reg[3], i_reg[0]};
     end
 
-
     //Set group output bit to the selected group
     always_comb begin
         unique case(group_select)
@@ -110,10 +116,83 @@ module micro_instruction_decoder(
             `SELECT_SIZE'b110: set_group_output_flags(`GROUP2_AND_FLAG_OUTPUT);
             `SELECT_SIZE'b1?1: set_group_output_flags(`GROUP3_FLAG_OUTPUT);
         endcase
+
+        micro_g2 = group2_or_select | group2_and_select;
+    end
+
+    //Group1 inustrctions
+    always_comb begin
+        //Block 0 - Clear
+        if(group1_instruction_bits.CLA === 1'b1) block_connection[0].accumlator = '0;
+        else block_connection[0].accumlator = ac_reg;
+
+        if(group1_instruction_bits.CLL === 1'b1) block_connection[0].link = '0;
+        else block_connection[0].link = l_reg;
+
+        //Block 1 - Complement
+        if(group1_instruction_bits.CMA === 1'b1) begin
+            block_connection[1].accumlator = ~block_connection[0].accumlator;
+        end
+        else block_connection[1].accumlator = block_connection[0].accumlator;
+
+        if(group1_instruction_bits.CML === 1'b1) begin
+            block_connection[1].link = ~block_connection[0].link;
+        end
+        else block_connection[1].link = block_connection[0].link;
+
+        //Block 2 - increment
+        link_and_accumulator = {block_connection[1].link, block_connection[1].accumlator} + 1'b1;
+
+        if(group1_instruction_bits.IAC === 1'b1) begin
+            block_connection[2].accumlator = link_and_accumulator[`ACCUMLATOR_AND_LINK_SIZE-2:0];
+            block_connection[2].link = link_and_accumulator[`ACCUMLATOR_AND_LINK_SIZE-1];
+        end
+        else begin
+            block_connection[2].accumlator = block_connection[1].accumlator;
+            block_connection[2].link = block_connection[1].link;
+        end
+
+        //Block 3 - shift
+        group1_block3_select = {group1_instruction_bits.RAR,
+                                group1_instruction_bits.RAL,
+                                group1_instruction_bits.BSW};
+        
+        case(group1_block3_select)
+           `BYTE_SWAP: begin
+                       block_connection[3].accumlator = {block_connection[2].accumlator[5:0],
+                                                         block_connection[2].accumlator[11:6]};
+                       end
+            `LEFT_SHIFT1: begin
+                          block_connection[3].link = block_connection[2].accumlator[11];
+                          block_connection[3].accumlator = {block_connection[2].accumlator[10:0],
+                                                            block_connection[2].link};
+                          end
+            `LEFT_SHIFT2: begin
+                          block_connection[3].link = block_connection[2].accumlator[10];
+                          block_connection[3].accumlator = {block_connection[2].accumlator[9:0],
+                                                            block_connection[2].link,
+                                                            block_connection[2].accumlator[11]};
+                          end
+            `RIGHT_SHIFT1: begin
+                           block_connection[3].link = block_connection[2].accumlator[0];
+                           block_connection[3].accumlator = {block_connection[2].link,
+                                                             block_connection[2].accumlator[11:1]};
+                           end
+            `RIGHT_SHIFT2: begin
+                           block_connection[3].link = block_connection[2].accumlator[1];
+                           block_connection[3].accumlator = {block_connection[2].accumlator[0],
+                                                             block_connection[2].link,
+                                                             block_connection[2].accumlator[11:2]};
+                           end
+            default: begin
+                     block_connection[3].link = block_connection[2].link;
+                     block_connection[3].accumlator = block_connection[2].accumlator;
+                     end
+        endcase
     end
 
     function void set_group_output_flags(input logic [`GROUP_FLAG_SIZE-1:0] group_flags);
-        {micro_g1, or_select, and_select, micro_g3} = group_flags;
+        {micro_g1, group2_or_select, group2_and_select, micro_g3} = group_flags;
     endfunction
 
 endmodule
