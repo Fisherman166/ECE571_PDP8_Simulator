@@ -40,6 +40,10 @@
 `define RIGHT_SHIFT1 `SELECT_SIZE'b100
 `define RIGHT_SHIFT2 `SELECT_SIZE'b101
 
+//For group2 OR and AND indentification
+`define OR_INSTRUCTION 2'b10
+`define AND_INSTRUCTION 2'b11
+
 module micro_instruction_decoder(
     input logic [`INSTRUCTION_SIZE-1:0] i_reg,
     input word ac_reg,
@@ -158,10 +162,10 @@ module micro_instruction_decoder(
                                 group1_instruction_bits.BSW};
         
         case(group1_block3_select)
-           `BYTE_SWAP: begin
-                       block_connection[3].accumlator = {block_connection[2].accumlator[5:0],
-                                                         block_connection[2].accumlator[11:6]};
-                       end
+            `BYTE_SWAP: begin
+                        block_connection[3].accumlator = {block_connection[2].accumlator[5:0],
+                                                          block_connection[2].accumlator[11:6]};
+                        end
             `LEFT_SHIFT1: begin
                           block_connection[3].link = block_connection[2].accumlator[11];
                           block_connection[3].accumlator = {block_connection[2].accumlator[10:0],
@@ -189,6 +193,34 @@ module micro_instruction_decoder(
                      block_connection[3].accumlator = block_connection[2].accumlator;
                      end
         endcase
+    end
+
+    //Group2 OR instruction
+    always_comb begin
+        automatic logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SMA,
+                                                                     group2_instruction_bits.SZA,
+                                                                     group2_instruction_bits.SNL};
+
+        if(group_select[2:1] === `OR_INSTRUCTION) begin
+            case(instructions_dectected)
+                3'b001: if(l_reg !== 1'b0) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b010: if(ac_reg === '0) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b011: if( (ac_reg === '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b100: if(ac_reg[11] === 1'b1) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b101: if( (ac_reg[11] === 1'b1) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b110: if( (ac_reg[11] === 1'b1) || (ac_reg === '0) ) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+                3'b111: if( (ac_reg[11] === 1'b1) || (ac_reg === '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                        else skip_or = 1'b0;
+               default: skip_or = 1'b0;
+            endcase
+        end
+        else skip_or = 1'b0;
     end
 
     function void set_group_output_flags(input logic [`GROUP_FLAG_SIZE-1:0] group_flags);
