@@ -9,15 +9,22 @@ int main() {
         exit(-1);
     }
 
-    CLA(&registers, 07654, 0);
-    write_regs(&registers, output_file);
-    CLA(&registers, 07654, 1);
-    write_regs(&registers, output_file);
+    CLA_test(&registers, output_file);
 
     fclose(output_file);
     return 0;
 }
 
+void CLA_test(regs* registers, FILE* output_file) {
+    uint16_t i;
+
+    for(i = 0; i < 0777; i++) {
+        CLA(registers, i, 0);
+        write_regs(registers, output_file);
+        CLA(registers, i, 1);
+        write_regs(registers, output_file);
+    }
+}
 
 void write_regs(regs* registers, FILE *output_file) {
     fprintf(output_file, "%04o %04o %01u %04o %01u %01u %01u %01u %01u\n", 

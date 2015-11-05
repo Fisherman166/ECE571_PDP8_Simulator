@@ -22,6 +22,7 @@ typedef struct {
     uint8_t micro_g3;
 } regs;
 
+void CLA_test(regs*, FILE*);
 void write_regs(regs*, FILE*);
 
 /* Opcode 7 - group 1 */
