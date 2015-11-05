@@ -1,52 +1,237 @@
-#include <stdio.h>
-#include <inttypes.h>
-#include <unistd.h>
-
-#define I_REG_MASK 0x1FF
-#define AC_REG_MASK 0xFFF
-#define SINGLE_BIT 0x1o
-
-// Group 1 micro instructions
-#define NOP  07000
-#define CLA  07200
-#define CLL  07100
-#define CMA  07040
-#define CML  07020
-#define IAC  07001
-#define RAR  07010
-#define RTR  07012
-#define RAL  07004
-#define RTL  07006
-
-// Group 2 micro instructions
-#define SMA  07100
-#define SZA  07040
-#define SNL  07020
-#define SPA  07110
-#define SNA  07050
-#define SZL  07030
-#define SKP  07010
-#define CLA  07200
-#define OSR  07004
-#define HLT  07002
-
-struct {
-    uint16_t i_reg;
-    uint16_t ac_reg;
-    uint8_t l_reg;
-    uint16_t result_ac;
-    uint8_t result_link;
-    uint8_t ;
-    uint8_t ;
-
+#include "micro_instruction_generator.h"
 
 int main() {
-    FILE *output_file = fopen("micro_instructions.txt", w);
+    FILE *output_file = fopen("../test_cases/micro_instructions.txt", "w");
+    regs registers;
     
     if(output_file == NULL) {
         printf("Failed to open output file\n");
         exit(-1);
     }
 
-    
-        
+    CLA(&registers, 07654, 0);
+    write_regs(&registers, output_file);
+    CLA(&registers, 07654, 1);
+    write_regs(&registers, output_file);
+
+    fclose(output_file);
+    return 0;
+}
+
+
+void write_regs(regs* registers, FILE *output_file) {
+    fprintf(output_file, "%04o %04o %01u %04o %01u %01u %01u %01u %01u\n", 
+            registers->i_reg & I_REG_MASK,
+            registers->ac_reg & AC_REG_MASK,
+            registers->l_reg & SINGLE_BIT,
+            registers->result_ac & AC_REG_MASK,
+            registers->result_link & SINGLE_BIT,
+            registers->skip & SINGLE_BIT,
+            registers->micro_g1 & SINGLE_BIT,
+            registers->micro_g2 & SINGLE_BIT,
+            registers->micro_g3 & SINGLE_BIT);
+}
+
+/* Opcode 7 - group 1 */
+void CLA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0200;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = 00000;
+    registers->result_link = link;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+void CLL(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0100;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = 0;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+void CMA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0040;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ~ac;
+    registers->result_link = link;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+void CML(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0020;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = ~link;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+void IAC(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0001;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = (ac + 1);
+    registers->result_link = link;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+void RAR(regs* registers, uint16_t ac, uint8_t link) {
+    const uint8_t bit11_shift = 11;
+
+    registers->i_reg = 0010;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = (ac >> 1) | (link << bit11_shift);
+    registers->result_link = registers->result_ac & 1;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+//Doing two RAR in a row and then resetting the inputs to the right value
+void RTR(regs* registers, uint16_t ac, uint8_t link) {
+    RAR(registers, ac, link);
+    RAR(registers, registers->ac_reg, registers->l_reg);
+
+    registers->i_reg = 0012;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+}
+
+void RAL(regs* registers, uint16_t ac, uint8_t link) {
+    const uint8_t shift_num = 12;   /* Shift bit 12 into bit 0 */
+    const uint16_t new_link_pos = 0x1000;   /* Bit 12 */
+
+    registers->i_reg = 0004;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = (ac << 1) | link;
+    registers->result_link = (registers->result_ac & new_link_pos) >> shift_num;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+}
+
+//Doing two RAL in a row and then resetting the inputs to the right value
+void RTL(regs* registers, uint16_t ac, uint8_t link) {
+    RAL(registers, ac, link);
+    RAL(registers, registers->ac_reg, registers->l_reg);
+
+    registers->i_reg = 0006;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+}
+
+
+/* Opcode 7 - group 2 */
+void SMA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0500;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(ac & 04000) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+void SZA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0440;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(!ac) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+void SNL(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0420;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(link) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+void SPA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0510;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(!(ac & 04000)) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+void SNA(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0450;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(ac) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+void SZL(regs* registers, uint16_t ac, uint8_t link) { 
+    registers->i_reg = 0430;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    if(!link) registers->skip = 1;
+    else registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+}
+
+
+void MQL(regs* registers, uint16_t ac, uint8_t link) {
+    registers->i_reg = 0421;
+    registers->ac_reg = ac;
+    registers->l_reg = link;
+    registers->result_ac = ac;
+    registers->result_link = link;
+    registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 1;
+}
+
