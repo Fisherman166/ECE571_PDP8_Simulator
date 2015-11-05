@@ -1,7 +1,51 @@
 // ECE571 Project: PDP8 Simulator
 // micro_instruction_decoder.sv
 
-`include "micro_instruction_decoder.vh"
+`ifndef MICRO_INSTRUCTION_DECODER
+`define MICRO_INSTRUCTION_DECODER
+
+`include "memory_utils.pkg"
+
+`define INSTRUCTION_SIZE 9
+`define SELECT_SIZE 3
+`define ACCUMLATOR_AND_LINK_SIZE 13
+`define GROUP_FLAG_SIZE 4
+`define NUM_BLOCKS 4
+
+//Group 1 instruction bits
+`define CLA_BIT 7
+`define CLL_BIT 6
+`define CMA_BIT 5
+`define CML_BIT 4
+`define RAR_BIT 3
+`define RAL_BIT 2
+`define BSW_BIT 1
+`define IAC_BIT 0
+
+//Group 2 instruction bits
+`define SMA_BIT 6
+`define SZA_BIT 5
+`define SNL_BIT 4
+`define SPA_BIT 6
+`define SNA_BIT 5
+`define SZL_BIT 4
+
+//For group output bits
+`define GROUP1_FLAG_OUTPUT `GROUP_FLAG_SIZE'b1000
+`define GROUP2_OR_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0100
+`define GROUP2_AND_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0010
+`define GROUP3_FLAG_OUTPUT `GROUP_FLAG_SIZE'b0001
+
+//For shift case statement
+`define BYTE_SWAP `SELECT_SIZE'b001
+`define LEFT_SHIFT1 `SELECT_SIZE'b010
+`define LEFT_SHIFT2 `SELECT_SIZE'b011
+`define RIGHT_SHIFT1 `SELECT_SIZE'b100
+`define RIGHT_SHIFT2 `SELECT_SIZE'b101
+
+//For group2 OR and AND indentification
+`define OR_INSTRUCTION 2'b10
+`define AND_INSTRUCTION 2'b11
 
 module micro_instruction_decoder(
     input logic [`INSTRUCTION_SIZE-1:0] i_reg,
@@ -41,12 +85,12 @@ module micro_instruction_decoder(
     } group2_instruction_bits;
 
     logic [`ACCUMLATOR_AND_LINK_SIZE-1:0] link_and_accumulator;
-    logic [`SELECT_SIZE-1:0] group_select;
-    logic [`SELECT_SIZE-1:0] group2_or_select;
-    logic [`SELECT_SIZE-1:0] group2_and_select;
-    logic [`SELECT_SIZE-1:0] group1_block3_select;
-    logic skip_or;
-    logic skip_and;
+    logic [`SELECT_SIZE-1:0] group_select = 3'b000;
+    logic [`SELECT_SIZE-1:0] group1_block3_select = 3'b000;
+    logic group2_or_select = 1'b0;
+    logic group2_and_select = 1'b0;
+    logic skip_or = 1'b0;
+    logic skip_and = 1'b0;
 
     //Decode instruction register
     always_comb begin
@@ -73,7 +117,10 @@ module micro_instruction_decoder(
 
     //Set group output bit to the selected group
     always_comb begin
-        unique case(group_select)
+        `ifdef DEBUG
+            $display("Group select = %b", group_select);
+        `endif
+        case(group_select) inside
             `SELECT_SIZE'b0??: set_group_output_flags(`GROUP1_FLAG_OUTPUT);
             `SELECT_SIZE'b100: set_group_output_flags(`GROUP2_OR_FLAG_OUTPUT);
             `SELECT_SIZE'b110: set_group_output_flags(`GROUP2_AND_FLAG_OUTPUT);
@@ -85,6 +132,10 @@ module micro_instruction_decoder(
 
     //Group1 inustrctions
     always_comb begin
+        `ifdef DEBUG
+            $display("Inputs = %o, %o, %b", i_reg, ac_reg, l_reg);
+        `endif
+
         //Block 0 - Clear
         if(group1_instruction_bits.CLA === 1'b1) block_connection[0].accumlator = '0;
         else block_connection[0].accumlator = ac_reg;
@@ -152,6 +203,9 @@ module micro_instruction_decoder(
                      block_connection[3].accumlator = block_connection[2].accumlator;
                      end
         endcase
+
+        ac_micro = block_connection[3].accumlator;
+        l_micro = block_connection[3].link;
     end
 
     //Group2 OR instructions
@@ -218,4 +272,6 @@ module micro_instruction_decoder(
     endfunction
 
 endmodule
+
+`endif
 
