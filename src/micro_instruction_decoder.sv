@@ -204,8 +204,14 @@ module micro_instruction_decoder(
                      end
         endcase
 
-        ac_micro = block_connection[3].accumlator;
-        l_micro = block_connection[3].link;
+        if( (group_select[2:1] === `OR_INSTRUCTION) || (group_select[2:1] === `AND_INSTRUCTION) ) begin
+            ac_micro = ac_reg;
+            l_micro = l_reg;
+        end
+        else begin
+            ac_micro = block_connection[3].accumlator;
+            l_micro = block_connection[3].link;
+        end
     end
 
     //Group2 OR instructions

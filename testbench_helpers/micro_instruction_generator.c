@@ -11,9 +11,10 @@ int main() {
     
     #ifdef RUN_SINGLE_TESTS
         group1_single_tests(&registers, output_file);
+        group2_single_tests(&registers, output_file);
     #endif
 
-    #ifdef RUN_SINGLE_TESTS
+    #ifdef RUN_EXHAUSTIVE_TESTS
         group1_exhaustive_tests(&registers, output_file);
     #endif
 
@@ -132,6 +133,32 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     write_regs(registers, output_file);
 }
 
+void group2_single_tests(regs* registers, FILE* output_file) {
+    run_single_test(SMA, registers, 04001, output_file);    //Skip
+    run_single_test(SMA, registers, 00001, output_file);    //Don't skip
+    run_single_test(SZA, registers, 00000, output_file);    //Skip
+    run_single_test(SZA, registers, 00001, output_file);    //Don't skip
+    run_single_test(SNL, registers, 00000, output_file);    //Both skip and no skip
+
+    run_single_test(SPA, registers, 00001, output_file);    //Skip
+    run_single_test(SPA, registers, 04001, output_file);    //Don't skip
+    run_single_test(SNA, registers, 00004, output_file);    //Skip
+    run_single_test(SNA, registers, 00000, output_file);    //Don't skip
+    run_single_test(SZL, registers, 00000, output_file);    //Both skip and no skip
+}
+
+void group2_exhaustive_tests(regs* registers, FILE* output_file) {
+    run_exhaustive_test(CLA, registers, output_file);
+    run_exhaustive_test(CLA, registers, output_file);
+    run_exhaustive_test(CLL, registers, output_file);
+    run_exhaustive_test(CMA, registers, output_file);
+    run_exhaustive_test(CML, registers, output_file);
+    run_exhaustive_test(IAC, registers, output_file);
+    run_exhaustive_test(RAR, registers, output_file);
+    //run_exhaustive_test(RTR, registers, output_file); FIXME
+    run_exhaustive_test(RAL, registers, output_file);
+    //run_exhaustive_test(RTL, registers, output_file); FIXME
+}
 
 /* Opcode 7 - group 1 */
 void CLA(regs* registers, uint16_t ac, uint8_t link) {
@@ -220,7 +247,7 @@ void RTR(regs* registers, uint16_t ac, uint8_t link) {
     RAR(registers, ac, link);
     RAR(registers, registers->ac_reg, link);
 
-    registers->i_reg = 0002;
+    registers->i_reg = 0012;
     registers->ac_reg = ac;
     registers->l_reg = link;
     strncpy(registers->opcodes, "RTR", OPCODE_TEXT_SIZE-1);
