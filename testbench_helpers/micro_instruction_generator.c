@@ -87,7 +87,6 @@ void group1_exhaustive_tests(regs* registers, FILE* output_file) {
 void group1_directed_tests(regs* registers, FILE* output_file) {
     //After setting them on the first bloock, variables after result_link
     //never change
-    //CLA and CLL
     registers->i_reg = 0300;
     registers->ac_reg = 07777;
     registers->l_reg = 01;
@@ -100,7 +99,6 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     strncpy(registers->opcodes, "CLA,CLL", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
 
-    //CLA and CMA
     registers->i_reg = 0240;
     registers->ac_reg = 07777;
     registers->l_reg = 01;
@@ -108,9 +106,23 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     registers->result_link = 01;
     strncpy(registers->opcodes, "CLA,CMA", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
-    
 
-    //CLA, CLL, CMA, CML, IAC, RAR, RAL
+    registers->i_reg = 0120;
+    registers->ac_reg = 07777;
+    registers->l_reg = 01;
+    registers->result_ac = 07777;
+    registers->result_link = 01;
+    strncpy(registers->opcodes, "CLL,CML", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0205;
+    registers->ac_reg = 07777;
+    registers->l_reg = 00;
+    registers->result_ac = 02;
+    registers->result_link = 00;
+    strncpy(registers->opcodes, "CLA,IAC,RAL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
     registers->i_reg = 0375;
     registers->ac_reg = 07777;
     registers->l_reg = 01;
