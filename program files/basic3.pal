@@ -1,0 +1,19 @@
+MUY=7405
+DVI=7407
+*10
+auto,   0
+
+*200            / page 1
+    CLA CLL     / tests JMS and subroutines
+    JMS 300
+    DCA 270
+
+*300
+    0000        / address of return goes here
+    CLA CLL
+    TAD (200)
+    TAD (300)
+    JMP I 300 
+
+/    HLT
+$               / end of program

@@ -1,0 +1,26 @@
+
+I'll be uploading test programs into this thread. Attached here is basic1.pal, which tests most basic functions, 
+including group1 and group2 OPR instructions (skips, rotates, compliments, and clears). I will upload more programs 
+that test subroutines, looping, and multiply/divide.
+
+You can compile it by placing both the program under test and the macro8x program (in the distro) in the same 
+folder on your computer. Then, navigate to the folder containing both and run:
+
+macro8x -r <program>.pal
+
+It will generate a RIM file that you can use in the simulator or with your project.
+The program should be set up that if your hardware works (or you use the simulator), 
+the program will run perfectly until the end. There are lots of "landmine" HLT instructions 
+place throughout, so the program should halt if you have an issue with a command or register. 
+My program isn't perfect, so it won't catch everything. I still suggest debugging manually if 
+you are worried about a specific command. You can also use the pdp8 simulator to compare your
+registers/memory to a reference.
+
+I will try my best to do both programs (the Sieve of Eratosthenes and the bruteforce algorithms), 
+but I would suggest that you try to get your multiply and divide working.
+
+Basic2 tests looping using ISZ.
+Basic3 tests a basic subroutine using JMS.
+Basic4 displays "123, HELLO!" to the terminal.
+Basic5 tests multiplication.
+Basic6 tests division.

@@ -1,0 +1,134 @@
+MUY=7405
+DVI=7407
+*10
+checking, 2
+/trial, 0
+in, 2
+MAXINT, 7777
+MAXROOT, 64
+
+*200            / page 1
+settr, CLA CLL     / makes sure AC and L are cleared properly
+       TAD (2)
+       DCA trial   / set trial to 2
+
+chetr, TAD checking
+       CMA IAC
+       CLL
+       TAD trial
+       SZL         / check if trial < checking
+       JMP prime   / if trial /< checking, it's a prime
+ 
+       CLA CLL   
+       TAD checking
+       MQL
+       CLA CLL
+       DVI
+trial, 0  / divide checking/trial
+    
+       SZA         / skip if AC = 0
+       JMP inctr
+
+notprime, CLA CLL
+       TAD checking
+       TAD (1)
+       DCA checking / checking = checking + 1
+
+       CLA
+       TAD checking
+       CMA IAC
+       CLL
+       TAD MAXINT
+       SNL         / if MAXINT >= checking
+       HLT         / end program when MAXINT is reached
+       JMP settr
+ 
+inctr, CLA CLL
+       TAD trial
+       TAD (1)
+       DCA trial   / trial = trial + 1
+       JMP chetr
+
+      
+prime, TAD checking
+       DCA in       / in = checking
+
+       CLA CLL
+       TAD (-12)
+       TAD in
+       SZL
+       JMP is10    / if in < 10, write digit
+wr1, 
+       CLA CLL  
+       TAD in
+       TAD (060)
+       JMS TTYO    / write in
+       
+       CLA CLL
+       TAD (040)
+       JMS TTYO    / write ' '
+
+       JMP notprime
+
+is10,
+       CLA CLL
+       TAD (-144)
+       TAD in
+       SZL
+       JMP is100   / if in < 10, write digit
+wr10,
+       CLA CLL   
+       TAD in
+       MQL
+       CLA CLL
+       DVI; 12  / divide by 10
+       DCA in   / store remainder in in
+       MQA
+       TAD (060)
+       JMS TTYO    /write quotient
+       cLA CLL      
+       JMP wr1 
+
+is100,
+       CLA CLL
+       TAD (-1750)
+       TAD in
+       SZL
+       JMP is1000   / if in < 10, write digit
+wr100,
+       CLA CLL   
+       TAD in
+       MQL
+       CLA CLL
+       DVI; 144 / divide by 100
+       DCA in   / store remainder in in
+       MQA
+       TAD (060)
+       JMS TTYO    /write quotient
+       cLA CLL      
+       JMP wr10 
+
+is1000,
+wr1000,
+       CLA CLL   
+       TAD in
+       MQL
+       CLA CLL
+       DVI; 1750 / divide by 100
+       DCA in   / store remainder in in
+       MQA
+       TAD (060)
+       JMS TTYO    /write quotient
+       cLA CLL      
+       JMP wr100 
+
+TTYO,  0
+       TLS
+       TSF
+       JMP .-1
+       CLA
+       JMP I TTYO
+ 
+
+/    HLT
+$               / end of program

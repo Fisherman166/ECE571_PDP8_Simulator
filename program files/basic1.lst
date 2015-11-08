@@ -1,0 +1,97 @@
+
+      MUY=7405                                                            Page 1
+
+
+    1       7405  MUY=7405
+    2       7407  DVI=7407
+    3       0010  *10
+    4 00010 0000  auto,   0
+    5             
+    6       0200  *200            / page 1
+    7 00200 7300      CLA CLL     / makes sure AC and L are cleared properly at
+    8 00201 7440      SZA         / start
+    9 00202 7402      HLT
+   10 00203 7430      SZL
+   11 00204 7402      HLT     
+   12             
+   13 00205 1377      TAD (10)
+   14 00206 7010      RAR
+   15 00207 7010      RAR
+   16 00210 7012      RTR         / rotates AC  right four times; clearing it
+   17 00211 7440      SZA         / and placing 1 in L
+   18 00212 7402      HLT
+   19 00213 7420      SNL
+   20 00214 7402      HLT
+   21 00215 5300      JMP 300
+   22                 
+   23       0300  *300
+   24 00300 7320      CLA CLL CML / makes sure L is cleared too, put 1 in L
+   25 00301 7420      SNL
+   26 00302 7402      HLT
+   27 00303 7004      RAL         / rotates AC left 4 times
+   28 00304 7004      RAL
+   29 00305 7006      RTL
+   30 00306 7510      SPA
+   31 00307 7402      HLT
+   32 00310 7430      SZL
+   33 00311 7402      HLT
+   34 00312 5776@     JMP 400
+   35             
+      00376 0400
+      00377 0010
+   36       0400  *400
+   37 00400 7340      CLA CLL CMA / tests if AC can be set to all 1s
+   38 00401 7000      NOP
+   39 00402 7450      SNA
+   40 00403 7402      HLT
+   41 00404 7500      SMA
+   42 00405 7402      HLT
+   43 00406 7001      IAC
+   44 00407 7440      SZA
+   45 00410 7402      HLT
+   46 00411 5300      JMP 500
+   47                 
+   48       0500  *500
+   49 00500 7300      CLA CLL    / tests some of the skips
+   50 00501 1377      TAD (1)
+   51 00502 7510      SPA
+   52 00503 7402      HLT
+   53 00504 7450      SNA
+   54 00505 7402      HLT
+   55 00506 7410      SKP
+
+      MUY=7405                                                            Page 2
+
+
+   56 00507 7402      HLT  
+   57 00510 4776@     JMS 600 
+   58             
+      00576 0600
+      00577 0001
+   59       0600  *600
+   60 00600 0000      0
+   61 00601 7300      CLA CLL    / tests and and or
+   62 00602 1377      TAD (5252)
+   63 00603 0376      AND (2525)
+   64 00604 7440      SZA
+   65 00605 7402      HLT
+   66 00606 1376      TAD (2525)
+   67 00607 5300      JMP 700
+   68             
+   69       0700  *700
+   70 00700 0000  loc, 0
+   71 00701 7340      CLA CLL CMA  / tests DCA and TAD
+   72 00702 3300      DCA loc
+   73 00703 7440      SZA
+   74 00704 7402      HLT
+   75 00705 1300      TAD loc
+   76 00706 7420      SNL
+   77 00707 7402      HLT
+   78                 
+   79              
+   80             
+   81             /    HLT
+      00776 2525
+      00777 5252
+
+      No detected errors
