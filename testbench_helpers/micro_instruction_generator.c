@@ -8,20 +8,31 @@ int main() {
         printf("Failed to open output file\n");
         exit(-1);
     }
-    
-    #ifdef RUN_SINGLE_TESTS
+
+    #ifdef GROUP1_TESTS
+        #ifdef RUN_SINGLE_TESTS
         group1_single_tests(&registers, output_file);
-        group2_single_tests(&registers, output_file);
-    #endif
-
-    #ifdef RUN_EXHAUSTIVE_TESTS
+        #endif
+        #ifdef RUN_EXHAUSTIVE_TESTS
         group1_exhaustive_tests(&registers, output_file);
-    #endif
-
-    #ifdef RUN_DIRECTED_TESTS 
+        #endif
+        #ifdef RUN_DIRECTED_TESTS
         group1_directed_tests(&registers, output_file);
+        #endif
     #endif
 
+    #ifdef GROUP2_TESTS
+        #ifdef RUN_SINGLE_TESTS
+        group2_single_tests(&registers, output_file);
+        #endif
+        #ifdef RUN_EXHAUSTIVE_TESTS
+        group2_exhaustive_tests(&registers, output_file);
+        #endif
+        #ifdef RUN_DIRECTED_TESTS
+        group2_or_directed_tests(&registers, output_file);
+        #endif
+    #endif
+    
     fclose(output_file);
     return 0;
 }
@@ -148,17 +159,37 @@ void group2_single_tests(regs* registers, FILE* output_file) {
 }
 
 void group2_exhaustive_tests(regs* registers, FILE* output_file) {
-    run_exhaustive_test(CLA, registers, output_file);
-    run_exhaustive_test(CLA, registers, output_file);
-    run_exhaustive_test(CLL, registers, output_file);
-    run_exhaustive_test(CMA, registers, output_file);
-    run_exhaustive_test(CML, registers, output_file);
-    run_exhaustive_test(IAC, registers, output_file);
-    run_exhaustive_test(RAR, registers, output_file);
-    //run_exhaustive_test(RTR, registers, output_file); FIXME
-    run_exhaustive_test(RAL, registers, output_file);
-    //run_exhaustive_test(RTL, registers, output_file); FIXME
+    run_exhaustive_test(SMA, registers, output_file);
+    run_exhaustive_test(SZA, registers, output_file);
+    run_exhaustive_test(SNL, registers, output_file);
+    run_exhaustive_test(SPA, registers, output_file);
+    run_exhaustive_test(SNA, registers, output_file);
+    run_exhaustive_test(SZL, registers, output_file);
 }
+
+void group2_or_directed_tests(regs* registers, FILE* output_file) {
+    //All should skip
+    registers->i_reg = 0520;
+    registers->ac_reg = 04001;
+    registers->l_reg = 01;
+    registers->result_ac = 04001;
+    registers->result_link = 01;
+    registers->skip = 1;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SMA,SNL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0460;
+    registers->ac_reg = 00000;
+    registers->l_reg = 01;
+    registers->result_ac = 00000;
+    registers->result_link = 01;
+    strncpy(registers->opcodes, "SZA,SNL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+}
+
 
 /* Opcode 7 - group 1 */
 void CLA(regs* registers, uint16_t ac, uint8_t link) {

@@ -204,6 +204,9 @@ module micro_instruction_decoder(
                      end
         endcase
 
+        //This is only to make verification in the testbench easier
+        //since my C program expects that the inputted ac and link
+        //will be outtputed by the module for group 2 instructions
         if( (group_select[2:1] === `OR_INSTRUCTION) || (group_select[2:1] === `AND_INSTRUCTION) ) begin
             ac_micro = ac_reg;
             l_micro = l_reg;
