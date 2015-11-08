@@ -13,8 +13,12 @@ int main() {
         group1_single_tests(&registers, output_file);
     #endif
 
-    #ifndef RUN_SINGLE_TESTS
+    #ifdef RUN_SINGLE_TESTS
         group1_exhaustive_tests(&registers, output_file);
+    #endif
+
+    #ifdef RUN_DIRECTED_TESTS 
+        group1_directed_tests(&registers, output_file);
     #endif
 
     fclose(output_file);
@@ -78,6 +82,40 @@ void group1_exhaustive_tests(regs* registers, FILE* output_file) {
     run_exhaustive_test(RAL, registers, output_file);
     //run_exhaustive_test(RTL, registers, output_file); FIXME
 }
+
+void group1_directed_tests(regs* registers, FILE* output_file) {
+    //After setting them on the first bloock, variables after result_link
+    //never change
+    //CLA and CLL
+    registers->i_reg = 0300;
+    registers->ac_reg = 07777;
+    registers->l_reg = 01;
+    registers->result_ac = 00000;
+    registers->result_link = 00;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
+    write_regs(registers, output_file);
+
+    //CLA and CMA
+    registers->i_reg = 0240;
+    registers->ac_reg = 07777;
+    registers->l_reg = 01;
+    registers->result_ac = 07777;
+    registers->result_link = 01;
+    write_regs(registers, output_file);
+    
+
+    //CLA, CLL, CMA, CML, IAC, RAR, RAL
+    registers->i_reg = 0375;
+    registers->ac_reg = 07777;
+    registers->l_reg = 01;
+    registers->result_ac = 00000;
+    registers->result_link = 00;
+    write_regs(registers, output_file);
+}
+
 
 /* Opcode 7 - group 1 */
 void CLA(regs* registers, uint16_t ac, uint8_t link) {
@@ -160,7 +198,7 @@ void RTR(regs* registers, uint16_t ac, uint8_t link) {
     RAR(registers, ac, link);
     RAR(registers, registers->ac_reg, link);
 
-    registers->i_reg = 0012;
+    registers->i_reg = 0002;
     registers->ac_reg = ac;
     registers->l_reg = link;
 }

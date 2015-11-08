@@ -40,6 +40,34 @@ module micro_instruction_decoder_tb ();
         forever #1 clk = ~clk;
     end
 
+    `ifdef CHECK_PASS
+    always @(posedge clk) begin
+        automatic int local_error = 0;
+
+        if(ac_micro === expected_ac) begin
+            $display("PASS: Accumulator result = %0o, Expected = %0o", ac_micro, expected_ac);
+        end
+        if(l_micro === expected_link) begin
+            $display("PASS: link result = %b, Expected = %b", l_micro, expected_link);
+        end
+        if(skip === expected_skip) begin
+            $display("PASS: skip result = %b, Expected = %b", skip, expected_skip);
+        end
+        if(micro_g1 === expected_micro_g1) begin
+            $display("PASS: micro_g1 result = %b, Expected = %b", micro_g1, expected_micro_g1);
+        end
+        if(micro_g2 === expected_micro_g2) begin
+            $display("PASS: micro_g2 result = %b, Expected = %b", micro_g2, expected_micro_g2);
+        end
+        if(micro_g3 === expected_micro_g3) begin
+            $display("PASS: micro_g3 result = %b, Expected = %b", micro_g3, expected_micro_g3);
+        end
+
+        $display("Inputs were: i_reg = %o, ac_reg = %o, l_reg = %b\n",
+        i_reg, ac_reg, l_reg);
+    end
+    `endif
+
     always @(posedge clk) begin
         automatic int local_error = 0;
 
@@ -91,7 +119,7 @@ module micro_instruction_decoder_tb ();
             
         end
         else begin
-            num_read = $fscanf(file_ptr, "%04o %04o %b %04o %b %b %b %b %b", temp_i_reg,
+            num_read = $fscanf(file_ptr, "%03o %04o %b %04o %b %b %b %b %b", temp_i_reg,
                                                            temp_ac,
                                                            temp_l,
                                                            expected_ac,
