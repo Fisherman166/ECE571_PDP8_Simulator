@@ -17,6 +17,7 @@ module micro_instruction_decoder_tb ();
     integer file_ptr;
     logic expected_skip, expected_micro_g1, expected_micro_g2, expected_micro_g3, stop;
     logic error_flag = 0;
+    string opcodes;
 
     micro_instruction_decoder decoder1( .i_reg,
                                         .ac_reg,
@@ -63,8 +64,8 @@ module micro_instruction_decoder_tb ();
             $display("PASS: micro_g3 result = %b, Expected = %b", micro_g3, expected_micro_g3);
         end
 
-        $display("Inputs were: i_reg = %o, ac_reg = %o, l_reg = %b\n",
-        i_reg, ac_reg, l_reg);
+        $display("Inputs were: i_reg = %o, ac_reg = %o, l_reg = %b, opcode(s) = %s\n",
+        i_reg, ac_reg, l_reg, opcodes);
     end
     `endif
 
@@ -103,8 +104,8 @@ module micro_instruction_decoder_tb ();
         end
 
         if(local_error) begin
-            $display("Inputs were: i_reg = %o, ac_reg = %o, l_reg = %b",
-            i_reg, ac_reg, l_reg);
+            $display("Inputs were: i_reg = %o, ac_reg = %o, l_reg = %b, opcode(s) = %s\n",
+            i_reg, ac_reg, l_reg, opcodes);
         end
     end
 
@@ -113,13 +114,13 @@ module micro_instruction_decoder_tb ();
         automatic word temp_ac;
         automatic logic temp_l;
         automatic int num_read;
-        const int num_expected = 9;
+        const int num_expected = 10;
 
         if($feof(file_ptr)) begin
             
         end
         else begin
-            num_read = $fscanf(file_ptr, "%03o %04o %b %04o %b %b %b %b %b", temp_i_reg,
+            num_read = $fscanf(file_ptr, "%03o %04o %b %04o %b %b %b %b %b %s", temp_i_reg,
                                                            temp_ac,
                                                            temp_l,
                                                            expected_ac,
@@ -127,7 +128,8 @@ module micro_instruction_decoder_tb ();
                                                            expected_skip,
                                                            expected_micro_g1,
                                                            expected_micro_g2,
-                                                           expected_micro_g3);
+                                                           expected_micro_g3,
+                                                           opcodes);
             if(num_read == -1) begin //eof
                 $fclose(file_ptr);
                 if(error_flag) $display("\nSome tests FAILED.\n");

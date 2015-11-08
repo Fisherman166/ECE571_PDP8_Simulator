@@ -46,7 +46,7 @@ void run_single_test(void (*opcode) (regs*, uint16_t, uint8_t), regs* registers,
 }
 
 void write_regs(regs* registers, FILE* output_file) {
-    fprintf(output_file, "%03o %04o %01u %04o %01u %01u %01u %01u %01u\n", 
+    fprintf(output_file, "%03o %04o %01u %04o %01u %01u %01u %01u %01u %s\n", 
             registers->i_reg & I_REG_MASK,
             registers->ac_reg & AC_REG_MASK,
             registers->l_reg & SINGLE_BIT,
@@ -55,7 +55,8 @@ void write_regs(regs* registers, FILE* output_file) {
             registers->skip & SINGLE_BIT,
             registers->micro_g1 & SINGLE_BIT,
             registers->micro_g2 & SINGLE_BIT,
-            registers->micro_g3 & SINGLE_BIT);
+            registers->micro_g3 & SINGLE_BIT,
+            registers->opcodes);
 }
 
 void group1_single_tests(regs* registers, FILE* output_file) {
@@ -96,6 +97,7 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "CLA,CLL", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
 
     //CLA and CMA
@@ -104,6 +106,7 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     registers->l_reg = 01;
     registers->result_ac = 07777;
     registers->result_link = 01;
+    strncpy(registers->opcodes, "CLA,CMA", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
     
 
@@ -113,6 +116,7 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     registers->l_reg = 01;
     registers->result_ac = 00000;
     registers->result_link = 00;
+    strncpy(registers->opcodes, "CLA,CLL,CMA,CML,IAC,RAR,RAL", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
 }
 
@@ -128,6 +132,7 @@ void CLA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "CLA", OPCODE_TEXT_SIZE-1);
 }
 
 void CLL(regs* registers, uint16_t ac, uint8_t link) {
@@ -140,6 +145,7 @@ void CLL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "CLL", OPCODE_TEXT_SIZE-1);
 }
 
 void CMA(regs* registers, uint16_t ac, uint8_t link) {
@@ -152,6 +158,7 @@ void CMA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "CMA", OPCODE_TEXT_SIZE-1);
 }
 
 void CML(regs* registers, uint16_t ac, uint8_t link) {
@@ -164,6 +171,7 @@ void CML(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "CML", OPCODE_TEXT_SIZE-1);
 }
 
 void IAC(regs* registers, uint16_t ac, uint8_t link) {
@@ -176,6 +184,7 @@ void IAC(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "IAC", OPCODE_TEXT_SIZE-1);
 }
 
 void RAR(regs* registers, uint16_t ac, uint8_t link) {
@@ -190,6 +199,7 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "RAR", OPCODE_TEXT_SIZE-1);
 }
 
 //FIXME: Does not work as expected
@@ -201,6 +211,7 @@ void RTR(regs* registers, uint16_t ac, uint8_t link) {
     registers->i_reg = 0002;
     registers->ac_reg = ac;
     registers->l_reg = link;
+    strncpy(registers->opcodes, "RTR", OPCODE_TEXT_SIZE-1);
 }
 
 void RAL(regs* registers, uint16_t ac, uint8_t link) {
@@ -216,6 +227,7 @@ void RAL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "RAL", OPCODE_TEXT_SIZE-1);
 }
 
 //FIXME: Does not work as expected
@@ -227,6 +239,7 @@ void RTL(regs* registers, uint16_t ac, uint8_t link) {
     registers->i_reg = 0006;
     registers->ac_reg = ac;
     registers->l_reg = link;
+    strncpy(registers->opcodes, "RTL", OPCODE_TEXT_SIZE-1);
 }
 
 
@@ -242,6 +255,7 @@ void SMA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SMA", OPCODE_TEXT_SIZE-1);
 }
 
 void SZA(regs* registers, uint16_t ac, uint8_t link) {
@@ -255,6 +269,7 @@ void SZA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SZA", OPCODE_TEXT_SIZE-1);
 }
 
 void SNL(regs* registers, uint16_t ac, uint8_t link) {
@@ -268,6 +283,7 @@ void SNL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SNL", OPCODE_TEXT_SIZE-1);
 }
 
 void SPA(regs* registers, uint16_t ac, uint8_t link) {
@@ -281,6 +297,7 @@ void SPA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SPA", OPCODE_TEXT_SIZE-1);
 }
 
 void SNA(regs* registers, uint16_t ac, uint8_t link) {
@@ -294,6 +311,7 @@ void SNA(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SNA", OPCODE_TEXT_SIZE-1);
 }
 
 void SZL(regs* registers, uint16_t ac, uint8_t link) { 
@@ -307,6 +325,7 @@ void SZL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 1;
     registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SZL", OPCODE_TEXT_SIZE-1);
 }
 
 
@@ -320,5 +339,6 @@ void MQL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g1 = 0;
     registers->micro_g2 = 0;
     registers->micro_g3 = 1;
+    strncpy(registers->opcodes, "MQL", OPCODE_TEXT_SIZE-1);
 }
 

@@ -5,10 +5,12 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define I_REG_MASK 0x1FF
 #define AC_REG_MASK 0xFFF
 #define SINGLE_BIT 0x1
+#define OPCODE_TEXT_SIZE 100
 
 typedef struct {
     uint16_t i_reg;
@@ -20,6 +22,7 @@ typedef struct {
     uint8_t micro_g1;
     uint8_t micro_g2;
     uint8_t micro_g3;
+    char opcodes[OPCODE_TEXT_SIZE];
 } regs;
 
 // Test helper functions
