@@ -9,19 +9,23 @@ int main() {
         exit(-1);
     }
 
-    CLA_test(&registers, output_file);
+    
+    #ifdef RUN_ALL
+        run_exhaustive_test(CLA, &registers, output_file);
+    #endif
 
     fclose(output_file);
     return 0;
 }
 
-void CLA_test(regs* registers, FILE* output_file) {
+// Uses function pointer so you can pass in any opcode
+void run_exhaustive_test(void (*opcode) (regs*, uint16_t, uint8_t), regs* registers, FILE* output_file) {
     uint16_t i;
 
-    for(i = 0; i < 0777; i++) {
-        CLA(registers, i, 0);
+    for(i = 0; i < 010000; i++) {
+        opcode(registers, i, 0);
         write_regs(registers, output_file);
-        CLA(registers, i, 1);
+        opcode(registers, i, 1);
         write_regs(registers, output_file);
     }
 }
