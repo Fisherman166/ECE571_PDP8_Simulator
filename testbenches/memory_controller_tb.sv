@@ -3,30 +3,21 @@
 
 `include "../src/memory_controller.sv"
 `include "../src/memory_utils.pkg"
+`include "../src/CPU_Definitions.pkg"
 
 `define SIMULATION
 
 module memory_controller_tb();
     parameter CLK_PERIOD = 10;
-    word address;
-    word write_data;
     logic clk = 0;
-    logic read_enable = 1'b0;
     logic read_type;
-    logic write_enable = 1'b0;
-    word read_data;
-    logic operation_done;
+    memory_pins pins();
     logic error_flag = 1'b0;
 
     memory_controller controller1(
-        .address(address),
-        .write_data(write_data),
         .clk(clk),
-        .read_enable(read_enable),
         .read_type(read_type),
-        .write_enable(write_enable),
-        .read_data(read_data),
-        .operation_done(operation_done)
+        .pins(pins.slave)
     );
 
     typedef struct packed {
@@ -36,31 +27,31 @@ module memory_controller_tb();
 
     inputs_container inputs;
 
-    always @(posedge operation_done) begin
-        if(inputs.was_read && (inputs.data !== read_data)) begin
-            $display("Expected to read = %04o from address %04o, actually read =%04o",
-                     inputs.data, inputs.address, read_data);
+    always @(posedge pins.mem_finished) begin
+        if(inputs.was_read && (inputs.data !== pins.read_data)) begin
+            $display("ERROR: Expected to read = %04o from address %04o, actually read = %04o",
+                     inputs.data, inputs.address, pins.read_data);
             error_flag = 1'b1;
         end
     end
 
     task write_to_memory(input word address_to_write, input word data_to_write);
-        address = address_to_write;
-        write_data = data_to_write;
+        pins.address = address_to_write;
+        pins.write_data = data_to_write;
         inputs.was_read = 1'b0;
-        write_enable = 1'b1;
+        pins.write_enable = 1'b1;
         #CLK_PERIOD
-        write_enable = 1'b0;
+        pins.write_enable = 1'b0;
         #(CLK_PERIOD * 3);
     endtask
 
     task read_from_memory(input word address_to_read);
-        address = address_to_read;
+        pins.address = address_to_read;
         read_type = `DATA_READ;
         inputs.was_read = 1'b1;
-        read_enable = 1'b1;
+        pins.read_enable = 1'b1;
         #CLK_PERIOD;
-        read_enable = 1'b0;
+        pins.read_enable = 1'b0;
         #(CLK_PERIOD * 3);
     endtask
 
@@ -93,6 +84,10 @@ module memory_controller_tb();
         inputs.address = 12'o200;
         inputs.data = 12'o333;
         write_to_memory(inputs.address, inputs.data);
+        read_from_memory(inputs.address);
+
+        //Directed test that reads from invalid memory
+        inputs.address = 12'o201;
         read_from_memory(inputs.address);
 
         //Algorithimic test

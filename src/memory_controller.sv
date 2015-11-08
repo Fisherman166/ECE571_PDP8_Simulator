@@ -5,16 +5,12 @@
 `define MEMORY_H
 
 `include "memory_utils.pkg"
+`include "CPU_Definitions.pkg"
 
 module memory_controller(
-	input word address,
-	input word write_data,
     input logic clk,
-	input logic read_enable,
-	input logic read_type,
-	input logic write_enable,
-	output word read_data,
-    output logic operation_done
+    input logic read_type,
+    memory_pins.slave pins
 );
     states current_state = IDLE;
     states next_state;
@@ -26,8 +22,8 @@ module memory_controller(
     //Next state logic
     always_comb begin
         unique case (current_state)
-            IDLE: if(write_enable) next_state = WRITE;
-                  else if(read_enable) next_state = READ;
+            IDLE: if(pins.write_enable) next_state = WRITE;
+                  else if(pins.read_enable) next_state = READ;
                   else next_state = IDLE;
             READ: next_state = DONE;
             WRITE: next_state = DONE;
@@ -37,14 +33,14 @@ module memory_controller(
 
     //Output logic
     always_comb begin
-        read_data = read_data;
-        operation_done = 1'b0;
+        pins.read_data = pins.read_data;
+        pins.mem_finished = 1'b0;
 
         unique case (current_state)
-            IDLE: operation_done = 1'b0;
-            READ: read_data = read_memory(address, read_type);
-            WRITE: write_memory(address, write_data);
-            DONE: operation_done = 1'b1;
+            IDLE: pins.mem_finished = 1'b0;
+            READ: pins.read_data = read_memory(pins.address, read_type);
+            WRITE: write_memory(pins.address, pins.write_data);
+            DONE: pins.mem_finished = 1'b1;
         endcase
     end
 
