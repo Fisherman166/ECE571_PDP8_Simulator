@@ -30,6 +30,7 @@ int main() {
         #endif
         #ifdef RUN_DIRECTED_TESTS
         group2_or_directed_tests(&registers, output_file);
+        group2_and_directed_tests(&registers, output_file);
         #endif
     #endif
     
@@ -190,6 +191,148 @@ void group2_or_directed_tests(regs* registers, FILE* output_file) {
     write_regs(registers, output_file);
 }
 
+void group2_and_directed_tests(regs* registers, FILE* output_file) {
+    registers->i_reg = 0550;
+    registers->ac_reg = 04001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 1;
+    registers->micro_g3 = 0;
+    strncpy(registers->opcodes, "SPA,SNA", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0550;
+    registers->ac_reg = 00000;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SNA", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0550;
+    registers->ac_reg = 00001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 1;
+    strncpy(registers->opcodes, "SPA,SNA", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    //SPA,SZL
+    registers->i_reg = 0530;
+    registers->ac_reg = 04001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0530;
+    registers->ac_reg = 04001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0530;
+    registers->ac_reg = 00001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0530;
+    registers->ac_reg = 00001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 1;
+    strncpy(registers->opcodes, "SPA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    //SNA, SZL
+    registers->i_reg = 0470;
+    registers->ac_reg = 00000;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0470;
+    registers->ac_reg = 00001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0470;
+    registers->ac_reg = 00000;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0470;
+    registers->ac_reg = 00001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 1;
+    strncpy(registers->opcodes, "SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    //SPA, SNA, SZL
+    registers->i_reg = 0570;
+    registers->ac_reg = 04001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0570;
+    registers->ac_reg = 04001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0570;
+    registers->ac_reg = 00001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    strncpy(registers->opcodes, "SPA,SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+
+    registers->i_reg = 0570;
+    registers->ac_reg = 00001;
+    registers->l_reg = 00;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 1;
+    strncpy(registers->opcodes, "SPA,SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+}
 
 /* Opcode 7 - group 1 */
 void CLA(regs* registers, uint16_t ac, uint8_t link) {
