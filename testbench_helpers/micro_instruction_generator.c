@@ -8,10 +8,13 @@ int main() {
         printf("Failed to open output file\n");
         exit(-1);
     }
-
     
-    #ifdef RUN_ALL
-        run_exhaustive_test(CLA, &registers, output_file);
+    #ifdef RUN_SINGLE_TESTS
+        group1_single_tests(&registers, output_file);
+    #endif
+
+    #ifndef RUN_SINGLE_TESTS
+        group1_exhaustive_tests(&registers, output_file);
     #endif
 
     fclose(output_file);
@@ -30,8 +33,16 @@ void run_exhaustive_test(void (*opcode) (regs*, uint16_t, uint8_t), regs* regist
     }
 }
 
-void write_regs(regs* registers, FILE *output_file) {
-    fprintf(output_file, "%04o %04o %01u %04o %01u %01u %01u %01u %01u\n", 
+// Just to sanity check that all of the opcodes work right
+void run_single_test(void (*opcode) (regs*, uint16_t, uint8_t), regs* registers, uint16_t ac, FILE* output_file) {
+    opcode(registers, ac, 0);
+    write_regs(registers, output_file);
+    opcode(registers, ac, 1);
+    write_regs(registers, output_file);
+}
+
+void write_regs(regs* registers, FILE* output_file) {
+    fprintf(output_file, "%03o %04o %01u %04o %01u %01u %01u %01u %01u\n", 
             registers->i_reg & I_REG_MASK,
             registers->ac_reg & AC_REG_MASK,
             registers->l_reg & SINGLE_BIT,
@@ -41,6 +52,31 @@ void write_regs(regs* registers, FILE *output_file) {
             registers->micro_g1 & SINGLE_BIT,
             registers->micro_g2 & SINGLE_BIT,
             registers->micro_g3 & SINGLE_BIT);
+}
+
+void group1_single_tests(regs* registers, FILE* output_file) {
+    run_single_test(CLA, registers, 07654, output_file);
+    run_single_test(CLL, registers, 07654, output_file);
+    run_single_test(CMA, registers, 00000, output_file);
+    run_single_test(CML, registers, 07654, output_file);
+    run_single_test(IAC, registers, 07776, output_file);
+    run_single_test(RAR, registers, 07777, output_file);
+    //run_single_test(RTR, registers, 07777, output_file); FIXME
+    run_single_test(RAL, registers, 07777, output_file);
+    //run_single_test(RTL, registers, 07777, output_file); FIXME
+}
+
+void group1_exhaustive_tests(regs* registers, FILE* output_file) {
+    run_exhaustive_test(CLA, registers, output_file);
+    run_exhaustive_test(CLA, registers, output_file);
+    run_exhaustive_test(CLL, registers, output_file);
+    run_exhaustive_test(CMA, registers, output_file);
+    run_exhaustive_test(CML, registers, output_file);
+    run_exhaustive_test(IAC, registers, output_file);
+    run_exhaustive_test(RAR, registers, output_file);
+    //run_exhaustive_test(RTR, registers, output_file); FIXME
+    run_exhaustive_test(RAL, registers, output_file);
+    //run_exhaustive_test(RTL, registers, output_file); FIXME
 }
 
 /* Opcode 7 - group 1 */
@@ -118,10 +154,11 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g3 = 0;
 }
 
+//FIXME: Does not work as expected
 //Doing two RAR in a row and then resetting the inputs to the right value
 void RTR(regs* registers, uint16_t ac, uint8_t link) {
     RAR(registers, ac, link);
-    RAR(registers, registers->ac_reg, registers->l_reg);
+    RAR(registers, registers->ac_reg, link);
 
     registers->i_reg = 0012;
     registers->ac_reg = ac;
@@ -143,6 +180,7 @@ void RAL(regs* registers, uint16_t ac, uint8_t link) {
     registers->micro_g3 = 0;
 }
 
+//FIXME: Does not work as expected
 //Doing two RAL in a row and then resetting the inputs to the right value
 void RTL(regs* registers, uint16_t ac, uint8_t link) {
     RAL(registers, ac, link);

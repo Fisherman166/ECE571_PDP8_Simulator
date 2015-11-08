@@ -22,8 +22,14 @@ typedef struct {
     uint8_t micro_g3;
 } regs;
 
+// Test helper functions
 void run_exhaustive_test(void (*opcode) (regs*, uint16_t, uint8_t), regs*, FILE*);
+void run_single_test(void (*opcode) (regs*, uint16_t, uint8_t), regs*, uint16_t, FILE*);
 void write_regs(regs*, FILE*);
+
+//Group 1 test functions
+void group1_single_tests(regs*, FILE*);
+void group1_exhaustive_tests(regs*, FILE*);
 
 /* Opcode 7 - group 1 */
 void CLA(regs*, uint16_t, uint8_t);
