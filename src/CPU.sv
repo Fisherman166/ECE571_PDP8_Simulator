@@ -154,7 +154,7 @@ always_comb begin: WD
           WD_AC     : next_write_data = curr_reg.ac         ;    // Contents of accumulator
           WD_EA     : next_write_data = curr_reg.ea         ;    // Contents of effective address register
           WD_PCP1   : next_write_data = curr_reg.pc + 1     ;    // Program counter plus 1     
-          MB_NC     : next_write_data = mem.write_data      ;    // No change
+          WD_NC     : next_write_data = mem.write_data      ;    // No change
      endcase     
 end
 
