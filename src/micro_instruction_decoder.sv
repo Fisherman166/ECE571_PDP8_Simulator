@@ -156,14 +156,13 @@ module micro_instruction_decoder(
 
         //Block 2 - increment
         link_and_accumulator = {block_connection[1].link, block_connection[1].accumlator} + 1'b1;
+        block_connection[2].link = block_connection[1].link;
 
         if(group1_instruction_bits.IAC === 1'b1) begin
             block_connection[2].accumlator = link_and_accumulator[`ACCUMLATOR_AND_LINK_SIZE-2:0];
-            block_connection[2].link = link_and_accumulator[`ACCUMLATOR_AND_LINK_SIZE-1];
         end
         else begin
             block_connection[2].accumlator = block_connection[1].accumlator;
-            block_connection[2].link = block_connection[1].link;
         end
 
         //Block 3 - shift

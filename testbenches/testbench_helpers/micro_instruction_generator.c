@@ -1,7 +1,7 @@
 #include "micro_instruction_generator.h"
 
 int main() {
-    FILE *output_file = fopen("../test_cases/micro_instructions.txt", "w");
+    FILE *output_file = fopen("../../test_cases/micro_instructions.txt", "w");
     regs registers;
     
     if(output_file == NULL) {
@@ -436,8 +436,8 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     registers->i_reg = 0010;
     registers->ac_reg = ac;
     registers->l_reg = link;
-    registers->result_ac = (ac >> 1) | (link << bit11_shift);
     registers->result_link = registers->result_ac & 1;
+    registers->result_ac = (ac >> 1) | (link << bit11_shift);
     registers->skip = 0;
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
