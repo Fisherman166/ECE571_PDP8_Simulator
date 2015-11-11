@@ -1,0 +1,16 @@
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0201, CPMA: 0000
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0203, CPMA: 0000
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0204, CPMA: 0000
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0206, CPMA: 0000
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0207, CPMA: 0000
+Opcode: 007, AC: 0001, Link: 0, MB: 0000, PC: 0211, CPMA: 0000
+Opcode: 007, AC: 7777, Link: 0, MB: 0000, PC: 0212, CPMA: 0000
+Opcode: 007, AC: 7777, Link: 0, MB: 0000, PC: 0213, CPMA: 0000
+Opcode: 003, AC: 0000, Link: 0, MB: 7777, PC: 0214, CPMA: 0253
+Opcode: 007, AC: 0000, Link: 0, MB: 7777, PC: 0215, CPMA: 0253
+Opcode: 007, AC: 0000, Link: 0, MB: 7777, PC: 0216, CPMA: 0253
+Opcode: 003, AC: 0000, Link: 0, MB: 0000, PC: 0217, CPMA: 0254
+Opcode: 007, AC: 0000, Link: 1, MB: 0000, PC: 0220, CPMA: 0254
+Opcode: 007, AC: 0000, Link: 1, MB: 0000, PC: 0221, CPMA: 0254
+Opcode: 003, AC: 0000, Link: 1, MB: 0000, PC: 0222, CPMA: 0255
+Opcode: 007, AC: 0000, Link: 1, MB: 0000, PC: 0223, CPMA: 0255

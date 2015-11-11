@@ -100,16 +100,22 @@ void mem_init(void){
 ******************************************************************************/
 void mem_print_valid(void){
 	unsigned int i;
+    FILE* valid_memory_file = fopen("valid_memory.txt", "w");
 
-	printf("******************************PRINTING VALID MEMORY**************************\n");
-	printf("Address    Contents\n");
-	printf("-------    --------\n");
+    if(valid_memory_file == NULL) {
+        printf("Failed to open valid memory file\n");
+        exit(-10);
+    }
+
+	fprintf(valid_memory_file, "Address    Contents\n");
+	fprintf(valid_memory_file, "-------    --------\n");
 	for(i=0; i < PAGES * WORDS_PER_PAGE; i++){
 		if (memory[i] & MEMORY_VALID_BIT){
-			printf("%o        %o\n", i, memory[i] & MEMORY_MASK);
+			fprintf(valid_memory_file, "%04o        %04o\n", i, memory[i] & MEMORY_MASK);
 		}
 	}
-	printf("\n");
+	fprintf(valid_memory_file, "\n");
+    fclose(valid_memory_file);
 } // end mem_print_valid
 
 /******************************************************************************

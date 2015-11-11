@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
 	//run_program();
 	mem_print_valid();
-	print_stats();
+	////print_stats();
 	trace_close();
 	close_branch_trace();
 	return(0);
@@ -76,6 +76,7 @@ void* run_program(void* keyboard_object){
 	struct keyboard* local_kb = (struct keyboard*)keyboard_object;
 	unsigned int running;
 	unsigned int run_at_least_once = 1;
+    FILE* opcode_file = fopen("opcode_output.txt", "w");
 
 	reset_regs(&registers);		// initialize the CPU 
 
@@ -305,7 +306,6 @@ void* run_program(void* keyboard_object){
 				}
 				break;
 			}
-			//printf("Instruction = %s\n", instruct_text);
 
 #ifdef MEMORY_DEBUG
 			switch (addressing_mode){
@@ -343,17 +343,16 @@ void* run_program(void* keyboard_object){
 				clock_cycles += opcode_cycles[registers.IR] + 2;
 			}
 
-#ifdef DEBUG
-			printf("Cycles After = %u\n", clock_cycles);
-			printf("After opcode: %s - %04o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n\n", instruct_text, current_instruction, registers.AC & CUTOFF_MASK, 
+			fprintf(opcode_file, "Opcode: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n", registers.IR, registers.AC & CUTOFF_MASK, 
 					 registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
-#endif
 
 		} // while(running)
 		if (debugger_running()){
 			debugger_post_program_run();
 		}
 	} // while (debugger_running()) 
+
+    fclose(opcode_file);
 	
 	pthread_exit(0);
 } // end run_program
@@ -368,7 +367,6 @@ void init_system(int argc, char* argv[]) {
 
 	mem_init();
 	fill_memory(argc, argv);
-	mem_print_valid();
 	debugger_init(argc, argv);
 
 	for(i = 0; i < OPCODE_NUM; i++) {

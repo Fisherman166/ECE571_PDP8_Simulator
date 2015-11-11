@@ -1,0 +1,6 @@
+Current PC: 0201, Target: 0203, Type: Conditional, Result: Taken
+Current PC: 0204, Target: 0206, Type: Conditional, Result: Taken
+Current PC: 0207, Target: 0211, Type: Conditional, Result: Taken
+Current PC: 0212, Target: 0214, Type: Conditional, Result: Not Taken
+Current PC: 0215, Target: 0217, Type: Conditional, Result: Not Taken
+Current PC: 0220, Target: 0222, Type: Conditional, Result: Not Taken
