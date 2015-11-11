@@ -34,6 +34,10 @@ int main() {
         #endif
     #endif
     
+    #ifdef GROUP3_TESTS
+       group3_tests(&registers, output_file); 
+    #endif
+
     fclose(output_file);
     return 0;
 }
@@ -331,6 +335,32 @@ void group2_and_directed_tests(regs* registers, FILE* output_file) {
     registers->result_link = registers->l_reg;
     registers->skip = 1;
     strncpy(registers->opcodes, "SPA,SNA,SZL", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file);
+}
+
+void group3_tests(regs* registers, FILE* output_file) {
+    registers->i_reg = 0401;
+    registers->ac_reg = 04001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 1;
+    strncpy(registers->opcodes, "group3", OPCODE_TEXT_SIZE-1);
+    write_regs(registers, output_file); 
+
+    registers->i_reg = 0411;
+    registers->ac_reg = 04001;
+    registers->l_reg = 01;
+    registers->result_ac = registers->ac_reg;
+    registers->result_link = registers->l_reg;
+    registers->skip = 0;
+    registers->micro_g1 = 0;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 1;
+    strncpy(registers->opcodes, "group3", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
 }
 

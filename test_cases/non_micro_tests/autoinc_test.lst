@@ -1,0 +1,55 @@
+   1            /It has a pointer before 10 and past 10
+   2            / it should only out increment 10-17
+   3            / not the other 
+   4            / Also access the same array using zero 
+   5            / page indirect
+   6            *7
+   7 00007 0300 var1,	Array
+   8 00010 0277 Ptr0,	Array-1
+   9 00011 0277 Ptr1,	Array-1
+  10 00012 0277 Ptr2,	Array-1
+  11 00013 0277 Ptr3,	Array-1
+  12 00014 0277 Ptr4,	Array-1
+  13 00015 0277 Ptr5,	Array-1
+  14 00016 0277 Ptr6,	Array-1
+  15 00017 0277 Ptr7,	Array-1
+  16 00020 0300 Ptr8,	Array
+  17            
+  18            *50 
+  19 00050 0000 C,	0
+  20            
+  21            
+  22            
+  23            *0200			/ start at address 0200
+  24 00200 7300 Main, 	cla cll 	/ clear AC and Link
+  25 00201 1410 	tad i Ptr0 	/ Auto inc. add Array[1] to Accumulator 
+  26 00202 1411 	tad i Ptr1 	/ Auto inc. add Array[1]to Accumulator
+  27 00203 1412 	tad i Ptr2 	/ Auto inc. add Array[1] to Accumulator
+  28 00204 1413 	tad i Ptr3 	/ Auto inc. add Array[1] to Accumulator
+  29 00205 1414 	tad i Ptr4 	/ Auto inc. add Array[1] to Accumulator
+  30 00206 1415 	tad i Ptr5 	/ Auto inc. add Array[1] to Accumulator
+  31 00207 1416 	tad i Ptr6 	/ Auto inc. add Array[1] to Accumulator
+  32 00210 1417 	tad i Ptr7 	/ Auto inc. add Array[1] to Accumulator
+  33                    
+  34 00211 3250 	dca  A		/ Current page direct 
+  35 00212 1651         tad i B         / current page indirect
+  36 00213 1420 	tad i Ptr8 	/ NOT Auto inc. add Array to Accumulator
+  37 00214 1407 	tad i var1 	/ Not Auto inc. add Array to Accumulator
+  38 00215 3050 	dca C 		/ Direct Zero page
+  39 00216 7402 	hlt 		/ Halt program
+  40 00217 5200 	jmp Main	/ To continue - goto Main
+  41            /
+  42            / Data Section
+  43            /
+  44            
+  45            
+  46            *0250 			/ place data at address 0250
+  47 00250 0000 A, 	0 		/ A equals 1
+  48 00251 0300 B, 	300 		/ B used as address to array
+  49            
+  50            / auto incremented
+  51            *300
+  52 00300 0002 Array,	2
+  53 00301 0000 	0
+  54            
+  55            $Main 			/ End of Program; Main is entry point

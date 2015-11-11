@@ -41,6 +41,8 @@ void group2_exhaustive_tests(regs*, FILE*);
 void group2_or_directed_tests(regs*, FILE*);
 void group2_and_directed_tests(regs*, FILE*);
 
+void group3_tests(regs*, FILE*);
+
 /* Opcode 7 - group 1 */
 void CLA(regs*, uint16_t, uint8_t);
 void CLL(regs*, uint16_t, uint8_t);
