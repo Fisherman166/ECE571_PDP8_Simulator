@@ -1,0 +1,19 @@
+
+      MUY=7405                                                            Page 1
+
+
+    1       7405  MUY=7405
+    2       7407  DVI=7407
+    3             
+    4       0200  *200
+    5 00200 7200          CLA
+    6 00201 6046          TLS
+    7 00202 6031  TTYILP, KSF             / await input ready
+    8 00203 5202          JMP TTYILP
+    9 00204 6036          KRB             / read character
+   10 00205 6041  TTYOLP, TSF             / await input ready
+   11 00206 5205          JMP TTYOLP
+   12 00207 6046          TLS             / write character
+   13 00210 5202          JMP TTYILP
+
+      No detected errors

@@ -1,0 +1,22 @@
+
+      MUY=7405                                                            Page 1
+
+
+    1       7405  MUY=7405
+    2       7407  DVI=7407
+    3             
+    4       0200  *200            / test multiply
+    5 00200 7300  CLA CLL
+    6 00201 1207  TAD mux1
+    7 00202 7421  MQL
+    8 00203 7405  MUY
+    9 00204 0006  mux2, 6
+   10 00205 7501  MQA
+   11 00206 3210  DCA answer
+   12             
+   13 00207 0004  mux1, 0004
+   14 00210 0000  answer, 0000
+   15             
+   16             /    HLT
+
+      No detected errors

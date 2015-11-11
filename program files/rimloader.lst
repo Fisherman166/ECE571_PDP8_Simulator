@@ -1,0 +1,24 @@
+
+as12, an absolute assembler for Motorola MCU's, version 1.2h
+
+rimloader.asm:1: Error - Unknown mnemonic: rim
+rimloader.asm:4: Error - Unknown mnemonic: kcc
+rimloader.asm:5: Error - Unknown mnemonic: /
+rimloader.asm:6: Error - Unknown mnemonic: .-1
+rimloader.asm:7: Error - Unknown mnemonic: /
+rimloader.asm:8: Error - Unknown mnemonic: rtl
+rimloader.asm:9: Error - Unknown mnemonic: /
+rimloader.asm:10: Error - Unknown mnemonic: /
+rimloader.asm:11: Error - Unknown mnemonic: rim+1
+rimloader.asm:12: Error - Unknown mnemonic: /
+rimloader.asm:13: Error - Unknown mnemonic: /
+rimloader.asm:14: Error - Unknown mnemonic: .-1
+rimloader.asm:15: Error - Unknown mnemonic: /
+rimloader.asm:16: Error - Unknown mnemonic: /
+rimloader.asm:17: Error - Unknown mnemonic: i
+rimloader.asm:18: Error - Unknown mnemonic: temp
+rimloader.asm:19: Error - Unknown mnemonic: rim
+rimloader.asm:20: Error - Unknown mnemonic: 0
+
+Executed: Mon May 18 23:13:18 2015
+Total errors: 18, Total warnings: 0
