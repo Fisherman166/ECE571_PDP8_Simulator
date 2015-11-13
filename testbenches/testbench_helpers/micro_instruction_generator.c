@@ -144,7 +144,7 @@ void group1_directed_tests(regs* registers, FILE* output_file) {
     registers->ac_reg = 07777;
     registers->l_reg = 01;
     registers->result_ac = 00000;
-    registers->result_link = 00;
+    registers->result_link = 01;
     strncpy(registers->opcodes, "CLA,CLL,CMA,CML,IAC,RAR,RAL", OPCODE_TEXT_SIZE-1);
     write_regs(registers, output_file);
 }
@@ -356,7 +356,7 @@ void group3_tests(regs* registers, FILE* output_file) {
     registers->l_reg = 01;
     registers->result_ac = registers->ac_reg;
     registers->result_link = registers->l_reg;
-    registers->skip = 0;
+    registers->skip = 1;
     registers->micro_g1 = 0;
     registers->micro_g2 = 0;
     registers->micro_g3 = 1;
@@ -436,8 +436,8 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     registers->i_reg = 0010;
     registers->ac_reg = ac;
     registers->l_reg = link;
-    registers->result_link = registers->result_ac & 1;
     registers->result_ac = (ac >> 1) | (link << bit11_shift);
+    registers->result_link = registers->ac_reg & 1;
     registers->skip = 0;
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
@@ -445,7 +445,6 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     strncpy(registers->opcodes, "RAR", OPCODE_TEXT_SIZE-1);
 }
 
-//FIXME: Does not work as expected
 //Doing two RAR in a row and then resetting the inputs to the right value
 void RTR(regs* registers, uint16_t ac, uint8_t link) {
     RAR(registers, ac, link);
@@ -458,14 +457,14 @@ void RTR(regs* registers, uint16_t ac, uint8_t link) {
 }
 
 void RAL(regs* registers, uint16_t ac, uint8_t link) {
-    const uint8_t shift_num = 12;   /* Shift bit 12 into bit 0 */
-    const uint16_t new_link_pos = 0x1000;   /* Bit 12 */
+    const uint8_t shift_num = 11;   /* Shift bit 11 into bit 0 */
+    const uint16_t new_link_pos = 04000;   /* Bit 11 */
 
     registers->i_reg = 0004;
     registers->ac_reg = ac;
     registers->l_reg = link;
     registers->result_ac = (ac << 1) | link;
-    registers->result_link = (registers->result_ac & new_link_pos) >> shift_num;
+    registers->result_link = (ac & new_link_pos) >> shift_num;
     registers->skip = 0;
     registers->micro_g1 = 1;
     registers->micro_g2 = 0;
