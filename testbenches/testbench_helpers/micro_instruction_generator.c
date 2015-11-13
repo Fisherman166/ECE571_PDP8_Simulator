@@ -83,9 +83,9 @@ void group1_single_tests(regs* registers, FILE* output_file) {
     run_single_test(CML, registers, 07654, output_file);
     run_single_test(IAC, registers, 07776, output_file);
     run_single_test(RAR, registers, 07777, output_file);
-    //run_single_test(RTR, registers, 07777, output_file); FIXME
+    run_single_test(RTR, registers, 07777, output_file);
     run_single_test(RAL, registers, 07777, output_file);
-    //run_single_test(RTL, registers, 07777, output_file); FIXME
+    run_single_test(RTL, registers, 07777, output_file);
 }
 
 void group1_exhaustive_tests(regs* registers, FILE* output_file) {
@@ -96,9 +96,9 @@ void group1_exhaustive_tests(regs* registers, FILE* output_file) {
     run_exhaustive_test(CML, registers, output_file);
     run_exhaustive_test(IAC, registers, output_file);
     run_exhaustive_test(RAR, registers, output_file);
-    //run_exhaustive_test(RTR, registers, output_file); FIXME
+    run_exhaustive_test(RTR, registers, output_file);
     run_exhaustive_test(RAL, registers, output_file);
-    //run_exhaustive_test(RTL, registers, output_file); FIXME
+    run_exhaustive_test(RTL, registers, output_file);
 }
 
 void group1_directed_tests(regs* registers, FILE* output_file) {
@@ -445,14 +445,19 @@ void RAR(regs* registers, uint16_t ac, uint8_t link) {
     strncpy(registers->opcodes, "RAR", OPCODE_TEXT_SIZE-1);
 }
 
-//Doing two RAR in a row and then resetting the inputs to the right value
 void RTR(regs* registers, uint16_t ac, uint8_t link) {
-    RAR(registers, ac, link);
-    RAR(registers, registers->ac_reg, link);
+    const uint8_t bit11_shift = 11;
+    const uint8_t bit10_shift = 10;
 
     registers->i_reg = 0012;
     registers->ac_reg = ac;
     registers->l_reg = link;
+    registers->result_ac = (ac >> 2) | (link << bit10_shift) | ((ac & 1) << bit11_shift);
+    registers->result_link = (ac & 2) >> 1;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
     strncpy(registers->opcodes, "RTR", OPCODE_TEXT_SIZE-1);
 }
 
@@ -472,15 +477,21 @@ void RAL(regs* registers, uint16_t ac, uint8_t link) {
     strncpy(registers->opcodes, "RAL", OPCODE_TEXT_SIZE-1);
 }
 
-//FIXME: Does not work as expected
-//Doing two RAL in a row and then resetting the inputs to the right value
 void RTL(regs* registers, uint16_t ac, uint8_t link) {
-    RAL(registers, ac, link);
-    RAL(registers, registers->ac_reg, registers->l_reg);
+    const uint8_t shift_num_10 = 10;   /* Shift bit 10 into bit 0 */
+    const uint16_t new_link_pos = 02000;   /* Bit 10 */
+    const uint8_t shift_num_11 = 11;   /* Shift bit 11 into bit 0 */
+    const uint16_t bit_zero_pos = 04000;   /* Bit 11 */
 
     registers->i_reg = 0006;
     registers->ac_reg = ac;
     registers->l_reg = link;
+    registers->result_ac = (ac << 2) | (link << 1) | ((ac & bit_zero_pos) >> shift_num_11);
+    registers->result_link = (ac & new_link_pos) >> shift_num_10;
+    registers->skip = 0;
+    registers->micro_g1 = 1;
+    registers->micro_g2 = 0;
+    registers->micro_g3 = 0;
     strncpy(registers->opcodes, "RTL", OPCODE_TEXT_SIZE-1);
 }
 

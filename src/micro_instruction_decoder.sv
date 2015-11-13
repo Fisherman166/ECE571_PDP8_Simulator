@@ -182,7 +182,7 @@ module micro_instruction_decoder(
                           end
             `LEFT_SHIFT2: begin
                           block_connection[3].link = block_connection[2].accumlator[10];
-                          block_connection[3].accumlator = {block_connection[2].accumlator[9:0],
+                          block_connection[3].accumlator =  {block_connection[2].accumlator[9:0],
                                                             block_connection[2].link,
                                                             block_connection[2].accumlator[11]};
                           end
