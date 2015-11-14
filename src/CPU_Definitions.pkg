@@ -86,7 +86,8 @@ package CPU_Definitions;
           WD_MB = 0,               // Contents of memory buffer
           WD_AC    ,               // Contents of accumulator
           WD_EA    ,               // Contents of effective address register
-          WD_PCP1  ,               // Program counter plus 1     
+          WD_PCP1  ,               // Program counter plus 1 
+          WD_SR    ,               // Deposit Swith Register to memory     
           WD_NC                    // No change
                               } WD_ctrl_t;                          
      
@@ -116,7 +117,7 @@ package CPU_Definitions;
 
      // states for controller
      typedef enum logic [5:0] {
-          IDLE    ,      // Idle State                           
+          CPU_IDLE,      // Idle State                           
           SR_CHG_1,      // Switch register change while not running
           SR_CHG_2,      
           FETCH_1 ,      // Fetch instruction from memory
@@ -258,28 +259,30 @@ interface memory_pins;
                      input  read_enable); 
 endinterface
 
-interface controller_pins     ;
-     logic skip               ;         // skip instruction is apporopriate	
-     logic ea_reg_8_to_15     ;         // when in auto-incrementing memory locations 
-     logic micro_g1           ;         // when in group 1 microcoded
-     logic micro_g2           ;         // when in group 2 microcoded
-     logic micro_g3           ;         // when in group 3 micrododed
-     logic srchange           ;         // when a change in the switch register is detected
-     logic eae_fin            ;         // when EAE multiply or divide is complete
-     logic eae_start          ;         // when to start multiply or divide module
-     AC_ctrl_t AC_ctrl        ;         // mux selector for accumulator
-     LK_ctrl_t LK_ctrl        ;         // mux selector for link bit
-     MQ_ctrl_t MQ_ctrl        ;         // mux selector for mq register
-     PC_ctrl_t PC_ctrl        ;         // mux selector for program counter
-     IR_ctrl_t IR_ctrl        ;         // mux selector for instuction register
-     EA_ctrl_t EA_ctrl        ;         // mux selector for effective address register
-     MB_ctrl_t MB_ctrl        ;         // mux selector for memory buffer
-     WD_ctrl_t WD_ctrl        ;         // mux selector for write data 
-     AD_ctrl_t AD_ctrl        ;         // mux selector for mem address
-     DO_ctrl_t DO_ctrl        ;         // mux selector for display out to front panel
-     DT_ctrl_t DT_ctrl        ;         // mux selector for data out to IOT distributor
-     PDP8_Registers_t curr_reg;         // all current register values
-     
+interface controller_pins (front_panel_pins.master fp,
+                           iot_pins.master iot,
+                           memory_pins.master mem);
+     logic skip                 ;       // skip instruction if apporopriate	
+     logic ea_reg_8_to_15       ;       // when in auto-incrementing memory locations 
+     logic micro_g1             ;       // when in group 1 microcoded
+     logic micro_g2             ;       // when in group 2 microcoded
+     logic micro_g3             ;       // when in group 3 micrododed
+     logic srchange             ;       // when a change in the switch register is detected
+     logic eae_fin              ;       // when EAE multiply or divide is complete
+     logic eae_start            ;       // when to start multiply or divide module
+     AC_ctrl_t AC_ctrl = AC_NC  ;       // mux selector for accumulator
+     LK_ctrl_t LK_ctrl = LK_NC  ;       // mux selector for link bit
+     MQ_ctrl_t MQ_ctrl = MQ_NC  ;       // mux selector for mq register
+     PC_ctrl_t PC_ctrl = PC_NC  ;       // mux selector for program counter
+     IR_ctrl_t IR_ctrl = IR_NC  ;       // mux selector for instuction register
+     EA_ctrl_t EA_ctrl = EA_NC  ;       // mux selector for effective address register
+     MB_ctrl_t MB_ctrl = MB_RD  ;       // mux selector for memory buffer
+     WD_ctrl_t WD_ctrl = WD_NC  ;       // mux selector for write data 
+     AD_ctrl_t AD_ctrl = AD_NC  ;       // mux selector for mem address
+     DO_ctrl_t DO_ctrl = DO_NC  ;       // mux selector for display out to front panel
+     DT_ctrl_t DT_ctrl = DT_NC  ;       // mux selector for data out to IOT distributor
+     PDP8_Registers_t curr_reg  ;       // all current register values
+
      modport master (input  eae_start      ,
                      input  AC_ctrl        ,
                      input  LK_ctrl        ,
@@ -299,7 +302,11 @@ interface controller_pins     ;
                      output micro_g3       ,
                      output srchange       ,
                      output eae_fin        ,
-                     output curr_reg); 
+                     output curr_reg,
+                     fp ,
+                     iot ,
+                     mem
+                     ); 
                      
      modport slave  (output eae_start      ,
                      output AC_ctrl        ,
@@ -320,7 +327,42 @@ interface controller_pins     ;
                      input  micro_g3       ,
                      input  srchange       ,
                      input  eae_fin        ,
-                     input  curr_reg); 
+                     input  curr_reg,       
+                     fp ,
+                     iot,
+                     mem
+                     ); 
+                      
+endinterface
+
+interface eae_pins;
+     logic [11:0]     mq_mul    ;
+     logic [11:0]     ac_mul    ;          
+     logic [11:0]     mq_dvi    ;
+     logic [11:0]     ac_dvi    ;
+     logic            link_dvi  ;
+     logic            eae_fin   ;
+     logic            eae_start ;
+     PDP8_Registers_t curr_reg  ;
+     
+     modport master (input  mq_mul,
+                     input  ac_mul,
+                     input  mq_dvi,      
+                     input  ac_dvi,
+                     input  link_dvi,      
+                     input  eae_fin,
+                     output eae_start,
+                     output curr_reg);
+                     
+     modport slave  (output mq_mul,
+                     output ac_mul,
+                     output mq_dvi,      
+                     output ac_dvi,
+                     output link_dvi,      
+                     output eae_fin,
+                     input  eae_start,
+                     input  curr_reg);
+             
 endinterface
 
 `endif

@@ -3,18 +3,22 @@
 
 `include "CPU_Definitions.pkg"
 
+
 /******************************** Declare Module Ports **********************************/
 
 module CPU (input logic clock, 
             input logic resetN,
             front_panel_pins.master fp,
             iot_pins.master        iot,
-            memory_pins.master     mem,
-            controller_pins.master fsm   
+            memory_pins.master     mem           
             );
             
             
 /********************************** Declare Signals ************************************/
+
+// Interfaces for internal modules
+controller_pins fsm(.fp, .iot, .mem);
+eae_pins eae();
 
 // Main Registers
 PDP8_Registers_t curr_reg;
@@ -32,13 +36,6 @@ logic [11:0] next_dataout          ;
 MB_ctrl_t MB_ctrl_temp             ;
 logic [11:0] mb_p1                 ;  
 
-// Signals for output of EAE Module
-logic [11:0] mq_mul                ;
-logic [11:0] ac_mul                ;
-logic [11:0] mq_dvi                ;
-logic [11:0] ac_dvi                ;
-logic        link_dvi              ;
-
 // Signals for Output of Microcoded Module
 logic [11:0] ac_micro              ;
 logic        l_micro               ;            
@@ -53,9 +50,17 @@ logic        swreg_change          ;
 
 
 /********************************* Instatiate Modules **********************************/
-Controller SM0 (.*);
-EAE EAE0 (.*); 
-Micro MIC0 (.*);       
+Controller SM0 (.*,.cpu(fsm));
+EAE EAE0 (.*,.cpu(eae)); 
+micro_instruction_decoder MIC0 (.*,
+                                .i_reg   (curr_reg.ir ),
+                                .ac_reg  (curr_reg.ac ),
+                                .l_reg   (curr_reg.lk ),
+                                .skip    (fsm.skip    ),
+                                .micro_g1(fsm.micro_g1),
+                                .micro_g2(fsm.micro_g2),
+                                .micro_g3(fsm.micro_g3)
+                               );       
 
 /************************************** Main Body **************************************/
 
@@ -81,8 +86,8 @@ always_comb begin: AC
           AC_OR_MQ : next_reg.ac = curr_reg.ac | curr_reg.mq      ;   // OR MQ into AC
           AC_OR_DI : next_reg.ac = curr_reg.ac | {4'h0,iot.datain};   // OR datain from IOT into AC 
           AC_LD_MQ : next_reg.ac = curr_reg.mq                    ;   // Load MQ register (for swap) 
-          AC_MUL   : next_reg.ac = ac_mul                         ;   // Result from EAE for multiply 
-          AC_DVI   : next_reg.ac = ac_dvi                         ;   // Result from EAE for divide
+          AC_MUL   : next_reg.ac = eae.ac_mul                     ;   // Result from EAE for multiply 
+          AC_DVI   : next_reg.ac = eae.ac_dvi                     ;   // Result from EAE for divide
           AC_NC    : next_reg.ac = curr_reg.ac                    ;   // No change
      endcase     
 end
@@ -93,7 +98,7 @@ always_comb begin: LK
           LK_TAD   : next_reg.lk = curr_reg.lk ^ Cout  ;    // TAD instruction
           LK_MICRO : next_reg.lk = l_micro             ;    // Group 1 Microcoded Instruction
           LK_MUL   : next_reg.lk = 0                   ;    // Clear for multiply 
-          LK_DVI   : next_reg.lk = link_dvi            ;    // Result from EAE for divide
+          LK_DVI   : next_reg.lk = eae.link_dvi        ;    // Result from EAE for divide
           LK_NC    : next_reg.lk = curr_reg.lk         ;    // No change
      endcase     
 end
@@ -102,8 +107,8 @@ end
 always_comb begin: MQ
      unique case (fsm.MQ_ctrl)
           MQ_AC    : next_reg.mq = curr_reg.ac    ;    // TAD instruction
-          MQ_MUL   : next_reg.mq = mq_mul         ;    // Group 1 Microcoded Instruction
-          MQ_DVI   : next_reg.mq = mq_dvi         ;    // Clear for multiply 
+          MQ_MUL   : next_reg.mq = eae.mq_mul     ;    // Group 1 Microcoded Instruction
+          MQ_DVI   : next_reg.mq = eae.mq_dvi     ;    // Clear for multiply 
           MQ_NC    : next_reg.mq = curr_reg.mq    ;    // No change
      endcase     
 end
@@ -115,7 +120,7 @@ always_comb begin: PC
           PC_P2    : next_reg.pc = curr_reg.pc + 2     ;    // Skip
           PC_SR    : next_reg.pc = fp.swreg            ;    // Load from front panel
           PC_JMP   : next_reg.pc = curr_reg.ea         ;    // Load from effective address 
-          PC_NC    : next_reg.pc = curr_reg.mq         ;    // No change
+          PC_NC    : next_reg.pc = curr_reg.pc         ;    // No change
      endcase     
 end
 
@@ -135,7 +140,7 @@ always_comb begin: EA
           EA_SMP   : next_reg.ea = {5'd0,curr_reg.ir[6:0]};           // Simple address
           EA_IND   : next_reg.ea = curr_reg.mb            ;           // for indirection
           EA_INC   : next_reg.ea = curr_reg.mb + 1        ;           // for auto-increment indirection    
-          EA_NC    : next_reg.ea = curr_reg.mb            ;           // No change
+          EA_NC    : next_reg.ea = curr_reg.ea            ;           // No change
      endcase     
 end
 
@@ -153,7 +158,8 @@ always_comb begin: WD
           WD_MB     : next_write_data = curr_reg.mb         ;    // Contents of memory buffer
           WD_AC     : next_write_data = curr_reg.ac         ;    // Contents of accumulator
           WD_EA     : next_write_data = curr_reg.ea         ;    // Contents of effective address register
-          WD_PCP1   : next_write_data = curr_reg.pc + 1     ;    // Program counter plus 1     
+          WD_PCP1   : next_write_data = curr_reg.pc + 1     ;    // Program counter plus 1  
+          WD_SR     : next_write_data = fp.swreg            ;    // Deposit switch reg into memory     
           WD_NC     : next_write_data = mem.write_data      ;    // No change
      endcase     
 end
