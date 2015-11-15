@@ -23,8 +23,9 @@ PDP8_Registers_t curr_reg;
 PDP8_Registers_t next_reg;
 
 // Interfaces for internal modules
-controller_pins fsm(.fp, .iot, .mem, .curr_reg);
-eae_pins eae();
+eae_pins eae(.curr_reg);
+controller_pins fsm(.fp, .iot, .mem, .eae, .curr_reg);
+
 
 // Outputs of comb blocks to update memory, front panel, and IOT distributor
 logic [11:0] next_write_data       ;
@@ -98,7 +99,7 @@ always_comb begin: LK
           LK_TAD   : next_reg.lk = curr_reg.lk ^ Cout  ;    // TAD instruction
           LK_MICRO : next_reg.lk = l_micro             ;    // Group 1 Microcoded Instruction
           LK_MUL   : next_reg.lk = 0                   ;    // Clear for multiply 
-          LK_DVI   : next_reg.lk = eae.link_dvi        ;    // Result from EAE for divide
+          LK_DVI   : next_reg.lk = eae.link_dvi        ;    // Overflow indicator for DVI instruction
           LK_ZERO  : next_reg.lk = 0                   ;    // Zero Link bit
           LK_NC    : next_reg.lk = curr_reg.lk         ;    // No change
      endcase     

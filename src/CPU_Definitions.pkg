@@ -139,16 +139,20 @@ package CPU_Definitions;
           EA_AUT_3, 
           EA_AUT_4, 
           EA_AUT_5, 
+          EA_AUT_6, 
           DECODE  ,      // Decode instruction
           AND_1   ,      // AND Instruction  
-          AND_2   , 
+          AND_2   ,
+          AND_3   ,     
           TAD_1   ,      // TAD Instruction
-          TAD_2   , 
+          TAD_2   ,
+          TAD_3   ,     
           ISZ_1   ,      // ISZ Instruction
           ISZ_2   ,
           ISZ_3   ,
           ISZ_4   ,
           ISZ_5   ,
+          ISZ_6   ,
           DCA_1   ,      // DCA Instruction     
           DCA_2   ,
           DCA_3   ,
@@ -170,7 +174,8 @@ package CPU_Definitions;
           MIC_6   ,
           MIC_7   , 
           MIC_8   ,
-          MIC_9    
+          MIC_9   ,
+          HALT
                               } Controller_states_t;
                               
 
@@ -265,6 +270,7 @@ endinterface
 interface controller_pins (front_panel_pins.master fp,
                            iot_pins.master iot,
                            memory_pins.master mem,
+                           eae_pins.master eae,
                            input PDP8_Registers_t curr_reg);
      logic skip                 ;       // skip instruction if apporopriate	
      logic ea_reg_8_to_15       ;       // when in auto-incrementing memory locations 
@@ -285,7 +291,6 @@ interface controller_pins (front_panel_pins.master fp,
      AD_ctrl_t AD_ctrl = AD_NC  ;       // mux selector for mem address
      DO_ctrl_t DO_ctrl = DO_NC  ;       // mux selector for display out to front panel
      DT_ctrl_t DT_ctrl = DT_NC  ;       // mux selector for data out to IOT distributor
-     //PDP8_Registers_t curr_reg  ;       // all current register values
 
      modport master (input  eae_start      ,
                      input  AC_ctrl        ,
@@ -309,7 +314,8 @@ interface controller_pins (front_panel_pins.master fp,
                      output curr_reg       ,
                      fp ,
                      iot ,
-                     mem
+                     mem,
+                     eae
                      ); 
                      
      modport slave  (output eae_start      ,
@@ -334,12 +340,13 @@ interface controller_pins (front_panel_pins.master fp,
                      input  curr_reg       ,       
                      fp ,
                      iot,
-                     mem
+                     mem,
+                     eae
                      ); 
                       
 endinterface
 
-interface eae_pins;
+interface eae_pins(input PDP8_Registers_t curr_reg);;
      logic [11:0]     mq_mul    ;
      logic [11:0]     ac_mul    ;          
      logic [11:0]     mq_dvi    ;
@@ -347,7 +354,6 @@ interface eae_pins;
      logic            link_dvi  ;
      logic            eae_fin   ;
      logic            eae_start ;
-     PDP8_Registers_t curr_reg  ;
      
      modport master (input  mq_mul,
                      input  ac_mul,

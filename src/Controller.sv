@@ -73,36 +73,46 @@ always_comb begin: Next_State_Logic
           EA_AUT_2: if (cpu.mem.mem_finished === 1)
                          Next_State = EA_AUT_3;  
           EA_AUT_3: Next_State = EA_AUT_4;
-          EA_AUT_4: if (cpu.mem.mem_finished === 1)
-                         Next_State = EA_AUT_5;
-          EA_AUT_5: Next_State = DECODE;
-
-          DECODE:   case (cpu.curr_reg.ir[11:9])
-                         3'b000 : Next_State = AND_1;
-                         3'b001 : Next_State = TAD_1;
-                         3'b010 : Next_State = ISZ_1;
-                         3'b011 : Next_State = DCA_1;
-                         3'b100 : Next_State = JMS_1;
-                         3'b101 : Next_State = JMP_1;
-                         3'b110 : Next_State = IOT_1;
-                         default: Next_State = MIC_1;
-                    endcase     
+          EA_AUT_4: Next_State = EA_AUT_5;
+          EA_AUT_5: if (cpu.mem.mem_finished === 1)
+                         Next_State = EA_AUT_6;
+          EA_AUT_6: Next_State = DECODE;
           
-          AND_1:    if (cpu.mem.mem_finished === 1)
-                         Next_State = AND_2;
-          AND_2:    Next_State = CPU_IDLE;                          
+
+          DECODE:   begin
+                         if (cpu.curr_reg.ir === 12'o7402) Next_State = HALT;
+                         else case (cpu.curr_reg.ir[11:9])
+                              3'b000 : Next_State = AND_1;
+                              3'b001 : Next_State = TAD_1;
+                              3'b010 : Next_State = ISZ_1;
+                              3'b011 : Next_State = DCA_1;
+                              3'b100 : Next_State = JMS_1;
+                              3'b101 : Next_State = JMP_1;
+                              3'b110 : Next_State = IOT_1;
+                              default: Next_State = MIC_1;
+                         endcase     
+                    end
                
-          TAD_1:    if (cpu.mem.mem_finished === 1)
-                         Next_State = TAD_2;
-          TAD_2:    Next_State = CPU_IDLE;   
-               
-          ISZ_1:    Next_State = ISZ_2;
-          ISZ_2:    Next_State = ISZ_3;
+          AND_1:    Next_State = AND_2;
+          AND_2:    if (cpu.mem.mem_finished === 1)
+                         Next_State = AND_3;
+          AND_3:    Next_State = CPU_IDLE;
+          
+          TAD_1:    Next_State = TAD_2; 
+          TAD_2:    if (cpu.mem.mem_finished === 1)
+                         Next_State = TAD_3;
+          TAD_3:    Next_State = CPU_IDLE; 
+          
+          
+          ISZ_1:    Next_State = ISZ_2;          
+          ISZ_2:    if (cpu.mem.mem_finished === 1)
+                         Next_State = ISZ_3;
           ISZ_3:    Next_State = ISZ_4;
-          ISZ_4:    if (cpu.mem.mem_finished === 1)
-                         Next_State = ISZ_5;
-          ISZ_5:    Next_State = CPU_IDLE;          
-               
+          ISZ_4:    Next_State = ISZ_5;
+          ISZ_5:    if (cpu.mem.mem_finished === 1)
+                         Next_State = ISZ_6;
+          ISZ_6:    Next_State = CPU_IDLE;
+         
           DCA_1:    Next_State = DCA_2;  
           DCA_2:    if (cpu.mem.mem_finished === 1)
                          Next_State = DCA_3;  
@@ -126,7 +136,9 @@ always_comb begin: Next_State_Logic
           IOT_5:    Next_State = IOT_6;
           IOT_6:    Next_State = CPU_IDLE; 
                
-          MIC_1:    Next_State = MIC_2;
+          MIC_1:    if (cpu.micro_g1 === 1)
+                         Next_State = CPU_IDLE;
+                    else Next_State = MIC_2;     
           MIC_2:    if ({cpu.micro_g2,cpu.curr_reg.ir[1]} === 2'b11)
                          Next_State = CPU_IDLE;
                     else Next_State = MIC_3;   
@@ -138,16 +150,19 @@ always_comb begin: Next_State_Logic
           MIC_6:    Next_State = MIC_7;
           MIC_7:    if (cpu.mem.mem_finished === 1)
                          Next_State = MIC_8;
-          MIC_8:    if (cpu.eae_fin === 1)
+          MIC_8:    if (cpu.eae.eae_fin === 1)
                          Next_State = MIC_9;
-          MIC_9:    Next_State = CPU_IDLE;        
+          MIC_9:    Next_State = CPU_IDLE; 
+
+          HALT :    Next_State = CPU_IDLE;     
+          
      endcase     
 end: Next_State_Logic
 
 
 // Output control (Moore Machine)
 always_comb begin: Output_Logic
-     cpu.eae_start    = 0    ;     // Default to 0   
+     cpu.eae.eae_start= 0    ;     // Default to 0   
      cpu.AC_ctrl      = AC_NC;     // Default no change to accumulator
      cpu.LK_ctrl      = LK_NC;     // Default no change to link
      cpu.MQ_ctrl      = MQ_NC;     // Default no change to MQ register
@@ -159,13 +174,13 @@ always_comb begin: Output_Logic
      cpu.AD_ctrl      = AD_NC;     // Default no change to cpu.memeory address
      cpu.DO_ctrl      = DO_NC;     // Default no change to front panel display out
      cpu.DT_ctrl      = DT_NC;     // Default no change to IOT distrubutor dataout
-     cpu.mem.write_enable = 0;         // Default write enable for cpu.memory
-     cpu.mem.read_enable  = 0;         // Default write enable for cpu.memory
-     cpu.iot.bit1_cp2     = 0;         // Default control signal to IOT distributor
-     cpu.iot.bit2_cp3     = 0;         // Default control signal to IOT distributor
-     cpu.iot.io_address   = 0;         // Default IO address for IOT distributor
-     cpu.fp.halt          = 0;         // Default Halt signal to front panel
-     cpu.eae_start        = 0;         // Deafult control signal for EAE module
+     cpu.mem.write_enable = 0;     // Default write enable for cpu.memory
+     cpu.mem.read_enable  = 0;     // Default write enable for cpu.memory
+     cpu.iot.bit1_cp2     = 0;     // Default control signal to IOT distributor
+     cpu.iot.bit2_cp3     = 0;     // Default control signal to IOT distributor
+     cpu.iot.io_address   = 0;     // Default IO address for IOT distributor
+     cpu.fp.halt          = 0;     // Default Halt signal to front panel
+     cpu.eae_start        = 0;     // Deafult control signal for EAE module
      
 
      unique case (Curr_State)
@@ -210,7 +225,7 @@ always_comb begin: Output_Logic
                     
           EA_IND_1: cpu.AD_ctrl = AD_EA;
           EA_IND_2: begin
-                         cpu.mem.write_enable = 1;                            
+                         cpu.mem.read_enable = 1;                            
                          if (cpu.mem.mem_finished === 1)
                               cpu.EA_ctrl = EA_IND;
                     end   
@@ -221,9 +236,12 @@ always_comb begin: Output_Logic
           EA_AUT_4: begin
                          cpu.MB_ctrl = MB_NC;
                          cpu.WD_ctrl = WD_MB;
-                         cpu.mem.write_enable = 1;
                     end
           EA_AUT_5: begin
+                         cpu.MB_ctrl = MB_NC; 
+                         cpu.mem.write_enable = 1;
+                    end
+          EA_AUT_6: begin
                          cpu.MB_ctrl = MB_NC;
                          cpu.EA_ctrl = EA_IND;
                     end 
@@ -231,31 +249,31 @@ always_comb begin: Output_Logic
           DECODE:   if (cpu.curr_reg.ir[11:9] === 3'b110)
                          cpu.iot.io_address = cpu.curr_reg.ir[5:3];
           
-          AND_1:    begin
-                         cpu.AD_ctrl = AD_EA;  
-                         cpu.mem.read_enable = 1;  
-                    end
-          AND_2:    begin
+          AND_1:    cpu.AD_ctrl = AD_EA;
+          AND_2:    cpu.mem.read_enable = 1;  
+          AND_3:    begin
                          cpu.AC_ctrl = AC_AND;  
                          cpu.PC_ctrl = PC_P1;  
                     end     
-          TAD_1:    begin
-                         cpu.AD_ctrl = AD_EA;  
-                         cpu.mem.read_enable = 1;  
-                    end
-          TAD_2:    begin 
+          TAD_1:    cpu.AD_ctrl = AD_EA;
+          TAD_2:    cpu.mem.read_enable = 1;  
+          TAD_3:    begin 
                          cpu.AC_ctrl = AC_TAD;  
                          cpu.PC_ctrl = PC_P1;                           
                     end
                     
-          ISZ_1:    begin
-                         cpu.AD_ctrl = AD_EA;  
-                         cpu.mem.read_enable = 1;  
-                    end
-          ISZ_2:    cpu.MB_ctrl = MB_INC;  
-          ISZ_3:    cpu.WD_ctrl = WD_MB; 
-          ISZ_4:    cpu.mem.write_enable = 1;
-          ISZ_5:    if (cpu.curr_reg.mb === 0)
+          ISZ_1:    cpu.AD_ctrl = AD_EA;  
+          ISZ_2:    cpu.mem.read_enable = 1; 
+          ISZ_3:    cpu.MB_ctrl = MB_INC;          
+          ISZ_4:    begin
+                         cpu.MB_ctrl = MB_NC; 
+                         cpu.WD_ctrl = WD_MB; 
+                    end          
+          ISZ_5:    begin
+                         cpu.MB_ctrl = MB_NC;
+                         cpu.mem.write_enable = 1;
+                    end               
+          ISZ_6:    if (cpu.curr_reg.mb === 0)
                          cpu.PC_ctrl = PC_P2;
                     else cpu.PC_ctrl = PC_P1;  
                
@@ -307,8 +325,10 @@ always_comb begin: Output_Logic
           IOT_5:    cpu.DO_ctrl = DO_AC;     
           IOT_6:    cpu.PC_ctrl = PC_P1;
                     
-          MIC_1:    if (cpu.micro_g1 === 1) 
+          MIC_1:    if (cpu.micro_g1 === 1) begin
                          cpu.AC_ctrl = AC_MICRO;
+                         cpu.PC_ctrl = PC_P1;
+                    end     
      
           MIC_2:    if ({cpu.micro_g2,cpu.skip} === 2'b11) 
                          cpu.PC_ctrl = PC_P1;                              
@@ -331,20 +351,28 @@ always_comb begin: Output_Logic
                          cpu.AC_ctrl = AC_CLEAR; 
                     end
           MIC_5:    begin end
-          MIC_6:    cpu.AD_ctrl = AD_PC;
-          MIC_7:    cpu.mem.read_enable = 1;    
-          MIC_8:    cpu.eae_start = 1;    
+          MIC_6:    begin
+                         cpu.AD_ctrl = AD_PCP1;
+                         cpu.PC_ctrl = PC_P1;
+                    end     
+          MIC_7:    cpu.mem.read_enable = 1;
+          MIC_8:    cpu.eae.eae_start = 1;    
           MIC_9:    begin
                          if ({cpu.curr_reg.ir[2:1]} === 2'b10) begin
                               cpu.AC_ctrl = AC_MUL;
-                              cpu.MQ_ctrl = MQ_MUL;                              
+                              cpu.MQ_ctrl = MQ_MUL;
+                              cpu.LK_ctrl = LK_MUL;
                          end
                          else if ({cpu.curr_reg.ir[2:1]} === 2'b11) begin
                               cpu.AC_ctrl = AC_DVI;
-                              cpu.MQ_ctrl = MQ_DVI;                              
+                              cpu.MQ_ctrl = MQ_DVI;
+                              cpu.LK_ctrl = LK_DVI;
                          end
                          cpu.PC_ctrl = PC_P1;
-                    end                
+                    end
+                    
+          HALT :    cpu.fp.halt = 1;    
+                    
      endcase
 end: Output_Logic
 

@@ -25,7 +25,7 @@ typedef enum {S0, S1, S2, S3} STATE_TYPE;
 STATE_TYPE current_state, next_state;
 
 assign product = regp;
-assign adder = {1'b0,regp[23:0]} + {1'b0,regm};
+assign adder = {1'b0,regp[23:12]} + {1'b0,regm};
 assign doadd = regp[0];
 
 // regm

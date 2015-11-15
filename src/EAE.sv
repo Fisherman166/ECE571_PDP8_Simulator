@@ -28,10 +28,10 @@ logic [11:0] remainder;
 
 Multiply MUL0 (.clock                        ,    
                .multiplier(cpu.curr_reg.mq)  ,
-               .multiplicand(cpu.curr_reg.mq),
+               .multiplicand(cpu.curr_reg.mb),
                .start(cpu.eae_start)         ,
                .product                      ,
-               .finished(cpu.eae_fin)        
+               .finished        
                );
                  
 Divide DIV0   (.clock                        ,
@@ -50,6 +50,7 @@ Divide DIV0   (.clock                        ,
 
 assign start = cpu.eae_start;
 assign dividend = {cpu.curr_reg.ac, cpu.curr_reg.mq};
+assign cpu.eae_fin = finished;
 
 always_ff @(posedge clock) begin
      if (finished === 1) begin

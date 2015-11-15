@@ -39,9 +39,7 @@ DEB_STATE cur_state_deb, next_state_deb      ;
 assign fp.swreg = sw[11:0];
 assign dp = (digit_mux === 3'b011) ? ~fp.linkout : 1;
 assign count0 = (m1counter === 0) ? 1:0;
-assign led[15] = sw[12];
-assign fp.run = sw[12];
-assign led[14:4] = 0;
+assign {led[15:13],led[11:4]} = 0;
 
 
  // divide by 1,000,000 counter (low pass filter)
@@ -49,6 +47,23 @@ always_ff @ (posedge clock) begin
      if (m1counter === 5) m1counter <= 0; // 5 for simulation
      else m1counter <= m1counter + 1;
 end
+
+// run/halt
+always_ff @ (posedge sw[12], posedge fp.halt) begin
+     if (fp.halt === 1) begin
+          fp.run <= 0;
+          led[12] <= 0;
+     end     
+     else if (sw[12] === 1) begin 
+          fp.run <= 1;
+          led[12] <= 1;
+     end     
+     else begin 
+          fp.run <= 0;
+          led[12] <= 0;
+     end     
+end
+
 
 
 // 7 Segment display
