@@ -261,7 +261,8 @@ endinterface
 
 interface controller_pins (front_panel_pins.master fp,
                            iot_pins.master iot,
-                           memory_pins.master mem);
+                           memory_pins.master mem,
+                           input PDP8_Registers_t curr_reg);
      logic skip                 ;       // skip instruction if apporopriate	
      logic ea_reg_8_to_15       ;       // when in auto-incrementing memory locations 
      logic micro_g1             ;       // when in group 1 microcoded
@@ -281,7 +282,7 @@ interface controller_pins (front_panel_pins.master fp,
      AD_ctrl_t AD_ctrl = AD_NC  ;       // mux selector for mem address
      DO_ctrl_t DO_ctrl = DO_NC  ;       // mux selector for display out to front panel
      DT_ctrl_t DT_ctrl = DT_NC  ;       // mux selector for data out to IOT distributor
-     PDP8_Registers_t curr_reg  ;       // all current register values
+     //PDP8_Registers_t curr_reg  ;       // all current register values
 
      modport master (input  eae_start      ,
                      input  AC_ctrl        ,
@@ -302,7 +303,7 @@ interface controller_pins (front_panel_pins.master fp,
                      output micro_g3       ,
                      output srchange       ,
                      output eae_fin        ,
-                     output curr_reg,
+                     output curr_reg       ,
                      fp ,
                      iot ,
                      mem
@@ -327,7 +328,7 @@ interface controller_pins (front_panel_pins.master fp,
                      input  micro_g3       ,
                      input  srchange       ,
                      input  eae_fin        ,
-                     input  curr_reg,       
+                     input  curr_reg       ,       
                      fp ,
                      iot,
                      mem

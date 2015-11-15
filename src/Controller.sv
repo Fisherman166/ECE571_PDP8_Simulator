@@ -102,7 +102,7 @@ always_comb begin: Next_State_Logic
                          Next_State = ISZ_5;
           ISZ_5:    Next_State = CPU_IDLE;          
                
-          DCA_1:    Next_State = DCA_1;  
+          DCA_1:    Next_State = DCA_2;  
           DCA_2:    if (cpu.mem.mem_finished === 1)
                          Next_State = DCA_3;  
           DCA_3:    Next_State = CPU_IDLE;            
@@ -326,7 +326,7 @@ always_comb begin: Output_Logic
                          cpu.MQ_ctrl = MQ_AC;
                          cpu.AC_ctrl = AC_CLEAR; 
                     end
-          MIC_5:    cpu.PC_ctrl = PC_P1;
+          MIC_5:    begin end
           MIC_6:    cpu.AD_ctrl = AD_PC;
           MIC_7:    cpu.mem.read_enable = 1;    
           MIC_8:    cpu.eae_start = 1;    

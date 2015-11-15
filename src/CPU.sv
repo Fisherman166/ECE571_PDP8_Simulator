@@ -16,15 +16,15 @@ module CPU (input logic clock,
             
 /********************************** Declare Signals ************************************/
 
-// Interfaces for internal modules
-controller_pins fsm(.fp, .iot, .mem);
-eae_pins eae();
-
 // Main Registers
 PDP8_Registers_t curr_reg;
 
 // Outputs of comb blocks to update registers
 PDP8_Registers_t next_reg;
+
+// Interfaces for internal modules
+controller_pins fsm(.fp, .iot, .mem, .curr_reg);
+eae_pins eae();
 
 // Outputs of comb blocks to update memory, front panel, and IOT distributor
 logic [11:0] next_write_data       ;

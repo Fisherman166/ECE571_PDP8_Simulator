@@ -27,13 +27,11 @@ logic [20:0] digit_mux_counter               ;
 logic [ 2:0] digit_mux                       ;
 logic [ 2:0] digit_drive                     ;
 int   m1counter                              ;
-logic count0, disp_d, running                ;
+logic count0, disp_d                         ;
 typedef enum {b0, b1, b2, b3} DEB_STATE      ;
-typedef enum {p0, p1, p2, p3} POW_STATE      ;
 typedef enum {d0, d1, d2, d3} DISP_STATE     ; 
 DISP_STATE cur_state_disp, next_state_disp   ;
 DEB_STATE cur_state_deb, next_state_deb      ;
-POW_STATE cur_state_pow, next_state_pow      ;
 
 
 /************************************** Main Body **************************************/
@@ -41,8 +39,8 @@ POW_STATE cur_state_pow, next_state_pow      ;
 assign fp.swreg = sw[11:0];
 assign dp = (digit_mux === 3'b011) ? ~fp.linkout : 1;
 assign count0 = (m1counter === 0) ? 1:0;
-assign led[15] = running;
-assign fp.run = running;
+assign led[15] = sw[12];
+assign fp.run = sw[12];
 assign led[14:4] = 0;
 
 
@@ -97,12 +95,10 @@ always_ff @ (posedge clock, negedge resetN) begin
      if (!resetN) begin
           cur_state_disp <= d0;
           cur_state_deb  <= b0;
-          cur_state_pow  <= p0;
      end     
      else begin
 		cur_state_disp <= next_state_disp;
 		cur_state_deb  <= next_state_deb ;
-		cur_state_pow  <= next_state_pow ;
 	end
 end
 
@@ -173,28 +169,6 @@ always_comb begin
 	endcase
 end
 
-//Power switch and light state machine
-always_comb begin
-	running = 1;
-	next_state_pow <= cur_state_pow;
-	unique case (cur_state_pow)
-		p0:       begin
-                         running = 0;
-                         if (sw[12] === 1) next_state_pow = p1;
-                    end
-                    
-		p1:       begin
-                         running = 1;
-					if (count0 === 1) next_state_pow = p2;
-				end
-                    
-		p2:       begin 
-                         if (sw[12] === 0) next_state_pow = p3;
-					else if (fp.halt === 1) running = 0;
-				end
-                    
-		p3:       if (count0 === 1) next_state_pow = p0;
-	endcase
-end
+
 
 endmodule
