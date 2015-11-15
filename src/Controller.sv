@@ -22,7 +22,7 @@ Controller_states_t Curr_State = CPU_IDLE, Next_State;
                    
 // State register w/ asynchronous active-low reset                  
 always_ff @(posedge clock, negedge resetN)
-     if (!resetN) Curr_State <= CPU_IDLE;           // If reset, go to NORMAL state
+     if (!resetN) Curr_State <= REG_INIT;         // If reset, go to NORMAL state
      else         Curr_State <= Next_State;       // Else current state gets next state
      
      
@@ -31,6 +31,8 @@ always_ff @(posedge clock, negedge resetN)
 always_comb begin: Next_State_Logic
      Next_State = Curr_State;                     // Default to stay in current state
      unique case (Curr_State)
+          REG_INIT: Next_State = CPU_IDLE;
+      
           CPU_IDLE: Next_State = 
                     (cpu.fp.run     === 1) ? FETCH_1     :    
                     (cpu.fp.step    === 1) ? FETCH_1     : 
@@ -71,10 +73,9 @@ always_comb begin: Next_State_Logic
           EA_AUT_2: if (cpu.mem.mem_finished === 1)
                          Next_State = EA_AUT_3;  
           EA_AUT_3: Next_State = EA_AUT_4;
-          EA_AUT_4: Next_State = EA_AUT_5;
-          EA_AUT_5: if (cpu.mem.mem_finished === 1)
-                         Next_State = EA_AUT_6;
-          EA_AUT_6: Next_State = DECODE;
+          EA_AUT_4: if (cpu.mem.mem_finished === 1)
+                         Next_State = EA_AUT_5;
+          EA_AUT_5: Next_State = DECODE;
 
           DECODE:   case (cpu.curr_reg.ir[11:9])
                          3'b000 : Next_State = AND_1;
@@ -168,6 +169,12 @@ always_comb begin: Output_Logic
      
 
      unique case (Curr_State)
+          REG_INIT: begin
+                         cpu.AC_ctrl = AC_CLEAR;
+                         cpu.LK_ctrl = LK_ZERO;
+                         cpu.MQ_ctrl = MQ_ZERO;
+                    end
+                    
           CPU_IDLE: case (cpu.fp.dispsel)
                          2'b00 : cpu.DO_ctrl = DO_PC;
                          2'b01 : cpu.DO_ctrl = DO_AC;
@@ -209,21 +216,18 @@ always_comb begin: Output_Logic
                     end   
                               
           EA_AUT_1: cpu.AD_ctrl = AD_EA;
-          EA_AUT_2: begin end                               
-          EA_AUT_3: cpu.MB_ctrl = MB_ISZ;
+          EA_AUT_2: cpu.mem.read_enable = 1;                                
+          EA_AUT_3: cpu.MB_ctrl = MB_INC;
           EA_AUT_4: begin
-                         cpu.MB_ctrl = MB_ISZ;
-                         cpu.WD_ctrl = WD_MB;
-                    end
-          EA_AUT_5: begin
+                         cpu.MB_ctrl = MB_NC;
                          cpu.WD_ctrl = WD_MB;
                          cpu.mem.write_enable = 1;
                     end
-          EA_AUT_6: begin
-                         cpu.MB_ctrl = MB_ISZ;
+          EA_AUT_5: begin
+                         cpu.MB_ctrl = MB_NC;
                          cpu.EA_ctrl = EA_IND;
-                    end
-                           
+                    end 
+                    
           DECODE:   if (cpu.curr_reg.ir[11:9] === 3'b110)
                          cpu.iot.io_address = cpu.curr_reg.ir[5:3];
           
@@ -248,7 +252,7 @@ always_comb begin: Output_Logic
                          cpu.AD_ctrl = AD_EA;  
                          cpu.mem.read_enable = 1;  
                     end
-          ISZ_2:    cpu.MB_ctrl = MB_ISZ;  
+          ISZ_2:    cpu.MB_ctrl = MB_INC;  
           ISZ_3:    cpu.WD_ctrl = WD_MB; 
           ISZ_4:    cpu.mem.write_enable = 1;
           ISZ_5:    if (cpu.curr_reg.mb === 0)

@@ -37,16 +37,18 @@ package CPU_Definitions;
      typedef enum logic [2:0] {
           LK_TAD   = 0,            // TAD instruction
           LK_MICRO    ,            // Group 1 Microcoded Instruction
-          LK_MUL      ,            // Result from EAE for multiply 
+          LK_MUL      ,            // Clear for multiply 
           LK_DVI      ,            // Result from EAE for divide
+          LK_ZERO     ,            // Zero out link bit
           LK_NC                    // No change
                               } LK_ctrl_t;
      
      // MQ control signal
-     typedef enum logic [1:0] {
+     typedef enum logic [2:0] {
           MQ_AC    = 0,            // for MQ/AC swap operation
           MQ_MUL      ,            // for multiplication
           MQ_DVI      ,            // for division
+          MQ_ZERO     ,            // Zero out MQ
           MQ_NC                    // No change
                               } MQ_ctrl_t;
      
@@ -67,18 +69,19 @@ package CPU_Definitions;
                               } IR_ctrl_t;
      
      // MB control signal
-     typedef enum logic       {
-          MB_ISZ = 0,              // for ISZ instruction and auto increment
-          MB_RD                    // Store memory read
+     typedef enum logic [1:0] {
+          MB_INC = 0,              // for ISZ instruction and auto increment
+          MB_RD,                   // Store memory read
+          MB_NC                    // No change
                               } MB_ctrl_t;
      
      // EA control signal
      typedef enum logic [2:0] {
-          EA_PGE = 0,            
-          EA_SMP    ,            
-          EA_IND    ,            
-          EA_INC    ,            
-          EA_NC                  
+          EA_PGE = 0,              // Change page with upper 5 of PC  
+          EA_SMP    ,              // Simple address
+          EA_IND    ,              // for indirection
+          EA_INC    ,              // for auto-increment indirection   
+          EA_NC                    // No change
                               } EA_ctrl_t;  
                               
      // Memory write data control signal
@@ -117,6 +120,7 @@ package CPU_Definitions;
 
      // states for controller
      typedef enum logic [5:0] {
+          REG_INIT = 0,  // Initial state to initialize registers
           CPU_IDLE,      // Idle State                           
           SR_CHG_1,      // Switch register change while not running
           SR_CHG_2,      
@@ -135,7 +139,6 @@ package CPU_Definitions;
           EA_AUT_3, 
           EA_AUT_4, 
           EA_AUT_5, 
-          EA_AUT_6, 
           DECODE  ,      // Decode instruction
           AND_1   ,      // AND Instruction  
           AND_2   , 

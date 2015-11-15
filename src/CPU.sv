@@ -99,6 +99,7 @@ always_comb begin: LK
           LK_MICRO : next_reg.lk = l_micro             ;    // Group 1 Microcoded Instruction
           LK_MUL   : next_reg.lk = 0                   ;    // Clear for multiply 
           LK_DVI   : next_reg.lk = eae.link_dvi        ;    // Result from EAE for divide
+          LK_ZERO  : next_reg.lk = 0                   ;    // Zero Link bit
           LK_NC    : next_reg.lk = curr_reg.lk         ;    // No change
      endcase     
 end
@@ -106,10 +107,11 @@ end
 // mq_reg (For MUL and DVI instructions using EAE component)
 always_comb begin: MQ
      unique case (fsm.MQ_ctrl)
-          MQ_AC    : next_reg.mq = curr_reg.ac    ;    // TAD instruction
-          MQ_MUL   : next_reg.mq = eae.mq_mul     ;    // Group 1 Microcoded Instruction
-          MQ_DVI   : next_reg.mq = eae.mq_dvi     ;    // Clear for multiply 
-          MQ_NC    : next_reg.mq = curr_reg.mq    ;    // No change
+          MQ_AC    : next_reg.mq = curr_reg.ac    ;    // For MQ/AC swap operation
+          MQ_MUL   : next_reg.mq = eae.mq_mul     ;    // For multiplication
+          MQ_DVI   : next_reg.mq = eae.mq_dvi     ;    // For divisiond
+          MQ_ZERO  : next_reg.mq = 0              ;    // Zero out   
+          MQ_NC    : next_reg.mq = curr_reg.mq    ;    // Default, no change     
      endcase     
 end
 
@@ -147,8 +149,9 @@ end
 // mb_reg (Memory buffer register)
 always_comb begin: MB
      unique case (fsm.MB_ctrl)
-          MB_ISZ    : next_reg.mb = mb_p1         ;    // for auto increment and ISZ instruction
-          MB_RD     : next_reg.mb = mem.read_data ;    // Load read data from memory
+          MB_INC    : next_reg.mb = curr_reg.mb + 1    ;         // for auto increment and ISZ instruction
+          MB_RD     : next_reg.mb = mem.read_data      ;         // Load read data from memory
+          MB_NC     : next_reg.mb = curr_reg.mb        ;         // No change
      endcase     
 end
 
@@ -200,7 +203,7 @@ assign tad_sum = curr_reg.ac + curr_reg.mb;
 assign Cout    = tad_sum[12]; 
      
 // Signal for controller to know when in auto-incrementing memory locations
-assign ea_reg_8_to_15 = (curr_reg.ea[11:3] === 9'b000000001) ? 1 : 0;
+assign fsm.ea_reg_8_to_15 = (curr_reg.ea[11:3] === 9'b000000001) ? 1 : 0;
 
 // Detect change in switch register
 always_comb begin
@@ -212,14 +215,6 @@ always_ff @(posedge clock) begin
      swreg_temp <= fp.swreg;
      if (swreg_change === 1) fsm.srchange <= 1;
      else                    fsm.srchange <= 0;     
-end
-
-// Increment for ISZ instruction and auto increment effective address
-always_ff @(posedge clock) begin
-     MB_ctrl_temp <= fsm.MB_ctrl;
-     if ((MB_ctrl_temp !== fsm.MB_ctrl) &&
-         (fsm.MB_ctrl  === MB_ISZ     )) mb_p1 <= curr_reg.mb + 1;                    
-     else mb_p1 <= curr_reg.mb;
 end
 
 endmodule
