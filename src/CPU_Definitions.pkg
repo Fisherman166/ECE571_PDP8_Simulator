@@ -69,9 +69,11 @@ package CPU_Definitions;
                               } IR_ctrl_t;
      
      // MB control signal
-     typedef enum logic [1:0] {
+     typedef enum logic [2:0] {
           MB_INC = 0,              // for ISZ instruction and auto increment
+          MB_WD,                   // Write Data
           MB_RD,                   // Store memory read
+          MB_ZERO,                 // Zero out
           MB_NC                    // No change
                               } MB_ctrl_t;
      
@@ -80,7 +82,8 @@ package CPU_Definitions;
           EA_PGE = 0,              // Change page with upper 5 of PC  
           EA_SMP    ,              // Simple address
           EA_IND    ,              // for indirection
-          EA_INC    ,              // for auto-increment indirection   
+          EA_INC    ,              // for auto-increment indirection
+          EA_ZERO   ,              // Zero out     
           EA_NC                    // No change
                               } EA_ctrl_t;  
                               

@@ -1,8 +1,6 @@
 // Controller.sv
 // Jonathan Waldrip
 
-
-
 `include "CPU_Definitions.pkg"
 `include "memory_utils.pkg"
 
@@ -173,7 +171,7 @@ always_comb begin: Output_Logic
      bus.PC_ctrl      = PC_NC;     // Default no change to program counter
      bus.IR_ctrl      = IR_NC;     // Default no change to instruction register
      bus.EA_ctrl      = EA_NC;     // Default no change to effective address register
-     bus.MB_ctrl      = MB_RD;     // Default bus.memory buffer to store current read data
+     bus.MB_ctrl      = MB_NC;     // Default no change to memory buffer
      bus.WD_ctrl      = WD_NC;     // Default no change to write data
      bus.AD_ctrl      = AD_NC;     // Default no change to bus.memeory address
      bus.DO_ctrl      = DO_NC;     // Default no change to front panel display out
@@ -194,6 +192,10 @@ always_comb begin: Output_Logic
                          bus.AC_ctrl = AC_CLEAR;
                          bus.LK_ctrl = LK_ZERO;
                          bus.MQ_ctrl = MQ_ZERO;
+                         bus.EA_ctrl = EA_ZERO;
+                         bus.MB_ctrl = MB_ZERO;
+                         
+                         
                     end
                     
           CPU_IDLE: begin
@@ -207,8 +209,11 @@ always_comb begin: Output_Logic
                          end
                          
           SR_CHG_1: bus.AD_ctrl = AD_SR;
-          SR_CHG_2: bus.read_enable = 1;
-
+          SR_CHG_2: begin
+                         bus.read_enable = 1;
+                         bus.MB_ctrl = MB_RD;
+                    end
+                         
           FETCH_1:  bus.AD_ctrl = AD_PC;    
           FETCH_2:  begin
                          bus.read_enable = 1; 
@@ -237,13 +242,20 @@ always_comb begin: Output_Logic
                     
           EA_IND_1: bus.AD_ctrl = AD_EA;
           EA_IND_2: begin
-                         bus.read_enable = 1;                            
+                         bus.read_enable = 1;
+                         bus.MB_ctrl = MB_RD;
                          if (bus.mem_finished == 1)
                               bus.EA_ctrl = EA_IND;
                     end   
                               
-          EA_AUT_1: bus.AD_ctrl = AD_EA;
-          EA_AUT_2: bus.read_enable = 1;                                
+          EA_AUT_1: begin
+                         bus.AD_ctrl = AD_EA;
+                         bus.MB_ctrl = MB_RD;
+                    end     
+          EA_AUT_2: begin
+                         bus.read_enable = 1;
+                         bus.MB_ctrl = MB_RD;
+                    end               
           EA_AUT_3: bus.MB_ctrl = MB_INC;
           EA_AUT_4: begin
                          bus.MB_ctrl = MB_NC;
@@ -262,20 +274,29 @@ always_comb begin: Output_Logic
                          bus.io_address = bus.curr_reg.ir[5:3];
           
           AND_1:    bus.AD_ctrl = AD_EA;
-          AND_2:    bus.read_enable = 1;  
+          AND_2:    begin
+                         bus.read_enable = 1; 
+                         bus.MB_ctrl = MB_RD;
+                    end          
           AND_3:    begin
                          bus.AC_ctrl = AC_AND;  
-                         bus.PC_ctrl = PC_P1;  
+                         bus.PC_ctrl = PC_P1;                         
                     end     
           TAD_1:    bus.AD_ctrl = AD_EA;
-          TAD_2:    bus.read_enable = 1;  
+          TAD_2:    begin
+                         bus.read_enable = 1; 
+                         bus.MB_ctrl = MB_RD;
+                    end    
           TAD_3:    begin 
                          bus.AC_ctrl = AC_TAD;  
                          bus.PC_ctrl = PC_P1;                           
                     end
                     
           ISZ_1:    bus.AD_ctrl = AD_EA;  
-          ISZ_2:    bus.read_enable = 1; 
+          ISZ_2:    begin
+                         bus.read_enable = 1; 
+                         bus.MB_ctrl = MB_RD;
+                    end   
           ISZ_3:    bus.MB_ctrl = MB_INC;          
           ISZ_4:    begin
                          bus.MB_ctrl = MB_NC; 
@@ -293,7 +314,10 @@ always_comb begin: Output_Logic
                          bus.AD_ctrl = AD_EA;
                          bus.WD_ctrl = WD_AC;
                     end
-          DCA_2:    bus.write_enable = 1;
+          DCA_2:    begin
+                         bus.write_enable = 1; 
+                         bus.MB_ctrl = MB_WD;
+                    end  
           DCA_3:    begin 
                          bus.AC_ctrl = AC_CLEAR;  
                          bus.PC_ctrl = PC_P1;
@@ -304,6 +328,7 @@ always_comb begin: Output_Logic
                          bus.WD_ctrl = WD_PCP1;
                     end 
           JMS_2:    begin 
+                         bus.MB_ctrl = MB_NC;
                          bus.write_enable = 1;
                          bus.PC_ctrl = PC_JMP;
                     end
