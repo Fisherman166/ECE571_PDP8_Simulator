@@ -4,7 +4,7 @@
 
 
 `include "CPU_Definitions.pkg"
-
+`include "memory_utils.pkg"
 
 /******************************** Declare Module Ports **********************************/
 
@@ -181,6 +181,7 @@ always_comb begin: Output_Logic
      bus.io_address   = 0    ;     // Default IO address for IOT distributor
      bus.halt         = 0    ;     // Default Halt signal to front panel
      bus.eae_start    = 0    ;     // Deafult control signal for EAE module
+     bus.read_type = `DATA_READ;   // Default read type
      
 
      unique case (Curr_State)
@@ -201,7 +202,10 @@ always_comb begin: Output_Logic
           SR_CHG_2: bus.read_enable = 1;
 
           FETCH_1:  bus.AD_ctrl = AD_PC;    
-          FETCH_2:  bus.read_enable = 1;         
+          FETCH_2:  begin
+                         bus.read_enable = 1; 
+                         bus.read_type = `INSTRUCTION_FETCH;
+                    end               
           FETCH_3:  bus.IR_ctrl = IR_LD;
 
           LD_PC_1:  bus.PC_ctrl = PC_SR;

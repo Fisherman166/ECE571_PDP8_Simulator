@@ -1,7 +1,8 @@
 // EAE for PDP8 Project
 // Jonathan Waldrip
 
-
+`include "CPU_Definitions.pkg"
+`include "memory_utils.pkg"
 
 
 /******************************** Declare Module Ports **********************************/
