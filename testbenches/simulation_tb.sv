@@ -5,6 +5,14 @@
 `include "memory_utils.pkg"
 
 //`define FILL_DEBUG
+
+`define READ_ENABLE     TOP0.bus.read_enable
+`define MEM_FINISHED    TOP0.bus.mem_finished
+`define MEM_VALID       TOP0.MEM0.memory[TOP0.bus.address].valid
+`define MEM_ADDRESS     TOP0.bus.address
+`define MEM_READ_DATA   TOP0.bus.read_data
+`define MEM_DATA        TOP0.MEM0.memory[TOP0.bus.address].data
+`define MEM_WRITE_DATA  TOP0.bus.write_data
      
 /******************************** Declare Module Ports **********************************/
 
@@ -61,23 +69,23 @@ module simulation_tb ();
     end
 
     //Generate memory trace file
-    always @(posedge TOP0.bus.mem_finished) begin
+    always @(posedge `MEM_FINISHED) begin
         if(TOP0.led[12]) begin //This is high when the program is running
-            if(TOP0.bus.read_enable) begin
-                if(TOP0.MEM0.memory[TOP0.bus.address].valid === 1'b0) begin
-                    $fdisplay(mem_trace_file, "ERROR: Attempting to read from invalid address %04o", TOP0.bus.address);
+            if(`READ_ENABLE) begin
+                if(`MEM_VALID === 1'b0) begin
+                    $fdisplay(mem_trace_file, "ERROR: Attempting to read from invalid address %04o", `MEM_ADDRESS);
                 end
                 else begin
                     if(TOP0.bus.read_type === `DATA_READ) begin
-                        $fdisplay(mem_trace_file, "DR %04o %04o %04o", TOP0.bus.address, TOP0.bus.read_data, TOP0.MEM0.memory[TOP0.bus.address].data);
+                        $fdisplay(mem_trace_file, "DR %04o %04o %04o", `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);
                     end
                     else begin
-                        $fdisplay(mem_trace_file, "IF %04o %04o %04o", TOP0.bus.address, TOP0.bus.read_data, TOP0.MEM0.memory[TOP0.bus.address].data);
+                        $fdisplay(mem_trace_file, "IF %04o %04o %04o", `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);
                     end
                 end
             end
             else if(TOP0.bus.write_enable) begin
-                $fdisplay(mem_trace_file, "DW %04o %04o %04o", TOP0.bus.address, TOP0.bus.write_data, TOP0.MEM0.memory[TOP0.bus.address].data);
+                $fdisplay(mem_trace_file, "DW %04o %04o %04o", `MEM_ADDRESS, `MEM_WRITE_DATA, `MEM_DATA);
             end
             else $display(mem_trace_file, "Neither read nor write");
         end //if led
