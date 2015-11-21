@@ -1,7 +1,7 @@
 // Top Level for PDP8 Project
 // Jonathan Waldrip
 
-`include "CPU_Definitions.pkg"
+//`include "CPU_Definitions.pkg"
 
 
 /******************************** Declare Module Ports **********************************/
@@ -25,15 +25,16 @@ module Top (input logic clk           ,
 
 
 // Interfaces for internal modules
-front_panel_pins fp ();
-iot_pins         iot();
-memory_pins      mem();
-  
-  
+main_bus bus();
+
+ 
 /********************************* Instatiate Modules **********************************/
 
-Front_Panel FP0 (.*,.clock(clk),.resetN(btnCpuReset), .fp(fp));    
-CPU CPU0 (.*,.clock(clk),.resetN(btnCpuReset), .fp(fp));
-memory_controller MEM0 (.*,.read_type('1),.pins(mem));
+Front_Panel FP0 (.*,.clock(clk),.resetN(btnCpuReset),.bus);    
+CPU CPU0 (.clock(clk),.resetN(btnCpuReset),.bus);
+Controller FSM0 (.clock(clk),.resetN(btnCpuReset),.bus);
+EAE EAE0 (.clock(clk),.resetN(btnCpuReset),.bus);
+memory_controller MEM0 (.clk,.read_type('1),.bus);
+
  
 endmodule

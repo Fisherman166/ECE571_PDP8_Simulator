@@ -30,23 +30,23 @@ assign doadd = regp[0];
 
 // regm
 always_ff @(posedge clock) begin
-     if (load === 1) regm <= multiplier;
+     if (load == 1) regm <= multiplier;
 end     
 
 // regp
 always_ff @(posedge clock) begin
-     if (load === 1) regp <= multiplicand;
-     else if (shift === 1) regp <= regp[23:1];
-     else if (add === 1) regp <= {adder,regp[11:1]};
+     if (load == 1) regp <= multiplicand;
+     else if (shift == 1) regp <= regp[23:1];
+     else if (add == 1) regp <= {adder,regp[11:1]};
 end
 
 // counter
 always_ff @(posedge clock) begin
-     if (en_cnt === 1) counter <= counter + 1;
+     if (en_cnt == 1) counter <= counter + 1;
      else counter <= 0; 
 end      
 
-assign cntnm1 = (counter === 11) ? 1 : 0 ;
+assign cntnm1 = (counter == 11) ? 1 : 0 ;
 
 // State Register
 always_ff @(posedge clock) begin
@@ -63,7 +63,7 @@ always_comb begin
      next_state = current_state;
 	case (current_state)
 		S0:  begin
-               if (start === 1) begin 
+               if (start == 1) begin 
                     load = 1;
                     next_state = S1;
                     end
@@ -71,14 +71,14 @@ always_comb begin
                
 		S1:  begin
                en_cnt <= 1;
-               if (doadd === 1) add = 1;
+               if (doadd == 1) add = 1;
                else shift = 1;
-               if (cntnm1 === 1) next_state = S2;     
+               if (cntnm1 == 1) next_state = S2;     
                end
                
 		S2:  begin
                finished = 1;
-               if (start === 0) next_state = S0;
+               if (start == 0) next_state = S0;
                else next_state = S3;
                end
                

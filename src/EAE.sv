@@ -1,14 +1,14 @@
 // EAE for PDP8 Project
 // Jonathan Waldrip
 
-`include "CPU_Definitions.pkg"
+
 
 
 /******************************** Declare Module Ports **********************************/
 
 module EAE (input logic clock, 
             input logic resetN,
-            eae_pins.slave cpu
+            main_bus.eae bus
             );
 
            
@@ -27,20 +27,20 @@ logic [11:0] remainder;
 /********************************* Instatiate Modules **********************************/
 
 Multiply MUL0 (.clock                        ,    
-               .multiplier(cpu.curr_reg.mq)  ,
-               .multiplicand(cpu.curr_reg.mb),
-               .start(cpu.eae_start)         ,
+               .multiplier(bus.curr_reg.mq)  ,
+               .multiplicand(bus.curr_reg.mb),
+               .start(bus.eae_start)         ,
                .product                      ,
                .finished        
                );
                  
 Divide DIV0   (.clock                        ,
                .dividend                     ,
-               .divisor(cpu.curr_reg.mb)     ,
-               .start(cpu.eae_start)         ,
+               .divisor(bus.curr_reg.mb)     ,
+               .start(bus.eae_start)         ,
                .quotient                     ,
                .remainder                    ,
-               .link_out(cpu.link_dvi)       ,
+               .link_out(bus.link_dvi)       ,
                .finished(fin_div)   
                );                 
                        
@@ -48,19 +48,19 @@ Divide DIV0   (.clock                        ,
 /************************************** Main Body **************************************/
 
 
-assign start = cpu.eae_start;
-assign dividend = {cpu.curr_reg.ac, cpu.curr_reg.mq};
-assign cpu.eae_fin = finished;
+assign start = bus.eae_start;
+assign dividend = {bus.curr_reg.ac, bus.curr_reg.mq};
+assign bus.eae_fin = finished;
 
 always_ff @(posedge clock) begin
-     if (finished === 1) begin
-          cpu.ac_mul <= product[23:12];
-          cpu.mq_mul <= product[11: 0];
+     if (finished == 1) begin
+          bus.ac_mul <= product[23:12];
+          bus.mq_mul <= product[11: 0];
      end
      
-     if (fin_div === 1) begin
-          cpu.ac_dvi <= remainder;
-          cpu.mq_dvi <= quotient ;
+     if (fin_div == 1) begin
+          bus.ac_dvi <= remainder;
+          bus.mq_dvi <= quotient ;
      end
 end 
 

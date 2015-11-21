@@ -32,27 +32,27 @@ assign dosub      = !subtractor[12];
 
 // regm
 always_ff @(posedge clock) begin
-     if (load === 1) regm <= divisor;
+     if (load == 1) regm <= divisor;
 end     
 
 // regp
 always_ff @(posedge clock) begin
-     if (load === 1) regp <= dividend;
-     else if (shift === 1) begin
-          if (regp[23] === 1) link_out <= 1;
+     if (load == 1) regp <= dividend;
+     else if (shift == 1) begin
+          if (regp[23] == 1) link_out <= 1;
           else link_out <= 0;
           regp <= {regp[22:0],1'b0};
           end
-     else if (sub === 1) regp <= {subtractor[11:0],regp[10:0],1'b1}; 
+     else if (sub == 1) regp <= {subtractor[11:0],regp[10:0],1'b1}; 
 end
 
 // counter
 always_ff @(posedge clock) begin
-     if (en_cnt === 1) counter <= counter + 1;
+     if (en_cnt == 1) counter <= counter + 1;
      else counter <= 0;
 end      
 
-assign cntnm1 = (counter === 11) ? 1 : 0 ;
+assign cntnm1 = (counter == 11) ? 1 : 0 ;
 
 // State Register
 always_ff @(posedge clock) begin
@@ -69,7 +69,7 @@ always_comb begin
      next_state = current_state;
 	case (current_state)
           S0:  begin
-               if (start === 1) begin
+               if (start == 1) begin
                     load = 1;
                     next_state = S1;
                     end
@@ -77,14 +77,14 @@ always_comb begin
                
           S1:  begin
                en_cnt = 1;
-               if (dosub === 1) sub = 1;
+               if (dosub == 1) sub = 1;
                else shift = 1;
-               if (cntnm1 === 1) next_state = S2;     
+               if (cntnm1 == 1) next_state = S2;     
                end
                
           S2:  begin
                finished = 1;
-               if (start === 0) next_state = S0;
+               if (start == 0) next_state = S0;
                else next_state = S3;
                end 
                

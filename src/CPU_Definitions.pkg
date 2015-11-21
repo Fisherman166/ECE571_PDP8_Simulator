@@ -2,7 +2,7 @@
 // Jonathan Waldrip
 
 `ifndef CPU_DEF_PKG
-`define CPU_DEF_PKG
+
 
 package CPU_Definitions;
 
@@ -183,196 +183,190 @@ endpackage : CPU_Definitions
 
 import CPU_Definitions::*;
 
-interface front_panel_pins;
-     logic [11:0] swreg  ;    // Switch register
-     logic [ 1:0] dispsel;    // Select data to be supplied on dispout 0-PC, 1-MQ, 2-Memory, 3-AC   
-     logic        run    ;    // 0 - stop execution 1 - run program 
-     logic        loadpc ;    // Load PC from switch register if CPU stopped
-     logic        loadac ;    // Load AC from switch register if CPU stopped
-     logic        step   ;    // Execute an instruction if CPU stopped
-     logic        deposit;    // Store switch register into memory specified by PC,increment the PC                          
-     logic [11:0] dispout;    // data to 7-segment display      
-     logic        linkout;    // link to 7-segment display
-     logic        halt   ;    // halt instruction  
+interface main_bus;
+     // CPU
+     PDP8_Registers_t curr_reg;    // Main PDP8 Registers
+
+     // Front Panel
+     logic [11:0] swreg       ;    // Switch register
+     logic [ 1:0] dispsel = 0 ;    // Select data to be supplied on dispout 0-PC, 1-MQ, 2-Memory, 3-AC   
+     logic        run = 0     ;    // 0 - stop execution 1 - run program 
+     logic        loadpc = 0  ;    // Load PC from switch register if CPU stopped
+     logic        loadac = 0  ;    // Load AC from switch register if CPU stopped
+     logic        step = 0    ;    // Execute an instruction if CPU stopped
+     logic        deposit = 0 ;    // Store switch register into memory specified by PC,increment the PC                          
+     logic [11:0] dispout     ;    // data to 7-segment display      
+     logic        linkout     ;    // link to 7-segment display
+     logic        halt        ;    // halt instruction
      
-     modport master (input  swreg   , 
-                     input  dispsel ,
-                     input  run     ,
-                     input  loadpc  ,
-                     input  loadac  ,
-                     input  step    ,
-                     input  deposit ,
-                     output dispout ,
-                     output linkout ,
-                     output halt); 
-                     
-     modport slave  (output swreg   , 
-                     output dispsel ,
-                     output run     ,
-                     output loadpc  ,
-                     output loadac  ,
-                     output step    ,
-                     output deposit ,
-                     input  dispout ,
-                     input  linkout ,
-                     input  halt); 
-endinterface
-
-interface iot_pins;
-     logic        skip_flag  ;     // skip next instruction
-     logic        clearacc   ;     // clear AC in clock period 2 if bit 1 of IR set.   
-     logic [ 7:0] datain     ;     // data to OR into AC in clock period 3
-     logic        bit1_cp2   ;     // bit 1 of IR set and clock period 2
-     logic        bit2_cp3   ;     // bit 2 of IR set and clock period 3
-     logic [ 2:0] io_address ;     // IO address (bits 5 to 3 of instruction
-     logic [ 7:0] dataout    ;     // lower 8 bits of AC
+     // IOT distributor
+     logic        skip_flag   ;    // skip next instruction
+     logic        clearacc    ;    // clear AC in clock period 2 if bit 1 of IR set.   
+     logic [ 7:0] datain      ;    // data to OR into AC in clock period 3
+     logic        bit1_cp2    ;    // bit 1 of IR set and clock period 2
+     logic        bit2_cp3    ;    // bit 2 of IR set and clock period 3
+     logic [ 2:0] io_address  ;    // IO address (bits 5 to 3 of instruction
+     logic [ 7:0] dataout     ;    // lower 8 bits of AC
      
-     modport master (input  skip_flag,       
-                     input  clearacc,        
-                     input  datain,
-                     output bit1_cp2,  
-                     output bit2_cp3,  
-                     output io_address,
-                     output dataout); 
-
-     modport slave  (output skip_flag,       
-                     output clearacc,        
-                     output datain,
-                     input  bit1_cp2,  
-                     input  bit2_cp3,  
-                     input  io_address,
-                     input  dataout); 
-endinterface
-
-interface memory_pins;
+     // Memory
      logic [11:0] read_data    ;   // data read from RAM
      logic        mem_finished ;   // High for 1 clock cycle when memory cycle is finished.                    
      logic [11:0] address      ;   // memory address
      logic [11:0] write_data   ;   // data to write
      logic        write_enable ;   // 1 - write write_data to address on next active clock edge.
-     logic        read_enable  ;   // 1 - start read of RAM at address on next active clock edge  
+     logic        read_enable  ;   // 1 - start read of RAM at address on next active clock edge
      
-     modport master (input  read_data,
-                     input  mem_finished,
-                     output address,      
-                     output write_data,  
-                     output write_enable,
-                     output read_enable); 
-                     
-     modport slave  (output read_data,
-                     output mem_finished,
-                     input  address,      
-                     input  write_data,  
-                     input  write_enable,
-                     input  read_enable); 
-endinterface
-
-interface controller_pins (front_panel_pins.master fp,
-                           iot_pins.master iot,
-                           memory_pins.master mem,
-                           eae_pins.master eae,
-                           input PDP8_Registers_t curr_reg);
-     logic skip                 ;       // skip instruction if apporopriate	
-     logic ea_reg_8_to_15       ;       // when in auto-incrementing memory locations 
-     logic micro_g1             ;       // when in group 1 microcoded
-     logic micro_g2             ;       // when in group 2 microcoded
-     logic micro_g3             ;       // when in group 3 micrododed
-     logic srchange             ;       // when a change in the switch register is detected
-     logic eae_fin              ;       // when EAE multiply or divide is complete
-     logic eae_start            ;       // when to start multiply or divide module
-     AC_ctrl_t AC_ctrl = AC_NC  ;       // mux selector for accumulator
-     LK_ctrl_t LK_ctrl = LK_NC  ;       // mux selector for link bit
-     MQ_ctrl_t MQ_ctrl = MQ_NC  ;       // mux selector for mq register
-     PC_ctrl_t PC_ctrl = PC_NC  ;       // mux selector for program counter
-     IR_ctrl_t IR_ctrl = IR_NC  ;       // mux selector for instuction register
-     EA_ctrl_t EA_ctrl = EA_NC  ;       // mux selector for effective address register
-     MB_ctrl_t MB_ctrl = MB_RD  ;       // mux selector for memory buffer
-     WD_ctrl_t WD_ctrl = WD_NC  ;       // mux selector for write data 
-     AD_ctrl_t AD_ctrl = AD_NC  ;       // mux selector for mem address
-     DO_ctrl_t DO_ctrl = DO_NC  ;       // mux selector for display out to front panel
-     DT_ctrl_t DT_ctrl = DT_NC  ;       // mux selector for data out to IOT distributor
-
-     modport master (input  eae_start      ,
-                     input  AC_ctrl        ,
-                     input  LK_ctrl        ,
-                     input  MQ_ctrl        ,
-                     input  PC_ctrl        ,
-                     input  IR_ctrl        ,
-                     input  EA_ctrl        ,
-                     input  MB_ctrl        ,
-                     input  WD_ctrl        ,
-                     input  AD_ctrl        ,
-                     input  DO_ctrl        ,
-                     input  DT_ctrl        ,
-                     output skip           ,
-                     output ea_reg_8_to_15 ,
-                     output micro_g1       ,
-                     output micro_g2       ,
-                     output micro_g3       ,
-                     output srchange       ,
-                     output eae_fin        ,
-                     output curr_reg       ,
-                     fp ,
-                     iot ,
-                     mem,
-                     eae
-                     ); 
-                     
-     modport slave  (output eae_start      ,
-                     output AC_ctrl        ,
-                     output LK_ctrl        ,
-                     output MQ_ctrl        ,
-                     output PC_ctrl        ,
-                     output IR_ctrl        ,
-                     output EA_ctrl        ,
-                     output MB_ctrl        ,
-                     output WD_ctrl        ,
-                     output AD_ctrl        ,
-                     output DO_ctrl        ,
-                     output DT_ctrl        ,
-                     input  skip           ,
-                     input  ea_reg_8_to_15 ,
-                     input  micro_g1       ,
-                     input  micro_g2       ,
-                     input  micro_g3       ,
-                     input  srchange       ,
-                     input  eae_fin        ,
-                     input  curr_reg       ,       
-                     fp ,
-                     iot,
-                     mem,
-                     eae
-                     ); 
-                      
-endinterface
-
-interface eae_pins(input PDP8_Registers_t curr_reg);;
-     logic [11:0]     mq_mul    ;
-     logic [11:0]     ac_mul    ;          
-     logic [11:0]     mq_dvi    ;
-     logic [11:0]     ac_dvi    ;
-     logic            link_dvi  ;
-     logic            eae_fin   ;
-     logic            eae_start ;
+     // CPU Controller
+     logic skip                 ;  // skip instruction if apporopriate	
+     logic ea_in_auto           ;  // when in auto-incrementing memory locations 
+     logic micro_g1             ;  // when in group 1 microcoded
+     logic micro_g2             ;  // when in group 2 microcoded
+     logic micro_g3             ;  // when in group 3 micrododed
+     logic srchange             ;  // when a change in the switch register is detected
+     AC_ctrl_t AC_ctrl = AC_NC  ;  // mux selector for accumulator
+     LK_ctrl_t LK_ctrl = LK_NC  ;  // mux selector for link bit
+     MQ_ctrl_t MQ_ctrl = MQ_NC  ;  // mux selector for mq register
+     PC_ctrl_t PC_ctrl = PC_NC  ;  // mux selector for program counter
+     IR_ctrl_t IR_ctrl = IR_NC  ;  // mux selector for instuction register
+     EA_ctrl_t EA_ctrl = EA_NC  ;  // mux selector for effective address register
+     MB_ctrl_t MB_ctrl = MB_RD  ;  // mux selector for memory buffer
+     WD_ctrl_t WD_ctrl = WD_NC  ;  // mux selector for write data 
+     AD_ctrl_t AD_ctrl = AD_NC  ;  // mux selector for mem address
+     DO_ctrl_t DO_ctrl = DO_NC  ;  // mux selector for display out to front panel
+     DT_ctrl_t DT_ctrl = DT_NC  ;  // mux selector for data out to IOT distributor
      
-     modport master (input  mq_mul,
-                     input  ac_mul,
-                     input  mq_dvi,      
-                     input  ac_dvi,
-                     input  link_dvi,      
-                     input  eae_fin,
-                     output eae_start,
-                     output curr_reg);
-                     
-     modport slave  (output mq_mul,
-                     output ac_mul,
-                     output mq_dvi,      
-                     output ac_dvi,
-                     output link_dvi,      
-                     output eae_fin,
-                     input  eae_start,
-                     input  curr_reg);
-             
+     //EAE
+     logic [11:0]     mq_mul    ;  // Value for MQ register after multiply is complete 
+     logic [11:0]     ac_mul    ;  // Value for AC register after multiply is complete           
+     logic [11:0]     mq_dvi    ;  // Value for MQ register after divide is complete 
+     logic [11:0]     ac_dvi    ;  // Value for MQ register after divide is complete 
+     logic            link_dvi  ;  // Value for Link register after divide is complete 
+     logic            eae_fin   ;  // Signal that multiply and/or divide is complete
+     logic            eae_start ;  // Signal to start multiply and/or divide     
+     
+     
+     modport cpu   (// Front Panel
+                    input  swreg        , 
+                    output dispout      ,
+                    output linkout      ,
+
+                    // IOT Distributor     
+                    input  datain       ,
+                    output dataout      , 
+                    
+                    // Memory          
+                    input  read_data    ,
+                    output address      , 
+                    output write_data   , 
+                    
+                    // State Machine (Controller)
+                    input  AC_ctrl      ,
+                    input  LK_ctrl      ,
+                    input  MQ_ctrl      ,
+                    input  PC_ctrl      ,
+                    input  IR_ctrl      ,
+                    input  EA_ctrl      ,
+                    input  MB_ctrl      ,
+                    input  WD_ctrl      ,
+                    input  AD_ctrl      ,
+                    input  DO_ctrl      ,
+                    input  DT_ctrl      ,
+                    output ea_in_auto   ,
+                    output srchange     ,
+                    output curr_reg     ,
+                    output skip         ,
+                    output micro_g1     ,
+                    output micro_g2     ,
+                    output micro_g3     ,
+                    
+                    // EAE Module 
+                    input  mq_mul       , 
+                    input  ac_mul       , 
+                    input  mq_dvi       , 
+                    input  ac_dvi       , 
+                    input  link_dvi     );
+                    
+     modport iot   (output skip_flag    ,       
+                    output clearacc     ,        
+                    output datain       ,
+                    input  bit1_cp2     ,  
+                    input  bit2_cp3     ,  
+                    input  io_address   ,
+                    input  dataout      );
+                    
+     modport mem   (output read_data    ,
+                    output mem_finished ,
+                    input  address      ,      
+                    input  write_data   ,  
+                    input  write_enable ,
+                    input  read_enable  ); 
+                    
+     modport fsm   (// CPU
+                    output AC_ctrl      ,
+                    output LK_ctrl      ,
+                    output MQ_ctrl      ,
+                    output PC_ctrl      ,
+                    output IR_ctrl      ,
+                    output EA_ctrl      ,
+                    output MB_ctrl      ,
+                    output WD_ctrl      ,
+                    output AD_ctrl      ,
+                    output DO_ctrl      ,
+                    output DT_ctrl      ,
+                    input  skip         ,
+                    input  ea_in_auto   ,
+                    input  micro_g1     ,
+                    input  micro_g2     ,
+                    input  micro_g3     ,
+                    input  srchange     ,
+                    input  curr_reg     , 
+                    
+                    // EAE
+                    output eae_start    ,
+                    input  eae_fin      ,
+                    
+                    // Front Panel
+                    input  dispsel      ,
+                    input  run          ,
+                    input  loadpc       ,
+                    input  loadac       ,
+                    input  step         ,
+                    input  deposit      ,
+                    output halt         ,
+                    
+                    // IOT distributor
+                    input  skip_flag    ,       
+                    input  clearacc     ,        
+                    output bit1_cp2     ,  
+                    output bit2_cp3     ,  
+                    output io_address   ,
+                    
+                    // Memory
+                    input  mem_finished ,
+                    output write_enable ,
+                    output read_enable  );                    
+
+     modport eae   (output mq_mul       ,
+                    output ac_mul       ,
+                    output mq_dvi       ,      
+                    output ac_dvi       ,
+                    output link_dvi     ,      
+                    output eae_fin      ,
+                    input  eae_start    ,
+                    input  curr_reg     );               
+
+     modport fp    (output swreg        , 
+                    output dispsel      ,
+                    output run          ,
+                    output loadpc       ,
+                    output loadac       ,
+                    output step         ,
+                    output deposit      ,
+                    input  dispout      ,
+                    input  linkout      ,
+                    input  halt         );               
+                    
 endinterface
 
 `endif
+
