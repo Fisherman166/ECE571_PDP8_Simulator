@@ -232,11 +232,14 @@ always_comb begin: Output_Logic
                          if (bus.mem_finished == 1)
                               bus.PC_ctrl = PC_P1;
                     end        
-                   
+
+          DECODE:   if (bus.curr_reg.ir[11:9] == 3'b110)
+                         bus.io_address = bus.curr_reg.ir[5:3];                    
+                              
           CAL_EA_1: if (bus.curr_reg.ir[7] == 0)
                          bus.EA_ctrl = EA_SMP;
                     else bus.EA_ctrl = EA_PGE;
-                    
+
           EA_IND_1: bus.AD_ctrl = AD_EA;
           EA_IND_2: begin
                          bus.read_enable = 1;
@@ -267,9 +270,6 @@ always_comb begin: Output_Logic
                          bus.EA_ctrl = EA_IND;
                     end 
                     
-          DECODE:   if (bus.curr_reg.ir[11:9] == 3'b110)
-                         bus.io_address = bus.curr_reg.ir[5:3];
-          
           AND_1:    bus.AD_ctrl = AD_EA;
           AND_2:    begin
                          bus.read_enable = 1; 
@@ -408,6 +408,7 @@ always_comb begin: Output_Logic
           HALT :    begin
                          bus.halt = 1; 
                          bus.CPU_idle = 1;
+                         PC_ctrl = PCP1;
                     end               
                     
      endcase
