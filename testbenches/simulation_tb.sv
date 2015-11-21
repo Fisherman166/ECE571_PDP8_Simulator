@@ -8,10 +8,10 @@
 
 `define READ_ENABLE     TOP0.bus.read_enable
 `define MEM_FINISHED    TOP0.bus.mem_finished
-`define MEM_VALID       TOP0.MEM0.memory[TOP0.bus.address].valid
 `define MEM_ADDRESS     TOP0.bus.address
+`define MEM_VALID       TOP0.MEM0.memory[`MEM_ADDRESS].valid
 `define MEM_READ_DATA   TOP0.bus.read_data
-`define MEM_DATA        TOP0.MEM0.memory[TOP0.bus.address].data
+`define MEM_DATA        TOP0.MEM0.memory[`MEM_ADDRESS].data
 `define MEM_WRITE_DATA  TOP0.bus.write_data
      
 /******************************** Declare Module Ports **********************************/
@@ -20,6 +20,7 @@ module simulation_tb ();
     parameter string INIT_MEM_FILENAME = "init_mem.obj";
     parameter string MEM_TRACE_FILENAME = "memory_trace_sv.txt";
     parameter string REG_TRACE_FILENAME = "opcode_output.txt";
+    parameter string VALID_MEM_FILENAME  = "valid_memory_sv.txt";
     bit   clk         ;
     logic btnCpuReset = 1 ;
     logic [15:0] led  ;
@@ -151,7 +152,7 @@ module simulation_tb ();
     endtask
 
     function void print_valid_memory();
-        automatic integer file = $fopen("valid_memory_sv.txt", "w");
+        automatic integer file = $fopen(VALID_MEM_FILENAME, "w");
 
         `ifdef SIMULATION
             if(!file) $display ("Error opening valid_memory_sv.txt file");
