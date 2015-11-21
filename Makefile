@@ -42,7 +42,6 @@ $(LIB_WORK)/_lib.qdb : src/Top.sv testbenches/simulation_tb.sv src/Multiply.sv \
 		 src/Multiply.sv src/Top.sv src/CPU_Definitions.pkg \
 		 src/memory_utils.pkg testbenches/simulation_tb.sv \
 		 +incdir+$(current_dir)/src/ \
-         +define+SIMULATION
 
 clean:
 	rm -rf $(LIB_WORK)
