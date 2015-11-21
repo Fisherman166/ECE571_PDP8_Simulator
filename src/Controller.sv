@@ -408,7 +408,7 @@ always_comb begin: Output_Logic
           HALT :    begin
                          bus.halt = 1; 
                          bus.CPU_idle = 1;
-                         PC_ctrl = PCP1;
+                         bus.PC_ctrl = PCP1;
                     end               
                     
      endcase
