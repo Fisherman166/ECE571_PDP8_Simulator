@@ -6,7 +6,7 @@
 
 `include "memory_utils.pkg"
 
-`define INSTRUCTION_SIZE 9
+`define INSTRUCTION_SIZE 12
 `define SELECT_SIZE 3
 `define ACCUMLATOR_AND_LINK_SIZE 13
 `define GROUP_FLAG_SIZE 4
@@ -137,19 +137,19 @@ module micro_instruction_decoder(
         `endif
 
         //Block 0 - Clear
-        if(group1_instruction_bits.CLA === 1'b1) block_connection[0].accumlator = '0;
+        if(group1_instruction_bits.CLA == 1'b1) block_connection[0].accumlator = '0;
         else block_connection[0].accumlator = ac_reg;
 
-        if(group1_instruction_bits.CLL === 1'b1) block_connection[0].link = '0;
+        if(group1_instruction_bits.CLL == 1'b1) block_connection[0].link = '0;
         else block_connection[0].link = l_reg;
 
         //Block 1 - Complement
-        if(group1_instruction_bits.CMA === 1'b1) begin
+        if(group1_instruction_bits.CMA == 1'b1) begin
             block_connection[1].accumlator = ~block_connection[0].accumlator;
         end
         else block_connection[1].accumlator = block_connection[0].accumlator;
 
-        if(group1_instruction_bits.CML === 1'b1) begin
+        if(group1_instruction_bits.CML == 1'b1) begin
             block_connection[1].link = ~block_connection[0].link;
         end
         else block_connection[1].link = block_connection[0].link;
@@ -158,7 +158,7 @@ module micro_instruction_decoder(
         link_and_accumulator = {block_connection[1].link, block_connection[1].accumlator} + 1'b1;
         block_connection[2].link = block_connection[1].link;
 
-        if(group1_instruction_bits.IAC === 1'b1) begin
+        if(group1_instruction_bits.IAC == 1'b1) begin
             block_connection[2].accumlator = link_and_accumulator[`ACCUMLATOR_AND_LINK_SIZE-2:0];
         end
         else begin
@@ -206,7 +206,7 @@ module micro_instruction_decoder(
         //This is only to make verification in the testbench easier
         //since my C program expects that the inputted ac and link
         //will be outtputed by the module for group 2 instructions
-        if( (group_select[2:1] === `OR_INSTRUCTION) || (group_select[2:1] === `AND_INSTRUCTION) ) begin
+        if( (group_select[2:1] == `OR_INSTRUCTION) || (group_select[2:1] == `AND_INSTRUCTION) ) begin
             ac_micro = ac_reg;
             l_micro = l_reg;
         end
@@ -222,21 +222,21 @@ module micro_instruction_decoder(
                                                                      group2_instruction_bits.SZA,
                                                                      group2_instruction_bits.SNL};
 
-        if(group_select[2:1] === `OR_INSTRUCTION) begin
+        if(group_select[2:1] == `OR_INSTRUCTION) begin
             case(instructions_dectected)
                 3'b001: if(l_reg !== 1'b0) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b010: if(ac_reg === '0) skip_or = 1'b1;
+                3'b010: if(ac_reg == '0) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b011: if( (ac_reg === '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b011: if( (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b100: if(ac_reg[11] === 1'b1) skip_or = 1'b1;
+                3'b100: if(ac_reg[11] == 1'b1) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b101: if( (ac_reg[11] === 1'b1) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b101: if( (ac_reg[11] == 1'b1) || (l_reg !== 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b110: if( (ac_reg[11] === 1'b1) || (ac_reg === '0) ) skip_or = 1'b1;
+                3'b110: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b111: if( (ac_reg[11] === 1'b1) || (ac_reg === '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                default: skip_or = 1'b0;
             endcase
@@ -250,22 +250,22 @@ module micro_instruction_decoder(
                                                                      group2_instruction_bits.SNA,
                                                                      group2_instruction_bits.SZL};
 
-        if(group_select[2:1] === `AND_INSTRUCTION) begin
+        if(group_select[2:1] == `AND_INSTRUCTION) begin
             case(instructions_dectected)
                 3'b000: skip_and = 1'b1;
-                3'b001: if(l_reg === 1'b0) skip_and = 1'b1;
+                3'b001: if(l_reg == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
                 3'b010: if(ac_reg !== '0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b011: if( (ac_reg !== '0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                3'b011: if( (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b100: if(ac_reg[11] === 1'b0) skip_and = 1'b1;
+                3'b100: if(ac_reg[11] == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b101: if( (ac_reg[11] === 1'b0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                3'b101: if( (ac_reg[11] == 1'b0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b110: if( (ac_reg[11] === 1'b0) && (ac_reg !== '0) ) skip_and = 1'b1;
+                3'b110: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b111: if( (ac_reg[11] === 1'b0) && (ac_reg !== '0) && (l_reg === 1'b0) ) skip_and = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
                default: skip_and = 1'b0;
             endcase

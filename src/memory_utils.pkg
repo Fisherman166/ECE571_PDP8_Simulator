@@ -41,7 +41,7 @@ package memory_utils;
 		$display("-------    --------\n");
 
 		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			if(memory[i].valid === 1'b1) begin
+			if(memory[i].valid == 1'b1) begin
 				$display("%04o        %04o\n", i, memory[i].data);
 			end //if
 		end //for

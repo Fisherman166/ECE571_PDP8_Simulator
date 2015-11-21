@@ -4,13 +4,14 @@
 `ifndef MEMORY_H
 `define MEMORY_H
 
+
 `include "memory_utils.pkg"
-`include "CPU_Definitions.pkg"
+
 
 module memory_controller(
     input logic clk,
     input logic read_type,
-    memory_pins.slave pins
+    main_bus.mem bus
 );
     states current_state = IDLE;
     states next_state;
@@ -22,8 +23,8 @@ module memory_controller(
     //Next state logic
     always_comb begin
         unique case (current_state)
-            IDLE: if(pins.write_enable) next_state = WRITE;
-                  else if(pins.read_enable) next_state = READ;
+            IDLE: if(bus.write_enable) next_state = WRITE;
+                  else if(bus.read_enable) next_state = READ;
                   else next_state = IDLE;
             READ: next_state = DONE;
             WRITE: next_state = DONE;
@@ -33,31 +34,31 @@ module memory_controller(
 
     //Output logic
     always_comb begin
-        pins.read_data = pins.read_data;
-        pins.mem_finished = 1'b0;
+        bus.read_data = bus.read_data;
+        bus.mem_finished = 1'b0;
 
         unique case (current_state)
-            IDLE: pins.mem_finished = 1'b0;
-            READ: pins.read_data = read_memory(pins.address, read_type);
-            WRITE: write_memory(pins.address, pins.write_data);
-            DONE: pins.mem_finished = 1'b1;
+            IDLE: bus.mem_finished = 1'b0;
+            READ: bus.read_data = read_memory(bus.address, read_type);
+            WRITE: write_memory(bus.address, bus.write_data);
+            DONE: bus.mem_finished = 1'b1;
         endcase
     end
 
 	function word read_memory(input word address, input logic read_type);
 		word retval;
 		
-		if(memory[address].valid === `INVALID) begin
+		if(memory[address].valid == `INVALID) begin
 			`ifdef SIMULATION
 				$display("Attempting to read from invalid address %04o", address);
 			`endif
 			retval = 12'h0;
 		end
-		else if( (read_type === `DATA_READ) || (read_type === `INSTRUCTION_FETCH) ) begin
+		else if( (read_type == `DATA_READ) || (read_type == `INSTRUCTION_FETCH) ) begin
 			retval = memory[address].data;
 
 			`ifdef SIMULATION
-				if(read_type === `DATA_READ) $fdisplay(memory_trace_file, "DR %04o", address);
+				if(read_type == `DATA_READ) $fdisplay(memory_trace_file, "DR %04o", address);
 				else $fdisplay(memory_trace_file, "IF %04o\n", address);
 			`endif
 		end
