@@ -209,10 +209,7 @@ always_comb begin: Output_Logic
                          end
                          
           SR_CHG_1: bus.AD_ctrl = AD_SR;
-          SR_CHG_2: begin
-                         bus.read_enable = 1;
-                         bus.MB_ctrl = MB_RD;
-                    end
+          SR_CHG_2: bus.read_enable = 1;
                          
           FETCH_1:  bus.AD_ctrl = AD_PC;    
           FETCH_2:  begin
@@ -408,7 +405,10 @@ always_comb begin: Output_Logic
                          bus.PC_ctrl = PC_P1;
                     end
                     
-          HALT :    bus.halt = 1;    
+          HALT :    begin
+                         bus.halt = 1; 
+                         bus.CPU_idle = 1;
+                    end               
                     
      endcase
 end: Output_Logic
