@@ -36,15 +36,22 @@ package memory_utils;
 	endfunction
 
 	function void print_valid_memory();
-		$display("******************************PRINTING VALID MEMORY**************************\n");
-		$display("Address    Contents\n");
-		$display("-------    --------\n");
+        automatic integer file = $fopen("valid_memory_sv.txt", "w");
+
+        `ifdef SIMULATION
+            if(!file) $display ("Error opening valid_memory_sv.txt file");
+        `endif
+
+		$fdisplay(file, "Address    Contents");
+		$fdisplay(file, "-------    --------");
 
 		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			if(memory[i].valid == 1'b1) begin
-				$display("%04o        %04o\n", i, memory[i].data);
+			if(memory[i].valid === 1'b1) begin
+				$fdisplay(file, "%04o        %04o", i, memory[i].data);
 			end //if
 		end //for
+
+        $fclose(file);
 	endfunction
 
 	function void trace_init();

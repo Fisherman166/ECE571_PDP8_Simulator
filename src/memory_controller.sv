@@ -59,7 +59,7 @@ module memory_controller(
 
 			`ifdef SIMULATION
 				if(read_type == `DATA_READ) $fdisplay(memory_trace_file, "DR %04o", address);
-				else $fdisplay(memory_trace_file, "IF %04o\n", address);
+				else $fdisplay(memory_trace_file, "IF %04o", address);
 			`endif
 		end
 		else begin
