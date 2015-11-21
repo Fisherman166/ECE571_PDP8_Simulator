@@ -29,7 +29,7 @@ int          line_count = 0;
 int          file,c;               
 bit   [11:0] temp;
 bit   [11:0] mem_image [4096];
-
+int          reg_file;
   
   
 /********************************* Instatiate Modules **********************************/
@@ -46,12 +46,15 @@ Top TOP0 (.btnc(Display_Select) ,
 // Generate clock signal
 always #10 clk = ~clk;  
  
-
 // Run test
 initial begin
      // Hold reset low on DUT for 5 clock cycles
      btnCpuReset = 0;
      repeat(5) @ (negedge clk); btnCpuReset = 1;
+     
+     // Open File
+     reg_file = $fopen("opcode_output.txt", "w");
+     if(!reg_file) $display ("Error opening valid_memory_sv.txt file");
      
      // read compiled asm file
      file = $fopen("-class3a.txt", "r");           // Open file compiled asm file
@@ -83,9 +86,32 @@ initial begin
      repeat(10) @ (negedge clk); Load_PC = 0;
      
      // Run program
-      repeat(10) @ (negedge clk); sw[12] = 1;
+     repeat(10) @ (negedge clk); sw[12] = 1;
      
-     
+      
+
 end 
+
+// Print all valid memeory when halt instuction executes
+always @(negedge led[12]) begin
+      print_valid_memory();
+      $fclose(reg_file); 
+end
+
+// Print contenets of each register after every instruction
+
+
+always @(posedge led[13]) begin
+
+     
+
+     if(led[12] == 1)
+          $fdisplay(reg_file, "Opcode: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
+               TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
+               TOP0.bus.curr_reg.mb, TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+     
+end
+
+
  
 endmodule

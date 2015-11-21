@@ -64,12 +64,7 @@ always_comb begin: Next_State_Logic
                                    3'b110 : Inst_State = IOT_1;
                                    default: Inst_State = MIC_1;
                               endcase
-                              if (bus.curr_reg.ir [11:9] == 3'b000 ||
-                                  bus.curr_reg.ir [11:9] == 3'b001 ||
-                                  bus.curr_reg.ir [11:9] == 3'b010 ||
-                                  bus.curr_reg.ir [11:9] == 3'b100 ||
-                                  bus.curr_reg.ir [11:9] == 3'b101)      Next_State = CAL_EA_1;
-                              else if (bus.curr_reg.ir [11:9] == 3'b011) Next_State = DCA_1;
+                              if (bus.curr_reg.ir [11:9] <= 5) Next_State = CAL_EA_1;
                               else if (bus.curr_reg.ir [11:9] == 3'b110) Next_State = IOT_1;
                               else Next_State = MIC_1;                        
                          end                    
