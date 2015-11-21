@@ -11,6 +11,7 @@
 module simulation_tb ();
     parameter string INIT_MEM_FILENAME = "init_mem.obj";
     parameter string MEM_TRACE_FILENAME = "memory_trace_sv.txt";
+    parameter string REG_TRACE_FILENAME = "opcode_output.txt";
     bit   clk         ;
     logic btnCpuReset = 1 ;
     logic [15:0] led  ;
@@ -24,7 +25,7 @@ module simulation_tb ();
     logic        Load_PC = 0 ;
     logic        Load_AC = 0 ;
     int          file, read_count1, read_count2;               
-    int          mem_trace_file; 
+    int          mem_trace_file, reg_file; 
     bit   [11:0] high_byte, low_byte;
     word         word_value;
 
@@ -46,7 +47,17 @@ module simulation_tb ();
     always @(negedge TOP0.led[12]) begin
         print_valid_memory();
         $fclose(mem_trace_file);
+        $fclose(reg_file);
         $finish();
+    end
+
+    //Print contents of all registers after each instruction
+    always @(posedge led[13]) begin
+        if(led[12]) begin
+            $fdisplay(reg_file, "Opcode: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
+                      TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
+                      TOP0.bus.curr_reg.mb, TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+        end
     end
 
     //Generate memory trace file
@@ -74,11 +85,7 @@ module simulation_tb ();
 
     // Run test
     initial begin
-        //Open different trace files
-        mem_trace_file = $fopen(MEM_TRACE_FILENAME, "w");
-        if(!mem_trace_file) $display("ERROR: Failed to open memory trace file.");
-        $fdisplay(mem_trace_file, "OP Addr Bus  Mem ");
-        $fdisplay(mem_trace_file, "-- ---- ---- ----");
+        init_output_files();
 
         // Hold reset low on DUT for 5 clock cycles
         btnCpuReset = 0;
@@ -153,4 +160,15 @@ module simulation_tb ();
 
         $fclose(file);
 	endfunction
+
+    function void init_output_files();
+        //Open different trace files
+        mem_trace_file = $fopen(MEM_TRACE_FILENAME, "w");
+        if(!mem_trace_file) $display("ERROR: Failed to open memory trace file.");
+        $fdisplay(mem_trace_file, "OP Addr Bus  Mem ");
+        $fdisplay(mem_trace_file, "-- ---- ---- ----");
+
+        reg_file = $fopen(REG_TRACE_FILENAME, "w");
+        if(!reg_file) $display ("Error opening reg trace file");
+    endfunction
 endmodule
