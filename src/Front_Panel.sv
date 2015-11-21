@@ -40,7 +40,8 @@ DEB_STATE cur_state_deb, next_state_deb      ;
 assign bus.swreg = sw[11:0];
 assign dp = (digit_mux == 3'b011) ? ~bus.linkout : 1;
 assign count0 = (m1counter == 0) ? 1:0;
-assign {led[15:13],led[11:4]} = 0;
+assign {led[15:14],led[11:4]} = 0;
+assign led[13] = bus.CPU_idle;
 
 
  // divide by 1,000,000 counter (low pass filter)

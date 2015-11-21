@@ -34,7 +34,7 @@ Front_Panel FP0 (.*,.clock(clk),.resetN(btnCpuReset),.bus);
 CPU CPU0 (.clock(clk),.resetN(btnCpuReset),.bus);
 Controller FSM0 (.clock(clk),.resetN(btnCpuReset),.bus);
 EAE EAE0 (.clock(clk),.resetN(btnCpuReset),.bus);
-memory_controller MEM0 (.clk,.bus);
+memory_controller MEM0 (.clk,.read_type('1),.bus);
 
  
 endmodule

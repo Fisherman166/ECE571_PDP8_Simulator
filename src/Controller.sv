@@ -15,7 +15,7 @@ module Controller (input logic clock,
 
 /********************************** Declare Signals ************************************/
 
-Controller_states_t Curr_State = CPU_IDLE, Next_State;
+Controller_states_t Curr_State = CPU_IDLE, Next_State, Inst_State;
 
 
 /************************************** Main Body **************************************/                
@@ -49,8 +49,32 @@ always_comb begin: Next_State_Logic
           FETCH_1:  Next_State = FETCH_2;
           FETCH_2:  if (bus.mem_finished == 1)
                          Next_State = FETCH_3;
-          FETCH_3:  Next_State = CAL_EA_1;
-
+          FETCH_3:  Next_State = DECODE;
+          
+          DECODE:   begin
+                         if (bus.curr_reg.ir == 12'o7402) Next_State = HALT;
+                         else begin 
+                              case (bus.curr_reg.ir[11:9])
+                                   3'b000 : Inst_State = AND_1;
+                                   3'b001 : Inst_State = TAD_1;
+                                   3'b010 : Inst_State = ISZ_1;
+                                   3'b011 : Inst_State = DCA_1;
+                                   3'b100 : Inst_State = JMS_1;
+                                   3'b101 : Inst_State = JMP_1;
+                                   3'b110 : Inst_State = IOT_1;
+                                   default: Inst_State = MIC_1;
+                              endcase
+                              if (bus.curr_reg.ir [11:9] == 3'b000 ||
+                                  bus.curr_reg.ir [11:9] == 3'b001 ||
+                                  bus.curr_reg.ir [11:9] == 3'b010 ||
+                                  bus.curr_reg.ir [11:9] == 3'b100 ||
+                                  bus.curr_reg.ir [11:9] == 3'b101)      Next_State = CAL_EA_1;
+                              else if (bus.curr_reg.ir [11:9] == 3'b011) Next_State = DCA_1;
+                              else if (bus.curr_reg.ir [11:9] == 3'b110) Next_State = IOT_1;
+                              else Next_State = MIC_1;                        
+                         end                    
+                    end
+                         
           LD_PC_1:  Next_State = CPU_IDLE;
 
           LD_AC_1:  Next_State = CPU_IDLE;
@@ -60,14 +84,14 @@ always_comb begin: Next_State_Logic
                          Next_State = CPU_IDLE;          
 
           CAL_EA_1: if (bus.curr_reg.ir[8] == 0)
-                         Next_State = DECODE;
+                         Next_State = Inst_State;
                     else Next_State = EA_IND_1;
                            
           EA_IND_1: if (bus.ea_in_auto == 0)
                          Next_State = EA_IND_2;
                     else Next_State = EA_AUT_1;         
           EA_IND_2: if (bus.mem_finished == 1)
-                         Next_State = DECODE;
+                         Next_State = Inst_State;
                               
           EA_AUT_1: Next_State = EA_AUT_2; 
           EA_AUT_2: if (bus.mem_finished == 1)
@@ -76,23 +100,8 @@ always_comb begin: Next_State_Logic
           EA_AUT_4: Next_State = EA_AUT_5;
           EA_AUT_5: if (bus.mem_finished == 1)
                          Next_State = EA_AUT_6;
-          EA_AUT_6: Next_State = DECODE;
-          
+          EA_AUT_6: Next_State = Inst_State;
 
-          DECODE:   begin
-                         if (bus.curr_reg.ir == 12'o7402) Next_State = HALT;
-                         else case (bus.curr_reg.ir[11:9])
-                              3'b000 : Next_State = AND_1;
-                              3'b001 : Next_State = TAD_1;
-                              3'b010 : Next_State = ISZ_1;
-                              3'b011 : Next_State = DCA_1;
-                              3'b100 : Next_State = JMS_1;
-                              3'b101 : Next_State = JMP_1;
-                              3'b110 : Next_State = IOT_1;
-                              default: Next_State = MIC_1;
-                         endcase     
-                    end
-               
           AND_1:    Next_State = AND_2;
           AND_2:    if (bus.mem_finished == 1)
                          Next_State = AND_3;
@@ -182,6 +191,7 @@ always_comb begin: Output_Logic
      bus.halt         = 0    ;     // Default Halt signal to front panel
      bus.eae_start    = 0    ;     // Deafult control signal for EAE module
      bus.read_type = `DATA_READ;   // Default read type
+     bus.CPU_idle     = 0    ;     // Default CPU_idle to low
      
 
      unique case (Curr_State)
@@ -191,12 +201,15 @@ always_comb begin: Output_Logic
                          bus.MQ_ctrl = MQ_ZERO;
                     end
                     
-          CPU_IDLE: case (bus.dispsel)
-                         2'b00 : bus.DO_ctrl = DO_PC;
-                         2'b01 : bus.DO_ctrl = DO_AC;
-                         2'b10 : bus.DO_ctrl = DO_MQ;
-                         2'b11 : bus.DO_ctrl = DO_MB;
-                    endcase
+          CPU_IDLE: begin
+                         bus.CPU_idle = 1;
+                         case (bus.dispsel)
+                              2'b00 : bus.DO_ctrl = DO_PC;
+                              2'b01 : bus.DO_ctrl = DO_AC;
+                              2'b10 : bus.DO_ctrl = DO_MQ;
+                              2'b11 : bus.DO_ctrl = DO_MB;
+                         endcase
+                         end
                          
           SR_CHG_1: bus.AD_ctrl = AD_SR;
           SR_CHG_2: bus.read_enable = 1;

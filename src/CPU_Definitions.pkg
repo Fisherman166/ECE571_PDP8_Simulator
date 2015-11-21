@@ -224,6 +224,7 @@ interface main_bus;
      logic micro_g2             ;  // when in group 2 microcoded
      logic micro_g3             ;  // when in group 3 micrododed
      logic srchange             ;  // when a change in the switch register is detected
+     logic CPU_idle             ;  // High when in idle state
      AC_ctrl_t AC_ctrl = AC_NC  ;  // mux selector for accumulator
      LK_ctrl_t LK_ctrl = LK_NC  ;  // mux selector for link bit
      MQ_ctrl_t MQ_ctrl = MQ_NC  ;  // mux selector for mq register
@@ -335,6 +336,7 @@ interface main_bus;
                     input  step         ,
                     input  deposit      ,
                     output halt         ,
+                    output CPU_idle     ,
                     
                     // IOT distributor
                     input  skip_flag    ,       
@@ -367,7 +369,8 @@ interface main_bus;
                     output deposit      ,
                     input  dispout      ,
                     input  linkout      ,
-                    input  halt         );               
+                    input  halt         ,
+                    input  CPU_idle     );               
                     
 endinterface
 
