@@ -25,50 +25,6 @@ package memory_utils;
                               READ =    4'b0010,
                               WRITE =   4'b0100,
                               DONE =    4'b1000} states;
-
-	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
-	integer memory_trace_file;
-
-	function void init_mem();
-		for(int i =0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			memory[i].valid = 1'b0;
-		end
-	endfunction
-
-	function void print_valid_memory();
-        automatic integer file = $fopen("valid_memory_sv.txt", "w");
-
-        `ifdef SIMULATION
-            if(!file) $display ("Error opening valid_memory_sv.txt file");
-        `endif
-
-		$fdisplay(file, "Address    Contents");
-		$fdisplay(file, "-------    --------");
-
-		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			if(memory[i].valid === 1'b1) begin
-				$fdisplay(file, "%04o        %04o", i, memory[i].data);
-			end //if
-		end //for
-
-        $fclose(file);
-	endfunction
-
-	function void trace_init();
-		automatic string tracefile_name = "memory_trace.txt";
-		memory_trace_file = $fopen(tracefile_name, "w");
-
-		if(memory_trace_file == 0) begin
-			$display("Memory trace file failed to open");
-		end
-		else begin
-			$display("Memory trace file opened sucessfully");
-		end
-	endfunction
-
-	function void trace_close();
-		$fclose(memory_trace_file);
-	endfunction
 endpackage
 
 import memory_utils::*;

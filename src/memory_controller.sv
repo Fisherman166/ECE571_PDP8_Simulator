@@ -4,9 +4,7 @@
 `ifndef MEMORY_H
 `define MEMORY_H
 
-
 `include "memory_utils.pkg"
-
 
 module memory_controller(
     input logic clk,
@@ -15,6 +13,7 @@ module memory_controller(
 );
     states current_state = IDLE;
     states next_state;
+	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
 
     always_ff @(posedge clk) begin
         current_state <= next_state;
@@ -49,23 +48,12 @@ module memory_controller(
 		word retval;
 		
 		if(memory[address].valid == `INVALID) begin
-			`ifdef SIMULATION
-				$display("Attempting to read from invalid address %04o", address);
-			`endif
 			retval = 12'h0;
 		end
 		else if( (read_type == `DATA_READ) || (read_type == `INSTRUCTION_FETCH) ) begin
 			retval = memory[address].data;
-
-			`ifdef SIMULATION
-				if(read_type == `DATA_READ) $fdisplay(memory_trace_file, "DR %04o", address);
-				else $fdisplay(memory_trace_file, "IF %04o", address);
-			`endif
 		end
 		else begin
-			`ifdef SIMULATION	
-				$fdisplay(memory_trace_file, "Read type not recongized at address %04o", address);
-			`endif
 			retval = 12'h0;
 		end
 
@@ -73,10 +61,6 @@ module memory_controller(
 	endfunction
 
 	function void write_memory(input word address, input word data);
-		`ifdef SIMULATION
-			$fdisplay(memory_trace_file, "DW %04o", address);
-		`endif
-
 		memory[address].data = data;
 		memory[address].valid = 1'b1;
 	endfunction
