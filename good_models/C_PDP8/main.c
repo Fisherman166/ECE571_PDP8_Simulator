@@ -11,7 +11,7 @@
 #include "kb_input.h"
 #include "branch_trace.h"
 #include "debugger.h"
-#define MEMORY_DEBUG
+//#define MEMORY_DEBUG
 #define OP_CODE_MASK 07000		// bits 0,1,2
 
 static uint32_t clock_cycles = 0;
@@ -76,7 +76,7 @@ void* run_program(void* keyboard_object){
 	struct keyboard* local_kb = (struct keyboard*)keyboard_object;
 	unsigned int running;
 	unsigned int run_at_least_once = 1;
-    FILE* opcode_file = fopen("opcode_output.txt", "w");
+   FILE* opcode_file = fopen("opcode_output.txt", "w");
 
 	reset_regs(&registers);		// initialize the CPU 
 
@@ -343,8 +343,9 @@ void* run_program(void* keyboard_object){
 				clock_cycles += opcode_cycles[registers.IR] + 2;
 			}
 
-			fprintf(opcode_file, "Opcode: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n", registers.IR, registers.AC & CUTOFF_MASK, 
-					 registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
+			fprintf(opcode_file, "Opcode %s: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
+                 instruct_text, registers.IR, registers.AC & CUTOFF_MASK, 
+					  registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
 
 		} // while(running)
 		if (debugger_running()){

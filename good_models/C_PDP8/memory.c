@@ -34,11 +34,11 @@ uint16_t mem_read(uint16_t to_convert, uint8_t read_or_fetch){
 	if(read_or_fetch == DATA_READ) {
 		//Remove internal state bits for read
 		retval = memory[converted] & CUTOFF_MASK;
-		fprintf( trace_file, "DR %04o\n", converted);
+		fprintf( trace_file, "DR %04o %04o %04o\n", converted, retval, memory[converted] & CUTOFF_MASK);
 	}
 	else if(read_or_fetch == INSTRUCTION_FETCH) {
-		retval = memory[converted];
-		fprintf( trace_file, "IF %04o\n", converted);
+		retval = memory[converted] & CUTOFF_MASK;
+		fprintf( trace_file, "IF %04o %04o %04o\n", converted, retval, memory[converted] & CUTOFF_MASK);
 	}
 	else {
 		fprintf( trace_file, "Read type not recognized\n");
@@ -67,9 +67,6 @@ void mem_write(uint16_t to_convert, uint16_t data){
 		printf("Offset:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",offset,offset,offset);
 	#endif
 
-	/* Write to trace file */
-	fprintf( trace_file, "DW %04o\n", converted);
-
 	//Make sure to make the location in memory valid
 	if(memory[converted] & MEMORY_BREAKPOINT_BIT) {
 		memory[converted] = MEMORY_VALID_BIT | data | MEMORY_BREAKPOINT_BIT;
@@ -78,6 +75,7 @@ void mem_write(uint16_t to_convert, uint16_t data){
 		memory[converted] = MEMORY_VALID_BIT | data;
 	}	
 
+	fprintf(trace_file, "DW %04o %04o %04o\n", converted, data & CUTOFF_MASK, memory[converted] & CUTOFF_MASK);
 	#ifdef MEMORY_DEBUG
 		printf("CALLEE->WROTE: %o to: %o IN OCTAL\n", data, converted);
 		printf("CALLEE->WROTE: %u to: %u IN UNSIGNED DEC\n", data, converted);
@@ -100,7 +98,7 @@ void mem_init(void){
 ******************************************************************************/
 void mem_print_valid(void){
 	unsigned int i;
-    FILE* valid_memory_file = fopen("valid_memory.txt", "w");
+    FILE* valid_memory_file = fopen("valid_memory_golden.txt", "w");
 
     if(valid_memory_file == NULL) {
         printf("Failed to open valid memory file\n");
@@ -114,8 +112,7 @@ void mem_print_valid(void){
 			fprintf(valid_memory_file, "%04o        %04o\n", i, memory[i] & MEMORY_MASK);
 		}
 	}
-	fprintf(valid_memory_file, "\n");
-    fclose(valid_memory_file);
+   fclose(valid_memory_file);
 } // end mem_print_valid
 
 /******************************************************************************
@@ -137,6 +134,9 @@ int trace_init(){
 	#endif
 		ret_val=0;
 	}/*end else*/
+
+   fprintf(trace_file, "OP Addr Bus  Mem \n");
+   fprintf(trace_file, "-- ---- ---- ----\n");
 return ret_val;
 }/*end trace_init()*/
 
