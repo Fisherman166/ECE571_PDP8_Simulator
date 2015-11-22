@@ -16,7 +16,7 @@ const char* const sub_text = "Subroutine";
 ** THIS FUNCTIONS OPENS THE BRANCH TRACE FILE
 ******************************************************************************/
 int branch_trace_init(void) {
-	const char* trace_name = "branch_trace.txt";
+	const char* trace_name = "branch_trace_golden.txt";
 	int retval = 0;
 	branch_file = fopen(trace_name, "w");
 
