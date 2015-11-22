@@ -12,23 +12,10 @@
 **	FOR READ_OR_FETCH VARIABLE: 0 = DATA READ		1 = INSTRUCTION_FETCH
 ******************************************************************************/
 uint16_t mem_read(uint16_t to_convert, uint8_t read_or_fetch){
-	uint16_t page;
-	uint8_t offset;
 	uint16_t converted;
 	uint16_t retval;
 
-	//parse address from CPMA
-	page = (0b0000111110000000 & to_convert);//0xF80
-	offset = (0b0000000001111111 & to_convert);//0x7F
-	converted = (page + offset);
-	#ifdef MEMORY_DEBUG
-		printf("UNCONVERTED:\n");
-		printf("Address:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",to_convert,to_convert,to_convert);
-		printf("CONVERTED:\n");
-		printf("Address:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",converted,converted,converted);
-		printf("Page:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",page,page,page);
-		printf("Offset:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",offset,offset,offset);
-	#endif
+    converted = to_convert & CUTOFF_MASK;
 
 	//Print to trace file and handle the fetch accordingly
 	if(read_or_fetch == DATA_READ) {
@@ -51,21 +38,8 @@ uint16_t mem_read(uint16_t to_convert, uint8_t read_or_fetch){
 ** 	WRITE TO MEMORY 	
 ******************************************************************************/
 void mem_write(uint16_t to_convert, uint16_t data){
-	uint16_t page;
-	uint8_t offset;
 	uint16_t converted;
-	//parse address from CPMA
-	page = (0b0000111110000000 & to_convert);//0xF80
-	offset = (0b0000000001111111 & to_convert);//0x7F
-	converted = (page + offset);
-	#ifdef MEMORY_DEBUG
-		printf("UNCONVERTED:\n");
-		printf("Address:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",to_convert,to_convert,to_convert);
-		printf("CONVERTED:\n");
-		printf("Address:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",converted,converted,converted);
-		printf("Page:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",page,page,page);
-		printf("Offset:\n\tHEX: 0x%x\tOCTAL: %o\tDEC: %u\n",offset,offset,offset);
-	#endif
+    converted = to_convert & CUTOFF_MASK;
 
 	//Make sure to make the location in memory valid
 	if(memory[converted] & MEMORY_BREAKPOINT_BIT) {
