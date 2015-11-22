@@ -67,4 +67,3 @@ module memory_controller(
 endmodule
 
 `endif
-
