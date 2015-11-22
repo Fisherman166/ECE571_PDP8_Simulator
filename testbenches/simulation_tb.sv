@@ -13,6 +13,7 @@
 `define MEM_READ_DATA   TOP0.bus.read_data
 `define MEM_DATA        TOP0.MEM0.memory[`MEM_ADDRESS].data
 `define MEM_WRITE_DATA  TOP0.bus.write_data
+`define HALT_OPCODE     12'o7402
      
 /******************************** Declare Module Ports **********************************/
 
@@ -21,6 +22,7 @@ module simulation_tb ();
     parameter string MEM_TRACE_FILENAME = "memory_trace_sv.txt";
     parameter string REG_TRACE_FILENAME = "opcode_output.txt";
     parameter string VALID_MEM_FILENAME  = "valid_memory_sv.txt";
+    parameter string BRANCH_TRACE_FILENAME  = "brance_trace_sv.txt";
     bit   clk         ;
     logic btnCpuReset = 1 ;
     logic [15:0] led  ;
@@ -34,9 +36,12 @@ module simulation_tb ();
     logic        Load_PC = 0 ;
     logic        Load_AC = 0 ;
     int          file, read_count1, read_count2;               
-    int          mem_trace_file, reg_file; 
+    int          mem_trace_file, reg_file, branch_file; 
     bit   [11:0] high_byte, low_byte;
     word         word_value;
+    Controller_states_t CPU_State;
+    logic [11:0] pc_temp;
+    logic        cond_skip_flag = 0;
 
       
     /********************************* Instatiate Modules **********************************/
@@ -49,6 +54,7 @@ module simulation_tb ();
               .*);    
      
     /************************************** Main Body **************************************/
+    assign CPU_State = TOP0.FSM0.Curr_State; 
      
     // Generate clock signal
     always #10 clk = ~clk;  
@@ -57,11 +63,13 @@ module simulation_tb ();
         print_valid_memory();
         $fclose(mem_trace_file);
         $fclose(reg_file);
+        $fclose(branch_file);
         $finish();
     end
 
     //Print contents of all registers after each instruction
     always @(posedge led[13]) begin
+        //Only print this 
         if(led[12]) begin
             $fdisplay(reg_file, "Opcode: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
                       TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
@@ -91,6 +99,31 @@ module simulation_tb ();
             else $display(mem_trace_file, "Neither read nor write");
         end //if led
     end //always
+
+    //Generates branch trace file
+    always_comb begin
+        // JMP and JMS
+        if (CPU_State === JMP_1 || CPU_State === JMS_1) begin
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
+                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+        end
+                    
+        // If microcoded group2 or ISZ, record current PC to temp and set flag              
+        if ((CPU_State === MIC_2) || (CPU_State === ISZ_1)) begin 
+            pc_temp = TOP0.bus.curr_reg.pc;
+            cond_skip_flag = 1;
+        end 
+        // If returned to idle state and flag is 1, print trace info
+        else if ((CPU_State === CPU_IDLE) && (cond_skip_flag === 1) && led[12] === 1) begin
+            cond_skip_flag = 0;
+            if ((TOP0.bus.curr_reg.pc - pc_temp) > 1) 
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional,   Result: Taken",
+                      pc_temp, pc_temp + 2);
+            else
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional,   Result: Not Taken",
+                      pc_temp, pc_temp + 2);
+        end     
+    end
 
     // Run test
     initial begin
@@ -132,7 +165,6 @@ module simulation_tb ();
 
         // Set program counter to 200
         set_pc(12'o200);
-        //print_valid_memory();
 
         // Run program
         repeat(10) @ (negedge clk); sw[12] = 1;
@@ -179,5 +211,8 @@ module simulation_tb ();
 
         reg_file = $fopen(REG_TRACE_FILENAME, "w");
         if(!reg_file) $display ("Error opening reg trace file");
+        
+        branch_file = $fopen(BRANCH_TRACE_FILENAME, "w");
+        if(!branch_file) $display("Error opening branch trace file");
     endfunction
 endmodule
