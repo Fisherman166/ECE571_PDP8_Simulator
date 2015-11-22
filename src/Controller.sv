@@ -140,10 +140,9 @@ always_comb begin: Next_State_Logic
                
           MIC_1:    if (bus.micro_g1 == 1)
                          Next_State = CPU_IDLE;
-                    else Next_State = MIC_2;     
-          MIC_2:    if ({bus.micro_g2,bus.curr_reg.ir[1]} == 2'b11)
-                         Next_State = CPU_IDLE;
-                    else Next_State = MIC_3;   
+                    else if (bus.micro_g2 == 1) Next_State = MIC_2;
+                    else  Next_State = MIC_3;      
+          MIC_2:    Next_State = CPU_IDLE;
           MIC_3:    Next_State = MIC_4;
           MIC_4:    Next_State = MIC_5;
           MIC_5:    if ({bus.micro_g3,bus.curr_reg.ir[2]} == 2'b11)
@@ -260,18 +259,10 @@ always_comb begin: Output_Logic
                          bus.MB_ctrl = MB_RD;
                     end               
           EA_AUT_3: bus.MB_ctrl = MB_INC;
-          EA_AUT_4: begin
-                         bus.MB_ctrl = MB_NC;
-                         bus.WD_ctrl = WD_MB;
-                    end
-          EA_AUT_5: begin
-                         bus.MB_ctrl = MB_NC; 
-                         bus.write_enable = 1;
-                    end
-          EA_AUT_6: begin
-                         bus.MB_ctrl = MB_NC;
-                         bus.EA_ctrl = EA_IND;
-                    end 
+          EA_AUT_4: bus.WD_ctrl = WD_MB;
+          EA_AUT_5: bus.write_enable = 1;
+          EA_AUT_6: bus.EA_ctrl = EA_IND;
+
                     
           AND_1:    bus.AD_ctrl = AD_EA;
           AND_2:    begin
@@ -325,7 +316,7 @@ always_comb begin: Output_Logic
                
           JMS_1:    begin 
                          bus.AD_ctrl = AD_EA;
-                         bus.WD_ctrl = WD_PCP1;
+                         bus.WD_ctrl = WD_PCP1;                         
                     end 
           JMS_2:    begin 
                          bus.MB_ctrl = MB_NC;
@@ -334,7 +325,9 @@ always_comb begin: Output_Logic
                     end
           JMS_3:    bus.PC_ctrl = PC_P1; 
                
-          JMP_1:    bus.PC_ctrl = PC_JMP; 
+          JMP_1:    begin
+                         bus.PC_ctrl = PC_JMP;
+                    end          
                
           IOT_1:    begin
                          bus.io_address = bus.curr_reg.ir[5:3];
@@ -368,13 +361,11 @@ always_comb begin: Output_Logic
                     end     
      
           MIC_2:    if ({bus.micro_g2,bus.skip} == 2'b11) 
-                         bus.PC_ctrl = PC_P1;                              
+                         bus.PC_ctrl = PC_P2;                              
                     else if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b11????1)
                          bus.AC_ctrl = AC_SWREG;
                     else if ({bus.micro_g2,bus.curr_reg.ir[2]} == 2'b11)
                          bus.AC_ctrl = AC_OR_SR;
-                    else if ({bus.micro_g2,bus.curr_reg.ir[1]} == 2'b11)
-                         bus.halt = 1;
           MIC_3:    if ({bus.micro_g3,bus.curr_reg.ir[7]} == 2'b11) 
                          bus.AC_ctrl = AC_CLEAR;
           MIC_4:    if ({bus.micro_g3,bus.curr_reg.ir[6:4]} == 4'b11?1) begin
@@ -392,8 +383,11 @@ always_comb begin: Output_Logic
                          bus.AD_ctrl = AD_PCP1;
                          bus.PC_ctrl = PC_P1;
                     end     
-          MIC_7:    bus.read_enable = 1;
-          MIC_8:    bus.eae_start = 1;    
+          MIC_7:    begin
+                         bus.read_enable = 1;
+                         bus.MB_ctrl = MB_RD;
+                    end     
+          MIC_8:    bus.eae_start = 1;          
           MIC_9:    begin
                          if ({bus.curr_reg.ir[2:1]} == 2'b10) begin
                               bus.AC_ctrl = AC_MUL;
