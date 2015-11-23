@@ -20,9 +20,9 @@
 module simulation_tb ();
     parameter string INIT_MEM_FILENAME = "init_mem.obj";
     parameter string MEM_TRACE_FILENAME = "memory_trace_sv.txt";
-    parameter string REG_TRACE_FILENAME = "opcode_output.txt";
+    parameter string REG_TRACE_FILENAME = "opcodes_sv.txt";
     parameter string VALID_MEM_FILENAME  = "valid_memory_sv.txt";
-    parameter string BRANCH_TRACE_FILENAME  = "brance_trace_sv.txt";
+    parameter string BRANCH_TRACE_FILENAME  = "branch_trace_sv.txt";
     bit   clk         ;
     logic btnCpuReset = 1 ;
     logic [15:0] led  ;

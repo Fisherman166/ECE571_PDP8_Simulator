@@ -11,7 +11,7 @@ use strict;
 use Getopt::Long;
 
 my $filename = undef;
-my $tracename = "memory_trace.txt";
+my $tracename = "memory_trace_golden.txt";
 my $PDP_name = "PDP8_sim";
 
 GetOptions(

@@ -76,7 +76,7 @@ void* run_program(void* keyboard_object){
 	struct keyboard* local_kb = (struct keyboard*)keyboard_object;
 	unsigned int running;
 	unsigned int run_at_least_once = 1;
-   FILE* opcode_file = fopen("opcode_output_golden.txt", "w");
+    FILE* opcode_file = fopen("opcodes_golden.txt", "w");
 
 	reset_regs(&registers);		// initialize the CPU 
 
