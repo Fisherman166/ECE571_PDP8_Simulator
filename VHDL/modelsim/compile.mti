@@ -1,0 +1,21 @@
+
+vcom -work ieee_proposed standard_additions_c.vhdl
+vcom -work ieee_proposed standard_textio_additions_c.vhdl
+vcom -work ieee_proposed env_c.vhdl
+vcom -work ieee_proposed std_logic_1164_additions.vhdl
+vcom -work ieee_proposed numeric_std_additions.vhdl
+vcom -work ieee_proposed numeric_std_unsigned_c.vhdl
+vcom -work ieee_proposed math_utility_pkg_c.vhdl
+vcom -work ieee_proposed fixed_pkg_c.vhdl
+vcom -work ieee_proposed float_pkg_c.vhdl
+
+
+
+#Create the library: 
+#    vlib ieee_proposed 
+#
+#Map the library: 
+#    vmap ieee_proposed <complete path to ieee_proposed> 
+#
+#Compile into the library: 
+#    vcom -work ieee_proposed <path to the .vhd file> 
