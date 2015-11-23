@@ -6,6 +6,7 @@
 
 //`define FILL_DEBUG
 
+//Defines for easy access to signals
 `define READ_ENABLE     TOP0.bus.read_enable
 `define MEM_FINISHED    TOP0.bus.mem_finished
 `define MEM_ADDRESS     TOP0.bus.address
@@ -13,8 +14,47 @@
 `define MEM_READ_DATA   TOP0.bus.read_data
 `define MEM_DATA        TOP0.MEM0.memory[`MEM_ADDRESS].data
 `define MEM_WRITE_DATA  TOP0.bus.write_data
-`define HALT_OPCODE     12'o7402
-     
+`define IR_REG          TOP0.bus.curr_reg.ir
+
+//Opcodes for instruction text
+`define OPCODE_AND     3'o0
+`define OPCODE_TAD     3'o1
+`define OPCODE_ISZ     3'o2
+`define OPCODE_DCA     3'o3
+`define OPCODE_JMS     3'o4
+`define OPCODE_JMP     3'o5
+
+// Group 1 micro instructions
+`define MICRO_INSTRUCTION_CLA 12'o7200
+`define MICRO_INSTRUCTION_CLL 12'o7100
+`define MICRO_INSTRUCTION_CMA 12'o7040
+`define MICRO_INSTRUCTION_CML 12'o7020
+`define MICRO_INSTRUCTION_IAC 12'o7001
+`define MICRO_INSTRUCTION_RAR 12'o7010
+`define MICRO_INSTRUCTION_RTR 12'o7012
+`define MICRO_INSTRUCTION_RAL 12'o7004
+`define MICRO_INSTRUCTION_RTL 12'o7006
+
+// Group 2 micro instructions
+`define MICRO_INSTRUCTION_SMA 12'o7500
+`define MICRO_INSTRUCTION_SZA 12'o7440
+`define MICRO_INSTRUCTION_SNL 12'o7420
+`define MICRO_INSTRUCTION_SPA 12'o7510
+`define MICRO_INSTRUCTION_SNA 12'o7450
+`define MICRO_INSTRUCTION_SZL 12'o7430
+`define MICRO_INSTRUCTION_SKP 12'o7410
+`define MICRO_INSTRUCTION_CLA2 12'o7600
+`define MICRO_INSTRUCTION_OSR 12'o7404
+`define MICRO_INSTRUCTION_HLT 12'o7402
+
+//Group 3 micro instructions
+`define MICRO_INSTRUCTION_CLA3 12'o7601
+`define MICRO_INSTRUCTION_MQL 12'o7421
+`define MICRO_INSTRUCTION_MQA 12'o7501
+`define MICRO_INSTRUCTION_SWP 12'o7521
+`define MICRO_INSTRUCTION_CAM 12'o7621
+
+
 /******************************** Declare Module Ports **********************************/
 
 module simulation_tb ();
@@ -69,10 +109,50 @@ module simulation_tb ();
 
     //Print contents of all registers after each instruction
     always @(posedge led[13]) begin
+        automatic string instruction_text = "";
+
         //Only print this 
         if(led[12]) begin
-            $fdisplay(reg_file, "Opcode: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
-                      TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
+            //For non-micro instructions
+            if(TOP0.bus.curr_reg.ir[11:9] < 3'o7) begin
+                unique case(TOP0.bus.curr_reg.ir[11:9])
+                    `OPCODE_AND: instruction_text = "AND";
+                    `OPCODE_TAD: instruction_text = "TAD";
+                    `OPCODE_ISZ: instruction_text = "ISZ";
+                    `OPCODE_DCA: instruction_text = "DCA";
+                    `OPCODE_JMS: instruction_text = "JMS";
+                    `OPCODE_JMP: instruction_text = "JMP";
+                endcase
+            end
+            else begin
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA)) instruction_text = {instruction_text, "CLA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CLL)) instruction_text = {instruction_text, "CLL "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CMA)) instruction_text = {instruction_text, "CMA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CML)) instruction_text = {instruction_text, "CML "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_IAC)) instruction_text = {instruction_text, "IAC "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_RAR)) instruction_text = {instruction_text, "RAR "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_RTR)) instruction_text = {instruction_text, "RTR "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_RAL)) instruction_text = {instruction_text, "RAL "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_RTL)) instruction_text = {instruction_text, "RTL "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SMA)) instruction_text = {instruction_text, "SMA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SZA)) instruction_text = {instruction_text, "SZA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SNL)) instruction_text = {instruction_text, "SNL "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SPA)) instruction_text = {instruction_text, "SPA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SNA)) instruction_text = {instruction_text, "SNA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SZL)) instruction_text = {instruction_text, "SZL"};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SKP)) instruction_text = {instruction_text, "SKP "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA2)) instruction_text = {instruction_text, "CLA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_OSR)) instruction_text = {instruction_text, "OSR "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_HLT)) instruction_text = {instruction_text, "HLT "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA3)) instruction_text = {instruction_text, "CLA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_MQL)) instruction_text = {instruction_text, "MQL "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_MQA)) instruction_text = {instruction_text, "MQA "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_SWP)) instruction_text = {instruction_text, "SWP "};
+                if(decode_micro_ops(`MICRO_INSTRUCTION_CAM)) instruction_text = {instruction_text, "CAM "};
+            end
+
+            $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
+                      instruction_text, TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
                       TOP0.bus.curr_reg.mb, TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
         end
     end
@@ -214,5 +294,11 @@ module simulation_tb ();
         
         branch_file = $fopen(BRANCH_TRACE_FILENAME, "w");
         if(!branch_file) $display("Error opening branch trace file");
+    endfunction
+
+    function logic decode_micro_ops(input word micro_op);
+        automatic logic retval = '0;
+        if((`IR_REG & micro_op) === micro_op) retval = 1'b1;
+        return retval;
     endfunction
 endmodule
