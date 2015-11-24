@@ -197,11 +197,11 @@ module simulation_tb ();
         else if ((CPU_State === CPU_IDLE) && (cond_skip_flag === 1) && led[12] === 1) begin
             cond_skip_flag = 0;
             if ((TOP0.bus.curr_reg.pc - pc_temp) > 1) 
-            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional,   Result: Taken",
-                      pc_temp, pc_temp + 2);
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
+                      pc_temp + 1, pc_temp + 2);
             else
-            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional,   Result: Not Taken",
-                      pc_temp, pc_temp + 2);
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Not Taken",
+                      pc_temp + 1, pc_temp + 2);
         end     
     end
 

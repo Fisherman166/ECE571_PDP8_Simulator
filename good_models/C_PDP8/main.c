@@ -343,8 +343,8 @@ void* run_program(void* keyboard_object){
 				clock_cycles += opcode_cycles[registers.IR] + 2;
 			}
 
-			fprintf(opcode_file, "Opcode: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
-                    registers.IR, registers.AC & CUTOFF_MASK, 
+			fprintf(opcode_file, "Opcode %s: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
+                    instruct_text, registers.IR, registers.AC & CUTOFF_MASK, 
 					registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
 
 		} // while(running)
