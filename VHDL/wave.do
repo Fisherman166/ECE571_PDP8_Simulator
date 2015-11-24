@@ -1,31 +1,3 @@
-.main clear
-
-vlib work
-
-################################################################################
-## Source Files
-################################################################################
-
-vcom Multiply.vhd
-vcom Divide.vhd
-vcom EAE.vhd
-vcom Adder.vhd
-vcom Adder12.vhd
-vcom Micro.vhd
-vcom State_Machine.vhd
-vcom CPU.vhd                      
-vcom ROM.vhd
-vcom RAM.vhd
-vcom Memory.vhd                       
-vcom front_panel.vhd                                      
-vcom Top_VHDL.vhd
-vcom TestBenchVHDL.vhd
-
-
-
-
-vsim -t 1ps TestBenchVHDL
-
 onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate -radix octal /testbenchvhdl/clk
@@ -57,18 +29,22 @@ add wave -noupdate -color {Cornflower Blue} -radix octal -radixshowbase 0 /testb
 add wave -noupdate -color Gold -radix octal -radixshowbase 0 /testbenchvhdl/TOP1/CPU0/write_data
 add wave -noupdate -color Gold -radix octal /testbenchvhdl/TOP1/CPU0/write_enable
 add wave -noupdate -color Cyan -radix octal /testbenchvhdl/TOP1/CPU0/mem_finished
-add wave -noupdate -divider -height 25 MICRO
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/skip
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/ea_reg_8_to_15
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/micro_g1
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/micro_g2
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/micro_g3
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/srchange
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/eae_fin
-add wave -noupdate -radix octal /testbenchvhdl/TOP1/CPU0/eae_start
 add wave -noupdate -divider -height 25 TEST
+add wave -noupdate -obj -radix octal -radixshowbase 0 /testbenchvhdl/line__181/branch_line
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/branch_flag
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/cond_flag
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/jms_flag
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/pc_temp
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/pc
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/pcp1
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/pcp2
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/ea
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/eap1
+add wave -noupdate -radix octal -radixshowbase 0 /testbenchvhdl/line__181/opcode
+add wave -noupdate /testbenchvhdl/mem_ready
+add wave -noupdate /testbenchvhdl/micro_cond_branch
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {365325067 ps} 0}
+WaveRestoreCursors {{Cursor 1} {402153905 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 388
 configure wave -valuecolwidth 165
@@ -84,6 +60,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits us
 update
-WaveRestoreZoom {1250 ns} {526250 ns}
-
-run 500 us
+WaveRestoreZoom {401094609 ps} {403145391 ps}
