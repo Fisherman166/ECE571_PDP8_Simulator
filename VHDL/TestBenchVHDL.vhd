@@ -20,7 +20,7 @@ use ieee_proposed.standard_additions;
 use ieee_proposed.standard_textio_additions.all;
 
 entity TestBenchVHDL is
-    generic (period    : time    := 10 ns);  -- Generic for number of test cycles to perform
+    generic (period    : time    := 10 ns);  -- Generic for clock period
 end TestBenchVHDL;
             
 architecture behavioral of TestBenchVHDL is 
