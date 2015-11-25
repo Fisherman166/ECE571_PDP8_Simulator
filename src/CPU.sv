@@ -41,6 +41,8 @@ logic [11:0] swreg_temp            ;
 logic        swreg_change          ;
 
 
+
+
 /********************************* Instatiate Modules **********************************/
 
 micro_instruction_decoder MIC0 (.ac_micro,
@@ -118,8 +120,8 @@ always_comb begin: PC
           PC_P1    : next_reg.pc = bus.curr_reg.pc + 1     ;    // Normal PC increment
           PC_EAP1  : next_reg.pc = bus.curr_reg.ea + 1     ;    // for JMS
           PC_SR    : next_reg.pc = bus.swreg               ;    // Load from front panel
-          PC_EA    : next_reg.pc = bus.curr_reg.ea         ;
-          PC_JMP   : next_reg.pc = bus.read_data           ;    // Load from effective address 
+          PC_EA    : next_reg.pc = bus.curr_reg.ea         ;    // Load from effective address 
+          PC_JMP   : next_reg.pc = bus.read_data           ;    
           PC_NC    : next_reg.pc = bus.curr_reg.pc         ;    // No change
      endcase     
 end

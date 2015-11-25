@@ -14,7 +14,7 @@ module Controller (input logic clock,
 /********************************** Declare Signals ************************************/
 
 Controller_states_t Curr_State = CPU_IDLE, Next_State, Inst_State;
-
+bit EA_Flag;
 
 /************************************** Main Body **************************************/                
                    
@@ -181,6 +181,7 @@ always_comb begin: Output_Logic
      bus.eae_start    = 0    ;     // Deafult control signal for EAE module
      bus.read_type = `DATA_READ;   // Default read type
      bus.CPU_idle     = 0    ;     // Default CPU_idle to low
+     EA_Flag = EA_Flag       ;
      
 
      unique case (Curr_State)
@@ -235,18 +236,29 @@ always_comb begin: Output_Logic
           DECODE:   if (bus.curr_reg.ir[11:9] == 3'b110)
                               bus.io_address = bus.curr_reg.ir[5:3];  
                               
-          CAL_EA_1: if (bus.curr_reg.ir[7] == 0)
+          CAL_EA_1: if (bus.curr_reg.ir[7] == 0) begin
                          bus.EA_ctrl = EA_SMP;
-                    else bus.EA_ctrl = EA_PGE;
+                         EA_Flag = 1;
+                    end     
+                    else begin
+                         bus.EA_ctrl = EA_PGE;
+                         EA_Flag = 1;
+                    end     
 
-          EA_IND_1: bus.AD_ctrl = AD_EA;
+          EA_IND_1: begin
+                         bus.AD_ctrl = AD_EA;
+                         EA_Flag = 0;
+                    end
           EA_IND_2: begin
                          bus.read_enable = 1;
                          if (bus.mem_finished == 1)
                               bus.EA_ctrl = EA_IND;
                     end   
                               
-          EA_AUT_1: bus.AD_ctrl = AD_EA;
+          EA_AUT_1: begin
+                         bus.AD_ctrl = AD_EA;
+                         EA_Flag = 0;
+                    end     
           EA_AUT_2: bus.read_enable = 1;              
           EA_AUT_3: bus.WD_ctrl = WD_RDP1;
           EA_AUT_4: bus.write_enable = 1;
@@ -306,9 +318,9 @@ always_comb begin: Output_Logic
                          bus.PC_ctrl = PC_EAP1;
                     end
                
-          JMP_1:    begin
+          JMP_1:    if (EA_Flag == 1)
                          bus.PC_ctrl = PC_JMP;
-                    end          
+                    else bus.PC_ctrl = PC_EA;
                
           IOT_1:    begin
                          bus.io_address = bus.curr_reg.ir[5:3];
