@@ -353,7 +353,9 @@ always_comb begin: Output_Logic
      
           MIC_2:    if ({bus.micro_g2,bus.skip} == 2'b11) begin
                          bus.PC_ctrl = PC_P1;
-                         bus.AC_ctrl = AC_MICRO;
+                         if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b1??????) begin
+                         bus.AC_ctrl = AC_CLEAR;
+                         end
                     end     
                     else if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b11????1)
                          bus.AC_ctrl = AC_SWREG;
