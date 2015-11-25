@@ -182,8 +182,11 @@ module simulation_tb ();
 
     //Generates branch trace file
     always_comb begin
-        // JMP and JMS
-        if (CPU_State === JMP_1 || CPU_State === JMS_1) begin
+        if (CPU_State === JMS_1) begin
+            $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Subroutine, Result: Taken",
+                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+        end
+        if (CPU_State === JMP_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
                       TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
         end
@@ -198,10 +201,10 @@ module simulation_tb ();
             cond_skip_flag = 0;
             if ((TOP0.bus.curr_reg.pc - pc_temp) > 1) 
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
-                      pc_temp + 1, pc_temp + 2);
+                      pc_temp, pc_temp + 1);
             else
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Not Taken",
-                      pc_temp + 1, pc_temp + 2);
+                      pc_temp, pc_temp + 1);
         end     
     end
 
