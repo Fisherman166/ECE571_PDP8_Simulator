@@ -126,7 +126,7 @@ module simulation_tb ();
             end
             else begin
                 //Group 1 instruction
-                if(!TOP0.bus.curr_reg.ir[8]) begin
+                if(!`IR_REG[8]) begin
                     if(decode_micro_ops(`MICRO_INSTRUCTION_CLA)) instruction_text = {instruction_text, "CLA "};
                     if(decode_micro_ops(`MICRO_INSTRUCTION_CLL)) instruction_text = {instruction_text, "CLL "};
                     if(decode_micro_ops(`MICRO_INSTRUCTION_CMA)) instruction_text = {instruction_text, "CMA "};
@@ -137,21 +137,29 @@ module simulation_tb ();
                     if(decode_micro_ops(`MICRO_INSTRUCTION_RTL)) instruction_text = {instruction_text, "RTL "};
                     else if(decode_micro_ops(`MICRO_INSTRUCTION_RAL)) instruction_text = {instruction_text, "RAL "};
                 end
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SMA)) instruction_text = {instruction_text, "SMA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SZA)) instruction_text = {instruction_text, "SZA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SNL)) instruction_text = {instruction_text, "SNL "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SPA)) instruction_text = {instruction_text, "SPA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SNA)) instruction_text = {instruction_text, "SNA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SZL)) instruction_text = {instruction_text, "SZL"};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SKP)) instruction_text = {instruction_text, "SKP "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA2)) instruction_text = {instruction_text, "CLA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_OSR)) instruction_text = {instruction_text, "OSR "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_HLT)) instruction_text = {instruction_text, "HLT "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA3)) instruction_text = {instruction_text, "CLA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_MQL)) instruction_text = {instruction_text, "MQL "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_MQA)) instruction_text = {instruction_text, "MQA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_SWP)) instruction_text = {instruction_text, "SWP "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CAM)) instruction_text = {instruction_text, "CAM "};
+                else if(`IR_REG[8] && !`IR_REG[0]) begin //Group 2
+                    if(!`IR_REG[3]) begin //Group 2 OR
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SMA)) instruction_text = {instruction_text, "SMA "};
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SZA)) instruction_text = {instruction_text, "SZA "};
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SNL)) instruction_text = {instruction_text, "SNL "};
+                    end
+                    else begin //Group 2 AND
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SPA)) instruction_text = {instruction_text, "SPA "};
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SNA)) instruction_text = {instruction_text, "SNA "};
+                        if(decode_micro_ops(`MICRO_INSTRUCTION_SZL)) instruction_text = {instruction_text, "SZL "};
+                    end
+                    if(`IR_REG === `MICRO_INSTRUCTION_SKP) instruction_text = {instruction_text, "SKP "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CLA2)) instruction_text = {instruction_text, "CLA "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_OSR)) instruction_text = {instruction_text, "OSR "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_HLT)) instruction_text = {instruction_text, "HLT "};
+                end
+                else begin //Group 3
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CLA3)) instruction_text = {instruction_text, "CLA "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_MQL)) instruction_text = {instruction_text, "MQL "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_MQA)) instruction_text = {instruction_text, "MQA "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_SWP)) instruction_text = {instruction_text, "SWP "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CAM)) instruction_text = {instruction_text, "CAM "};
+                end
             end
 
             $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
