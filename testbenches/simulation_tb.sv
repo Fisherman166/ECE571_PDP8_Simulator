@@ -199,7 +199,7 @@ module simulation_tb ();
         // If returned to idle state and flag is 1, print trace info
         else if ((CPU_State === CPU_IDLE) && (cond_skip_flag === 1) && led[12] === 1) begin
             cond_skip_flag = 0;
-            if ((TOP0.bus.curr_reg.pc - pc_temp) > 1) 
+            if ((TOP0.bus.curr_reg.pc - pc_temp) !== 0) 
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
                       pc_temp, pc_temp + 1);
             else
