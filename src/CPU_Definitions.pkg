@@ -55,7 +55,7 @@ package CPU_Definitions;
      // PC control signal
      typedef enum logic [2:0] {
           PC_P1   = 0,             // Normal PC increment
-          PC_P2      ,             // Skip
+          PC_EAP1      ,             // Skip
           PC_SR      ,             // Load from front panel
           PC_JMP     ,              
           PC_EA      ,             // Load from effective address

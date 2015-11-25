@@ -116,7 +116,7 @@ end
 always_comb begin: PC
      unique case (bus.PC_ctrl)
           PC_P1    : next_reg.pc = bus.curr_reg.pc + 1     ;    // Normal PC increment
-          PC_P2    : next_reg.pc = bus.curr_reg.pc + 2     ;    // Skip
+          PC_EAP1  : next_reg.pc = bus.curr_reg.ea + 1     ;    // for JMS
           PC_SR    : next_reg.pc = bus.swreg               ;    // Load from front panel
           PC_EA    : next_reg.pc = bus.curr_reg.ea         ;
           PC_JMP   : next_reg.pc = bus.read_data           ;    // Load from effective address 
