@@ -346,9 +346,10 @@ always_comb begin: Output_Logic
           IOT_4:    bus.AC_ctrl = AC_OR_DI;
           IOT_5:    bus.DO_ctrl = DO_AC;     
                     
-          MIC_1:    if (bus.micro_g1 == 1)
+          MIC_1:    if (bus.micro_g1 == 1) begin
                          bus.AC_ctrl = AC_MICRO;
-                         bus.LK_ctrl = LK_Micro;
+                         bus.LK_ctrl = LK_MICRO;
+                    end     
      
           MIC_2:    if ({bus.micro_g2,bus.skip} == 2'b11) 
                          bus.PC_ctrl = PC_P1;                              
