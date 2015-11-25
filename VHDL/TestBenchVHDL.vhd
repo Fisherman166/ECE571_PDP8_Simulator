@@ -105,7 +105,7 @@ process
      variable program_line : line;
      variable line_data : std_logic_vector(11 downto 0) := o"0000";     
 begin
-     file_open(program_file, "-class3a.txt",  read_mode);
+     file_open(program_file, "class3a.txt",  read_mode);
      file_open(opcode_file, "opcode_output.txt",  write_mode);
      file_open(branch_file, "branch_trace.txt",  write_mode);
      
