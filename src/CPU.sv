@@ -139,7 +139,8 @@ always_comb begin: EA
           EA_SMP   : next_reg.ea = {5'd0,bus.curr_reg.ir[6:0]};           // Simple address
           EA_IND   : next_reg.ea = bus.curr_reg.mb            ;           // for indirection
           EA_INC   : next_reg.ea = bus.curr_reg.mb + 1        ;           // for auto-increment indirection
-          EA_ZERO  : next_reg.ea = 0                          ;           // Zero out     
+          EA_WD    : next_reg.ea = bus.write_data             ;
+          EA_ZERO  : next_reg.ea = 0                          ;           // Zero out
           EA_NC    : next_reg.ea = bus.curr_reg.ea            ;           // No change
      endcase     
 end
@@ -159,6 +160,7 @@ end
 always_comb begin: WD
      unique case (bus.WD_ctrl)
           WD_MB     : next_write_data = bus.curr_reg.mb         ;    // Contents of memory buffer
+          WD_RDP1   : next_write_data = bus.read_data + 1       ;    // Contents of memory buffer 
           WD_AC     : next_write_data = bus.curr_reg.ac         ;    // Contents of accumulator
           WD_EA     : next_write_data = bus.curr_reg.ea         ;    // Contents of effective address register
           WD_PCP1   : next_write_data = bus.curr_reg.pc + 1     ;    // Program counter plus 1  

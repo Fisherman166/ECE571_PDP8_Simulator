@@ -90,10 +90,9 @@ always_comb begin: Next_State_Logic
           EA_AUT_2: if (bus.mem_finished == 1)
                          Next_State = EA_AUT_3;  
           EA_AUT_3: Next_State = EA_AUT_4;
-          EA_AUT_4: Next_State = EA_AUT_5;
-          EA_AUT_5: if (bus.mem_finished == 1)
-                         Next_State = EA_AUT_6;
-          EA_AUT_6: Next_State = Inst_State;
+          EA_AUT_4: if (bus.mem_finished == 1)
+                         Next_State = EA_AUT_5;
+          EA_AUT_5: Next_State = Inst_State;
 
           AND_1:    Next_State = AND_2;
           AND_2:    if (bus.mem_finished == 1)
@@ -245,23 +244,15 @@ always_comb begin: Output_Logic
           EA_IND_1: bus.AD_ctrl = AD_EA;
           EA_IND_2: begin
                          bus.read_enable = 1;
-                         bus.MB_ctrl = MB_RD;
                          if (bus.mem_finished == 1)
                               bus.EA_ctrl = EA_IND;
                     end   
                               
-          EA_AUT_1: begin
-                         bus.AD_ctrl = AD_EA;
-                         bus.MB_ctrl = MB_RD;
-                    end     
-          EA_AUT_2: begin
-                         bus.read_enable = 1;
-                         bus.MB_ctrl = MB_RD;
-                    end               
-          EA_AUT_3: bus.MB_ctrl = MB_INC;
-          EA_AUT_4: bus.WD_ctrl = WD_MB;
-          EA_AUT_5: bus.write_enable = 1;
-          EA_AUT_6: bus.EA_ctrl = EA_IND;
+          EA_AUT_1: bus.AD_ctrl = AD_EA;
+          EA_AUT_2: bus.read_enable = 1;              
+          EA_AUT_3: bus.WD_ctrl = WD_RDP1;
+          EA_AUT_4: bus.write_enable = 1;
+          EA_AUT_5: bus.EA_ctrl = EA_WD;
 
                     
           AND_1:    bus.AD_ctrl = AD_EA;
@@ -279,7 +270,8 @@ always_comb begin: Output_Logic
                          bus.MB_ctrl = MB_RD;
                     end    
           TAD_3:    begin 
-                         bus.AC_ctrl = AC_TAD;  
+                         bus.AC_ctrl = AC_TAD;
+				     bus.LK_ctrl = LK_TAD;						 
                          bus.PC_ctrl = PC_P1;                           
                     end
                     
@@ -319,7 +311,7 @@ always_comb begin: Output_Logic
                          bus.WD_ctrl = WD_PCP1;                         
                     end 
           JMS_2:    begin 
-                         bus.MB_ctrl = MB_NC;
+                         bus.MB_ctrl = MB_WD;
                          bus.write_enable = 1;
                          bus.PC_ctrl = PC_JMP;
                     end
