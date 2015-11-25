@@ -242,12 +242,11 @@ always_comb begin: Output_Logic
                     end     
                     else begin
                          bus.EA_ctrl = EA_PGE;
-                         EA_Flag = 1;
+                         EA_Flag = 0;
                     end     
 
           EA_IND_1: begin
                          bus.AD_ctrl = AD_EA;
-                         EA_Flag = 0;
                     end
           EA_IND_2: begin
                          bus.read_enable = 1;
