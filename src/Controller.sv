@@ -121,8 +121,7 @@ always_comb begin: Next_State_Logic
                
           JMS_1:    Next_State = JMS_2;
           JMS_2:    if (bus.mem_finished == 1)
-                         Next_State = JMS_3;
-          JMS_3:    Next_State = CPU_IDLE;       
+                         Next_State = CPU_IDLE;       
                
           JMP_1:    Next_State = CPU_IDLE;  
                
@@ -134,8 +133,7 @@ always_comb begin: Next_State_Logic
                          Next_State = IOT_4;   
                     else Next_State = IOT_5;
           IOT_4:    Next_State = IOT_5;
-          IOT_5:    Next_State = IOT_6;
-          IOT_6:    Next_State = CPU_IDLE; 
+          IOT_5:    Next_State = CPU_IDLE;
                
           MIC_1:    if (bus.micro_g1 == 1)
                          Next_State = CPU_IDLE;
@@ -214,7 +212,10 @@ always_comb begin: Output_Logic
                          bus.read_enable = 1; 
                          bus.read_type = `INSTRUCTION_FETCH;
                     end               
-          FETCH_3:  bus.IR_ctrl = IR_LD;
+          FETCH_3:  begin
+                         bus.IR_ctrl = IR_LD;
+                         bus.PC_ctrl = PC_P1;
+                    end
 
           LD_PC_1:  bus.PC_ctrl = PC_SR;
 
@@ -260,10 +261,7 @@ always_comb begin: Output_Logic
                          bus.read_enable = 1; 
                          bus.MB_ctrl = MB_RD;
                     end          
-          AND_3:    begin
-                         bus.AC_ctrl = AC_AND;  
-                         bus.PC_ctrl = PC_P1;                         
-                    end     
+          AND_3:    bus.AC_ctrl = AC_AND;   
           TAD_1:    bus.AD_ctrl = AD_EA;
           TAD_2:    begin
                          bus.read_enable = 1; 
@@ -271,8 +269,7 @@ always_comb begin: Output_Logic
                     end    
           TAD_3:    begin 
                          bus.AC_ctrl = AC_TAD;
-				     bus.LK_ctrl = LK_TAD;						 
-                         bus.PC_ctrl = PC_P1;                           
+				     bus.LK_ctrl = LK_TAD;						                         
                     end
                     
           ISZ_1:    bus.AD_ctrl = AD_EA;  
@@ -290,8 +287,7 @@ always_comb begin: Output_Logic
                          bus.write_enable = 1;
                     end               
           ISZ_6:    if (bus.curr_reg.mb == 0)
-                         bus.PC_ctrl = PC_P2;
-                    else bus.PC_ctrl = PC_P1;  
+                         bus.PC_ctrl = PC_P1; 
                
           DCA_1:    begin
                          bus.AD_ctrl = AD_EA;
@@ -301,10 +297,7 @@ always_comb begin: Output_Logic
                          bus.write_enable = 1; 
                          bus.MB_ctrl = MB_WD;
                     end  
-          DCA_3:    begin 
-                         bus.AC_ctrl = AC_CLEAR;  
-                         bus.PC_ctrl = PC_P1;
-                    end
+          DCA_3:    bus.AC_ctrl = AC_CLEAR;
                
           JMS_1:    begin 
                          bus.AD_ctrl = AD_EA;
@@ -315,7 +308,6 @@ always_comb begin: Output_Logic
                          bus.write_enable = 1;
                          bus.PC_ctrl = PC_EA;
                     end
-          JMS_3:    bus.PC_ctrl = PC_P1; 
                
           JMP_1:    begin
                          bus.PC_ctrl = PC_JMP;
@@ -345,15 +337,12 @@ always_comb begin: Output_Logic
                     
           IOT_4:    bus.AC_ctrl = AC_OR_DI;
           IOT_5:    bus.DO_ctrl = DO_AC;     
-          IOT_6:    bus.PC_ctrl = PC_P1;
                     
-          MIC_1:    if (bus.micro_g1 == 1) begin
-                         bus.AC_ctrl = AC_MICRO;
-                         bus.PC_ctrl = PC_P1;
-                    end     
+          MIC_1:    if (bus.micro_g1 == 1)
+                         bus.AC_ctrl = AC_MICRO;   
      
           MIC_2:    if ({bus.micro_g2,bus.skip} == 2'b11) 
-                         bus.PC_ctrl = PC_P2;                              
+                         bus.PC_ctrl = PC_P1;                              
                     else if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b11????1)
                          bus.AC_ctrl = AC_SWREG;
                     else if ({bus.micro_g2,bus.curr_reg.ir[2]} == 2'b11)
@@ -391,7 +380,6 @@ always_comb begin: Output_Logic
                               bus.MQ_ctrl = MQ_DVI;
                               bus.LK_ctrl = LK_DVI;
                          end
-                         bus.PC_ctrl = PC_P1;
                     end
                     
           HALT :    begin
