@@ -164,7 +164,7 @@ always_comb begin: WD
           WD_RDP1   : next_write_data = bus.read_data + 1       ;    // Contents of memory buffer 
           WD_AC     : next_write_data = bus.curr_reg.ac         ;    // Contents of accumulator
           WD_EA     : next_write_data = bus.curr_reg.ea         ;    // Contents of effective address register
-          WD_PCP1   : next_write_data = bus.curr_reg.pc + 1     ;    // Program counter plus 1  
+          WD_PC   : next_write_data = bus.curr_reg.pc          ;    // Program counter 
           WD_SR     : next_write_data = bus.swreg            ;   // Deposit switch reg into memory     
           WD_NC     : next_write_data = bus.write_data      ;    // No change
      endcase     

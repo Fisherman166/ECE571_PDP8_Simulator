@@ -301,7 +301,7 @@ always_comb begin: Output_Logic
                
           JMS_1:    begin 
                          bus.AD_ctrl = AD_EA;
-                         bus.WD_ctrl = WD_PCP1;                         
+                         bus.WD_ctrl = WD_PC;                         
                     end 
           JMS_2:    begin 
                          bus.MB_ctrl = MB_WD;
