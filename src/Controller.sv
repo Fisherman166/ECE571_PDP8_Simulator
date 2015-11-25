@@ -355,9 +355,9 @@ always_comb begin: Output_Logic
                          bus.PC_ctrl = PC_P1; 
                     else if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b11????1)
                          bus.AC_ctrl = AC_SWREG;
-                    else if ({bus.micro_g2,bus.curr_reg.ir[2]} == 2'b11)
+                    else if ({bus.micro_g2,bus.curr_reg.ir[2]} == 1)
                          bus.AC_ctrl = AC_OR_SR;
-                    else if ({bus.micro_g2,bus.curr_reg.ir[7:2]} == 7'b1??????)
+                    else if ({bus.micro_g2,bus.curr_reg.ir[7]} == 1)
                          bus.AC_ctrl = AC_CLEAR;
           MIC_3:    if ({bus.micro_g3,bus.curr_reg.ir[7]} == 2'b11) 
                          bus.AC_ctrl = AC_CLEAR;
