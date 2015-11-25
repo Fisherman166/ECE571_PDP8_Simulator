@@ -82,7 +82,7 @@ sub run_assembler() {
     die "No input filename was given. Exiting\n" unless defined $filename;
     print "$filename\n";
     my @split_filename = split(/\./, $filename);
-    die "Filename entered is not an assembly file\n" unless($split_filename[-1] eq "as");
+    die "Filename entered is not an assembly file\n" unless( ($split_filename[-1] eq "as") or ($split_filename[-1] eq "pal") );
     my $assembler_return = system("./testbenches/pal -o $filename");
     die "Assembler failed. Exiting script.\n" unless $assembler_return == 0;
 
