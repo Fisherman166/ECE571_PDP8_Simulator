@@ -252,7 +252,7 @@ void* run_program(void* keyboard_object){
 							registers.PC++;
 							subgroup_taken = 1;
 						}
-						write_branch_trace(current_PC-1, current_PC + 1, conditional_text, subgroup_taken);
+						write_branch_trace(current_PC, current_PC + 1, conditional_text, subgroup_taken);
 					}
 					//AND subgroup if bit 3 is set and bits 0-2 are not set
 					else if( current_instruction & MICRO_GROUP2_SUBGROUP_BIT ) {
@@ -281,7 +281,7 @@ void* run_program(void* keyboard_object){
 							registers.PC++;
 							subgroup_taken = 1;
 						}
-						write_branch_trace(current_PC-1, current_PC + 1, conditional_text, subgroup_taken);
+						write_branch_trace(current_PC, current_PC + 1, conditional_text, subgroup_taken);
 					}
 
 					//SKP will run along with SPA, SNA or SZL if bits 3-5 are not checked
