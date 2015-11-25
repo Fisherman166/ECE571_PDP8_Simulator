@@ -94,7 +94,7 @@ package CPU_Definitions;
           WD_MB = 0,               // Contents of memory buffer
           WD_AC    ,               // Contents of accumulator
           WD_EA    ,               // Contents of effective address register
-          WD_PCP1  ,               // Program counter plus 1 
+          WD_PC  ,               // Program counter plus 1 
           WD_RDP1  ,
           WD_SR    ,               // Deposit Swith Register to memory     
           WD_NC                    // No change
