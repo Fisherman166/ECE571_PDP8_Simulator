@@ -70,12 +70,12 @@ end
 always_comb begin: AC
      unique case (bus.AC_ctrl)
           AC_SWREG : next_reg.ac = bus.swreg;                         // load switch register 
-          AC_AND   : next_reg.ac = bus.curr_reg.ac & bus.curr_reg.mb      ;   // AND instruction
-          AC_TAD   : next_reg.ac = tad_sum                        ;   // TAD instruction
-          AC_CLEAR : next_reg.ac = 0                              ;   // Clear 
-          AC_MICRO : next_reg.ac = ac_micro                       ;   // Group 1 Microcoded Instruction
+          AC_AND   : next_reg.ac = bus.curr_reg.ac & bus.curr_reg.mb;   // AND instruction
+          AC_TAD   : next_reg.ac = tad_sum                            ;   // TAD instruction
+          AC_CLEAR : next_reg.ac = 0                              		;   // Clear 
+          AC_MICRO : next_reg.ac = ac_micro                           ;   // Group 1 Microcoded Instruction
           AC_OR_SR : next_reg.ac = bus.curr_reg.ac | bus.swreg        ;   // OR switch register into AC
-          AC_OR_MQ : next_reg.ac = bus.curr_reg.ac | bus.curr_reg.mq      ;   // OR MQ into AC
+          AC_OR_MQ : next_reg.ac = bus.curr_reg.ac | bus.curr_reg.mq  ;   // OR MQ into AC
           AC_OR_DI : next_reg.ac = bus.curr_reg.ac | {4'h0,bus.datain};   // OR datain from IOT into AC 
           AC_LD_MQ : next_reg.ac = bus.curr_reg.mq                    ;   // Load MQ register (for swap) 
           AC_MUL   : next_reg.ac = bus.ac_mul                     ;   // Result from EAE for multiply 
@@ -87,12 +87,17 @@ end
 // lk_reg (Link bit)
 always_comb begin: LK
      unique case (bus.LK_ctrl)
-          LK_TAD   : next_reg.lk = bus.curr_reg.lk ^ Cout  ;    // TAD instruction
+          LK_TAD   : begin 
+                     if (Cout == 1)
+                         next_reg.lk = ~bus.curr_reg.lk;    // TAD instruction
+                     else
+                         next_reg.lk = bus.curr_reg.lk;  
+                     end     
           LK_MICRO : next_reg.lk = l_micro             ;    // Group 1 Microcoded Instruction
           LK_MUL   : next_reg.lk = 0                   ;    // Clear for multiply 
           LK_DVI   : next_reg.lk = bus.link_dvi        ;    // Overflow indicator for DVI instruction
           LK_ZERO  : next_reg.lk = 0                   ;    // Zero Link bit
-          LK_NC    : next_reg.lk = bus.curr_reg.lk         ;    // No change
+          LK_NC    : next_reg.lk = bus.curr_reg.lk     ;    // No change
      endcase     
 end
 
