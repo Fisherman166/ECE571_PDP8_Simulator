@@ -138,7 +138,8 @@ module simulation_tb ();
                     else if(decode_micro_ops(`MICRO_INSTRUCTION_RAL)) instruction_text = {instruction_text, "RAL "};
                 end
                 else if(`IR_REG[8] && !`IR_REG[0]) begin //Group 2
-                    if(!`IR_REG[3]) begin //Group 2 OR
+                    if(`IR_REG === `MICRO_INSTRUCTION_SKP) instruction_text = {instruction_text, "SKP "};
+                    else if(!`IR_REG[3]) begin //Group 2 OR
                         if(decode_micro_ops(`MICRO_INSTRUCTION_SMA)) instruction_text = {instruction_text, "SMA "};
                         if(decode_micro_ops(`MICRO_INSTRUCTION_SZA)) instruction_text = {instruction_text, "SZA "};
                         if(decode_micro_ops(`MICRO_INSTRUCTION_SNL)) instruction_text = {instruction_text, "SNL "};
@@ -148,7 +149,6 @@ module simulation_tb ();
                         if(decode_micro_ops(`MICRO_INSTRUCTION_SNA)) instruction_text = {instruction_text, "SNA "};
                         if(decode_micro_ops(`MICRO_INSTRUCTION_SZL)) instruction_text = {instruction_text, "SZL "};
                     end
-                    if(`IR_REG === `MICRO_INSTRUCTION_SKP) instruction_text = {instruction_text, "SKP "};
                     if(decode_micro_ops(`MICRO_INSTRUCTION_CLA2)) instruction_text = {instruction_text, "CLA "};
                     if(decode_micro_ops(`MICRO_INSTRUCTION_OSR)) instruction_text = {instruction_text, "OSR "};
                     if(decode_micro_ops(`MICRO_INSTRUCTION_HLT)) instruction_text = {instruction_text, "HLT "};
@@ -210,7 +210,11 @@ module simulation_tb ();
         // If returned to idle state and flag is 1, print trace info
         else if ((CPU_State === CPU_IDLE) && (cond_skip_flag === 1) && led[12] === 1) begin
             cond_skip_flag = 0;
-            if ((TOP0.bus.curr_reg.pc - pc_temp) !== 0) 
+            if(`IR_REG === `MICRO_INSTRUCTION_SKP) 
+                $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
+                          pc_temp, pc_temp + 1);
+            else if(`IR_REG === `MICRO_INSTRUCTION_OSR) break;
+            else if ((TOP0.bus.curr_reg.pc - pc_temp) !== 0) 
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
                       pc_temp, pc_temp + 1);
             else

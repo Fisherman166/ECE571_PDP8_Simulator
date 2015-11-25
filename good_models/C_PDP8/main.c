@@ -230,7 +230,11 @@ void* run_program(void* keyboard_object){
 
 				case MICRO_INSTRUCTION_GROUP_BIT:	// Group 2
 		   		//OR subgroup if bit 3 is not set and bits 0-2 are not set
-					if( !(current_instruction & MICRO_GROUP2_SUBGROUP_BIT) && !(current_instruction & 07) ) {
+					if(current_instruction  == 07410){
+						SKP(&registers);
+						strcat(instruct_text, "SKP ");
+					}
+					else if( !(current_instruction & MICRO_GROUP2_SUBGROUP_BIT) && !(current_instruction & 07) ) {
 						// Set returns to 0 initially
 						subgroup_returns[0] = subgroup_returns[1] = subgroup_returns[2] = 0;
 						if((current_instruction & MICRO_INSTRUCTION_SMA_BITS) == MICRO_INSTRUCTION_SMA_BITS){
@@ -284,11 +288,7 @@ void* run_program(void* keyboard_object){
 						write_branch_trace(current_PC, current_PC + 1, conditional_text, subgroup_taken);
 					}
 
-					//SKP will run along with SPA, SNA or SZL if bits 3-5 are not checked
-					if((current_instruction & 07770) == MICRO_INSTRUCTION_SKP_BITS){
-						SKP(&registers);
-						strcat(instruct_text, "SKP ");
-					}
+					
 					if((current_instruction & MICRO_INSTRUCTION_CLA_BITS) == MICRO_INSTRUCTION_CLA_BITS){
 						CLA(&registers);
 						strcat(instruct_text, "CLA ");
