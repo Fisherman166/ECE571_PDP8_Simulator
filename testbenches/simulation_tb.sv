@@ -184,7 +184,7 @@ module simulation_tb ();
     always_comb begin
         if (CPU_State === JMS_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Subroutine, Result: Taken",
-                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea + 1);
         end
         if (CPU_State === JMP_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
