@@ -125,15 +125,18 @@ module simulation_tb ();
                 endcase
             end
             else begin
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CLA)) instruction_text = {instruction_text, "CLA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CLL)) instruction_text = {instruction_text, "CLL "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CMA)) instruction_text = {instruction_text, "CMA "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_CML)) instruction_text = {instruction_text, "CML "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_IAC)) instruction_text = {instruction_text, "IAC "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_RAR)) instruction_text = {instruction_text, "RAR "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_RTR)) instruction_text = {instruction_text, "RTR "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_RAL)) instruction_text = {instruction_text, "RAL "};
-                if(decode_micro_ops(`MICRO_INSTRUCTION_RTL)) instruction_text = {instruction_text, "RTL "};
+                //Group 1 instruction
+                if(!TOP0.bus.curr_reg.ir[8]) begin
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CLA)) instruction_text = {instruction_text, "CLA "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CLL)) instruction_text = {instruction_text, "CLL "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CMA)) instruction_text = {instruction_text, "CMA "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_CML)) instruction_text = {instruction_text, "CML "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_IAC)) instruction_text = {instruction_text, "IAC "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_RTR)) instruction_text = {instruction_text, "RTR "};
+                    else if(decode_micro_ops(`MICRO_INSTRUCTION_RAR)) instruction_text = {instruction_text, "RAR "};
+                    if(decode_micro_ops(`MICRO_INSTRUCTION_RTL)) instruction_text = {instruction_text, "RTL "};
+                    else if(decode_micro_ops(`MICRO_INSTRUCTION_RAL)) instruction_text = {instruction_text, "RAL "};
+                end
                 if(decode_micro_ops(`MICRO_INSTRUCTION_SMA)) instruction_text = {instruction_text, "SMA "};
                 if(decode_micro_ops(`MICRO_INSTRUCTION_SZA)) instruction_text = {instruction_text, "SZA "};
                 if(decode_micro_ops(`MICRO_INSTRUCTION_SNL)) instruction_text = {instruction_text, "SNL "};
