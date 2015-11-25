@@ -118,7 +118,7 @@ always_comb begin: PC
           PC_P1    : next_reg.pc = bus.curr_reg.pc + 1     ;    // Normal PC increment
           PC_P2    : next_reg.pc = bus.curr_reg.pc + 2     ;    // Skip
           PC_SR    : next_reg.pc = bus.swreg               ;    // Load from front panel
-          PC_JMP   : next_reg.pc = bus.curr_reg.ea         ;    // Load from effective address 
+          PC_JMP   : next_reg.pc = bus.read_data           ;    // Load from effective address 
           PC_NC    : next_reg.pc = bus.curr_reg.pc         ;    // No change
      endcase     
 end
@@ -137,7 +137,7 @@ always_comb begin: EA
      unique case (bus.EA_ctrl)
           EA_PGE   : next_reg.ea = {bus.curr_reg.pc[11:7],bus.curr_reg.ir[6:0]}; // Change page with upper 5 of PC 
           EA_SMP   : next_reg.ea = {5'd0,bus.curr_reg.ir[6:0]};           // Simple address
-          EA_IND   : next_reg.ea = bus.curr_reg.mb            ;           // for indirection
+          EA_IND   : next_reg.ea = bus.read_data              ;           // for indirection
           EA_INC   : next_reg.ea = bus.curr_reg.mb + 1        ;           // for auto-increment indirection
           EA_WD    : next_reg.ea = bus.write_data             ;
           EA_ZERO  : next_reg.ea = 0                          ;           // Zero out
