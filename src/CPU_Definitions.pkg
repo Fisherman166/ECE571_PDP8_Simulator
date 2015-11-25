@@ -57,7 +57,8 @@ package CPU_Definitions;
           PC_P1   = 0,             // Normal PC increment
           PC_P2      ,             // Skip
           PC_SR      ,             // Load from front panel
-          PC_JMP     ,             // Load from effective address 
+          PC_JMP     ,              
+          PC_EA      ,             // Load from effective address
           PC_NC                    // No change
                               } PC_ctrl_t;
      

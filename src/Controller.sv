@@ -313,7 +313,7 @@ always_comb begin: Output_Logic
           JMS_2:    begin 
                          bus.MB_ctrl = MB_WD;
                          bus.write_enable = 1;
-                         bus.PC_ctrl = PC_JMP;
+                         bus.PC_ctrl = PC_EA;
                     end
           JMS_3:    bus.PC_ctrl = PC_P1; 
                

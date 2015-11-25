@@ -118,6 +118,7 @@ always_comb begin: PC
           PC_P1    : next_reg.pc = bus.curr_reg.pc + 1     ;    // Normal PC increment
           PC_P2    : next_reg.pc = bus.curr_reg.pc + 2     ;    // Skip
           PC_SR    : next_reg.pc = bus.swreg               ;    // Load from front panel
+          PC_EA    : next_reg.pc = bus.curr_reg.ea         ;
           PC_JMP   : next_reg.pc = bus.read_data           ;    // Load from effective address 
           PC_NC    : next_reg.pc = bus.curr_reg.pc         ;    // No change
      endcase     
