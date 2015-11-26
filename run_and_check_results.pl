@@ -12,12 +12,12 @@ my $compile_sv = undef;
 my $compile_c = undef;
 my $run_c = undef;
 my $compile_vdhl = undef;
-my $run_vdhl = undef;
+my $run_vhdl = undef;
 my $print_help = undef;
 
 my $pwd = getcwd;
 my $C_PDP_path = 'good_models/C_PDP8/';
-
+my $VHDL_path = 'VHDL/';
 
 GetOptions(
     "f=s",      \$input_filename,
@@ -30,30 +30,36 @@ GetOptions(
 );
 
 if(defined $print_help) {
-    print "-input   Path to .as or .txt file to use a memory image\n";
+    print"Options:\n";
+    print "-f       Path to .as file to use a memory image\n";
     print "-c       Compile C simulator\n";
+    print "-runc    Run C simulator\n";
     print "-sv      Compile SystemVerilog simulator\n";
     print "-vhdl    Compile vhdl simulator\n";
+    print "-runvhdl Run vhdl simulator\n";
     print "-h       Print help information\n";
     exit(0);
 }
 
-die "No golden model chosen to run. Exiting.\n" unless (defined $run_c or defined $run_vdhl);
+die "No golden model chosen to run. Exiting.\n" unless (defined $run_c or defined $run_vhdl);
 
 if(defined $compile_c) {
     chdir "$pwd/$C_PDP_path";
     my $return = system('make');
-    die "Failed to make C simulator\n" unless (!$return);
+    die "Failed to compile C simulator\n" unless (!$return);
+    chdir $pwd;
+}
+
+if(defined $compile_vhdl) {
+    chdir "$pwd/$VHDL_path";
+    my $return = system('make');
+    die "Failed to compile VHDL simulator\n" unless (!$return);
     chdir $pwd;
 }
 
 if(defined $compile_sv) {
     my $return = system('make');
-    die "Failed to make C simulator\n" unless (!$return);
-}
-
-if(defined $compile_vdhl) {
-    print "Compiling vhdl\n";
+    die "Failed to compile SystemVerilog simulator\n" unless (!$return);
 }
 
 ## The real script starts here
@@ -63,12 +69,13 @@ my $sv_return = system("vsim -c simulation_tb -g INIT_MEM_FILENAME=$obj_file");
 die "Sv run failed.\n" unless $sv_return == 0;
 
 my $c_diff = 0;
+my $vhdl_diff = 0;
 if(defined $run_c) {
     my $tracename = "memory_trace_golden.txt";
     my $PDP_name = "PDP8_sim";
     my $C_return = system("./$C_PDP_path/$PDP_name $obj_file $tracename");
-    die "C PDP failed to run run.\n" unless $C_return == 0;
-    $c_diff = &diff_results($C_PDP_path);
+    die "C PDP failed to run. Exiting.\n" unless $C_return == 0;
+    $c_diff = &diff_results();
 }
 
 exit($c_diff);

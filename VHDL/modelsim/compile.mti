@@ -10,6 +10,7 @@ vcom -work ieee_proposed fixed_pkg_c.vhdl
 vcom -work ieee_proposed float_pkg_c.vhdl
 
 
+vcom -work ieee_proposed  standard_additions_c.vhdl standard_textio_additions_c.vhdl env_c.vhdl std_logic_1164_additions.vhdl numeric_std_additions.vhdl numeric_std_unsigned_c.vhdl math_utility_pkg_c.vhdl fixed_pkg_c.vhdl float_pkg_c.vhdl
 
 #Create the library: 
 #    vlib ieee_proposed 
