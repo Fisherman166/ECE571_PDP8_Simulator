@@ -209,7 +209,7 @@ module simulation_tb ();
             else cond_skip_flag = 1;
         end 
         // If returned to idle state and flag is 1, print trace info
-        else if ((CPU_State === CPU_IDLE) && (cond_skip_flag === 1) && led[12] === 1) begin
+        else if ( ((CPU_State === CPU_IDLE) || (CPU_State === HALT))  && cond_skip_flag && led[12]) begin
             cond_skip_flag = 0;
             if(`IR_REG === `MICRO_INSTRUCTION_SKP) 
                 $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
