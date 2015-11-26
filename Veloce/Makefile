@@ -1,4 +1,4 @@
-#This makefile is for the Image Processor Core testing using DPI calls 
+#This makefile is for the PDP8
 
 #Specify the mode- could be either puresim or veloce
 #Always make sure that everything works fine in puresim before changing to veloce
@@ -18,23 +18,24 @@ else
 	velmap work work.$(MODE)
 endif
 
+
 compile:
 ifeq ($(MODE),puresim)
-	vlog ../Packages.sv ../CellProcessor_int.sv ../CellProcessor.sv hdl/veloce_top.sv -dpiheader tbxbindings.h 
-	vlog hvl/ImageProcessorTestBench.cxx 
+	vlog ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv
+	vlog synth_tb.sv 
 else
-	velanalyze ../Packages.sv ../CellProcessor_int.sv ../CellProcessor.sv hdl/veloce_top.sv
+	#velanalyze ../Packages.sv ../CellProcessor_int.sv ../CellProcessor.sv hdl/veloce_top.sv
 	#Note that the ImageProcessorTestBench.cxx file is passed to velcomp in veloce.config file. That way it knows this is the CoModel and compiles, then later runs on workstation
-	velcomp
+	#velcomp
 endif
                                                            
 run:
 ifeq ($(MODE),puresim)
-	vsim -c veloce_top -do "run -all" | tee transcript.puresim
+	vsim -c synth_tb -do "run -all" | tee transcript.puresim
 else
-	velrun $(RUNTIME_OPTS) | tee transcript.veloce
+	#velrun $(RUNTIME_OPTS) | tee transcript.veloce
 endif
                                                                                 
 clean:
-	rm -rf edsenv transcript modelsim.ini transcript.veloce veloce.puresim transcript.puresim veloce.map veloce.wave velrunopts.ini work work.veloce veloce.out veloce.med veloce.log tbxbindings.h work.puresim
+	rm -rf edsenv transcript modelsim.ini transcript.veloce veloce.puresim transcript.puresim veloce.map veloce.wave velrunopts.ini work work.veloce veloce.out veloce.med veloce.log work.puresim
 
