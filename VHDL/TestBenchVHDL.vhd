@@ -20,7 +20,8 @@ use ieee_proposed.standard_additions;
 use ieee_proposed.standard_textio_additions.all;
 
 entity TestBenchVHDL is
-    generic (period    : time    := 10 ns);  -- Generic for clock period
+    generic (period      : time    := 10 ns;  -- Generic for clock period
+             data_file   : string  := "class3a.txt");  -- Generic for clock period
 end TestBenchVHDL;
             
 architecture behavioral of TestBenchVHDL is 
@@ -105,9 +106,11 @@ process
      variable program_line : line;
      variable line_data : std_logic_vector(11 downto 0) := o"0000";     
 begin
-     file_open(program_file, "class3a.txt",  read_mode);
-     file_open(opcode_file, "opcode_output.txt",  write_mode);
-     file_open(branch_file, "branch_trace.txt",  write_mode);
+     file_open(program_file, data_file,  read_mode);
+     file_open(opcode_file, "opcode_output_golden.txt", write_mode);
+     file_open(branch_file, "branch_trace_golden.txt",  write_mode);
+    -- file_open(branch_file, "memory_trace_golden.txt",  write_mode);     
+    -- file_open(branch_file, "valid_memory_golden.txt",  write_mode);     
      
      wait until mem_ready = '1'; -- Wait for memory initilaiziation to complete
      while not endfile(program_file) loop
@@ -258,12 +261,13 @@ end process;
 
 
 -- When program stops
-process(Run_LED) begin
-     if falling_edge(Run_LED) then
-          file_close(program_file);
-          file_close(opcode_file);
-          file_close(branch_file);
-     end if;
+process begin
+     wait until falling_edge(Run_LED);
+     file_close(program_file);
+     file_close(opcode_file);
+     file_close(branch_file);
+     wait for period;
+     assert false report "NONE. End of simulation." severity failure;
 
 end process;
 

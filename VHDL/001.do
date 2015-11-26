@@ -24,7 +24,7 @@ vcom TestBenchVHDL.vhd
 
 
 
-vsim -t 1ps TestBenchVHDL
+vsim -g period=5ns -g data_file="basic1.txt" -t 1ps TestBenchVHDL
 
 onerror {resume}
 quietly WaveActivateNextPane {} 0
@@ -86,4 +86,4 @@ configure wave -timelineunits us
 update
 WaveRestoreZoom {1250 ns} {526250 ns}
 
-run 500 us
+run
