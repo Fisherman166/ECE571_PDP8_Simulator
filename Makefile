@@ -44,5 +44,5 @@ $(LIB_WORK)/_lib.qdb : src/Top.sv testbenches/simulation_tb.sv src/Multiply.sv \
 		 +incdir+$(current_dir)/src/ \
 
 clean:
-	rm -rf $(LIB_WORK)
+	rm -rf $(LIB_WORK) transcript
 
