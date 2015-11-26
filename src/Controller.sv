@@ -139,9 +139,9 @@ always_comb begin: Next_State_Logic
                          Next_State = CPU_IDLE;
                     else if (bus.micro_g2 == 1) Next_State = MIC_2;
                     else  Next_State = MIC_3;      
-          MIC_2:    if (bus.curr_reg.ir(1) == 1)
+          MIC_2:    if (bus.curr_reg.ir[1] == 1)
                          Next_State = HALT;
-                    else Next_state = CPU_IDLE;     
+                    else Next_State = CPU_IDLE;     
           MIC_3:    Next_State = MIC_4;
           MIC_4:    Next_State = MIC_5;
           MIC_5:    if ({bus.micro_g3,bus.curr_reg.ir[2]} == 2'b11)
