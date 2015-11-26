@@ -122,6 +122,6 @@ $(LIB_WORK)/_lib.qdb : Adder.vhd \
 	$(VCOM) -2002 -work work Top_VHDL.vhd
 
 clean:
-	rm -rf work transcript modelsim/ieee_proposed
+	rm -rf work transcript
 
 

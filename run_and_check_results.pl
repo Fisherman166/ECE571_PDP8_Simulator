@@ -78,7 +78,14 @@ if(defined $run_c) {
     $c_diff = &diff_results();
 }
 
-exit($c_diff);
+if(defined $run_vhdl) {
+    chdir "$pwd/$VHDL_path";
+    my $VHDL_return = system("vsim -c -g data_file=$obj_file");
+    die "VHDL failed to run. Exiting.\n" unless $VHDL_return == 0;
+    $vhdl_diff = &diff_results();
+}
+
+exit($c_diff + $vhdl_diff);
 
 ## Functions start here
 ##
