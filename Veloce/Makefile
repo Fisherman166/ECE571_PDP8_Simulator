@@ -21,8 +21,7 @@ endif
 
 compile:
 ifeq ($(MODE),puresim)
-	vlog ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv
-	vlog synth_tb.sv 
+	vlog -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/
 else
 	#velanalyze ../Packages.sv ../CellProcessor_int.sv ../CellProcessor.sv hdl/veloce_top.sv
 	#Note that the ImageProcessorTestBench.cxx file is passed to velcomp in veloce.config file. That way it knows this is the CoModel and compiles, then later runs on workstation
@@ -31,7 +30,7 @@ endif
                                                            
 run:
 ifeq ($(MODE),puresim)
-	vsim -c synth_tb -do "run -all" | tee transcript.puresim
+	vsim synth_tb -do "run -all" | tee transcript.puresim
 else
 	#velrun $(RUNTIME_OPTS) | tee transcript.veloce
 endif
