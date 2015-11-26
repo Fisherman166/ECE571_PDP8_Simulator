@@ -11,7 +11,7 @@ my $input_filename = undef;
 my $compile_sv = undef;
 my $compile_c = undef;
 my $run_c = undef;
-my $compile_vdhl = undef;
+my $compile_vhdl = undef;
 my $run_vhdl = undef;
 my $print_help = undef;
 
@@ -24,8 +24,8 @@ GetOptions(
     "c",        \$compile_c,
     "runc",     \$run_c,
     "sv",       \$compile_sv,
-    "vhdl",     \$compile_vdhl,
-    "runvhdl",  \$run_vdhl,
+    "vhdl",     \$compile_vhdl,
+    "runvhdl",  \$run_vhdl,
     "h",        \$print_help,
 );
 
