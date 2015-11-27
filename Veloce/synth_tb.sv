@@ -35,7 +35,7 @@ Top TOP0 (.btnc(Display_Select) ,
 /************************************** Main Body **************************************/
 // Generate clock signal
     
-//tbx clkgen
+//Clock generator - tbx clkgen
 //initial begin
 //     clk = 0;
 //     forever begin

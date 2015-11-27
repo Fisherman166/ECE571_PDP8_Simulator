@@ -227,19 +227,19 @@ assign  instructions_dectected = {group2_instruction_bits.SMA,
 
         if(group_select[2:1] == `OR_INSTRUCTION) begin
             case(instructions_dectected)
-                3'b001: if(l_reg !== 1'b0) skip_or = 1'b1;
+                3'b001: if(l_reg != 1'b0) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b010: if(ac_reg == '0) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b011: if( (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b011: if( (ac_reg == '0) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b100: if(ac_reg[11] == 1'b1) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b101: if( (ac_reg[11] == 1'b1) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b101: if( (ac_reg[11] == 1'b1) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b110: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b111: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                default: skip_or = 1'b0;
             endcase
@@ -255,17 +255,17 @@ assign  instructions_dectected = {group2_instruction_bits.SMA,
                 3'b000: skip_and = 1'b1;
                 3'b001: if(l_reg == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b010: if(ac_reg !== '0) skip_and = 1'b1;
+                3'b010: if(ac_reg != '0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b011: if( (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
+                3'b011: if( (ac_reg != '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
                 3'b100: if(ac_reg[11] == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
                 3'b101: if( (ac_reg[11] == 1'b0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b110: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) ) skip_and = 1'b1;
+                3'b110: if( (ac_reg[11] == 1'b0) && (ac_reg != '0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b111: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b0) && (ac_reg != '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
                default: skip_and = 1'b0;
             endcase
