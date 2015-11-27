@@ -12,7 +12,7 @@ all:
 ifeq ($(MODE),puresim)
 	clean lib compile run
 else	
-     clean lib vmwclk compile run view  
+	clean lib vmwclk compile run view  
 endif
 
 
@@ -41,7 +41,7 @@ ifeq ($(MODE),puresim)
 	vlog -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/
 else
 	velanalyze  -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/velcomp
-     velcomp
+	velcomp
 endif
                                                            
 run:
@@ -49,7 +49,7 @@ ifeq ($(MODE),puresim)
 	vsim synth_tb -do "run -all" | tee transcript.puresim
 else
 	#velrun $(RUNTIME_OPTS) | tee transcript.veloce
-     velrun -nac -c -do run.do
+	velrun -nac -c -do run.do
 	@echo -e "\nMakeInfo: Emulation run successful!"
 endif
                                                                                 
