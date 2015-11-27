@@ -13,7 +13,7 @@ module memory_controller(
 );
     states current_state = IDLE;
     states next_state;
-	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
+	memory_element memory[`PAGES * `WORDS_PER_PAGE];
 
     always_ff @(posedge clk) begin
         current_state <= next_state;
