@@ -91,7 +91,12 @@ module micro_instruction_decoder(
     logic group2_and_select = 1'b0;
     logic skip_or = 1'b0;
     logic skip_and = 1'b0;
-
+    logic [`SELECT_SIZE-1:0] instructions_dectected;
+		
+assign  instructions_dectected = {group2_instruction_bits.SMA,
+                                  group2_instruction_bits.SZA,
+                                  group2_instruction_bits.SNL};
+		
     //Decode instruction register
     always_comb begin
         group1_instruction_bits.CLA = i_reg[`CLA_BIT];
@@ -219,25 +224,22 @@ module micro_instruction_decoder(
 
     //Group2 OR instructions
     always_comb begin
-        automatic logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SMA,
-                                                                     group2_instruction_bits.SZA,
-                                                                     group2_instruction_bits.SNL};
 
         if(group_select[2:1] == `OR_INSTRUCTION) begin
             case(instructions_dectected)
-                3'b001: if(l_reg !== 1'b0) skip_or = 1'b1;
+                3'b001: if(l_reg != 1'b0) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b010: if(ac_reg == '0) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b011: if( (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b011: if( (ac_reg == '0) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b100: if(ac_reg[11] == 1'b1) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b101: if( (ac_reg[11] == 1'b1) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b101: if( (ac_reg[11] == 1'b1) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                 3'b110: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
-                3'b111: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) || (l_reg !== 1'b0) ) skip_or = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b1) || (ac_reg == '0) || (l_reg != 1'b0) ) skip_or = 1'b1;
                         else skip_or = 1'b0;
                default: skip_or = 1'b0;
             endcase
@@ -247,26 +249,23 @@ module micro_instruction_decoder(
 
     //Group2 AND instructions
     always_comb begin
-        automatic logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SPA,
-                                                                     group2_instruction_bits.SNA,
-                                                                     group2_instruction_bits.SZL};
 
         if(group_select[2:1] == `AND_INSTRUCTION) begin
             case(instructions_dectected)
                 3'b000: skip_and = 1'b1;
                 3'b001: if(l_reg == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b010: if(ac_reg !== '0) skip_and = 1'b1;
+                3'b010: if(ac_reg != '0) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b011: if( (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
+                3'b011: if( (ac_reg != '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
                 3'b100: if(ac_reg[11] == 1'b0) skip_and = 1'b1;
                         else skip_and = 1'b0;
                 3'b101: if( (ac_reg[11] == 1'b0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b110: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) ) skip_and = 1'b1;
+                3'b110: if( (ac_reg[11] == 1'b0) && (ac_reg != '0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
-                3'b111: if( (ac_reg[11] == 1'b0) && (ac_reg !== '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
+                3'b111: if( (ac_reg[11] == 1'b0) && (ac_reg != '0) && (l_reg == 1'b0) ) skip_and = 1'b1;
                         else skip_and = 1'b0;
                default: skip_and = 1'b0;
             endcase
