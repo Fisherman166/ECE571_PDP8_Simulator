@@ -80,8 +80,12 @@ end
     
 // When program completes
 always @(negedge led[12]) begin
-     $writememb("mem_out.txt", TOP0.MEM0.memory);
-    // $finish();
+     for(m = 0; m < 4096; m++) begin 
+          mem_image[m] =  TOP0.MEM0.memory [12:1];
+     end
+
+     $writememb("mem_out.txt", mem_image);
+     //$finish();
 end  
 
 endmodule

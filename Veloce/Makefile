@@ -3,11 +3,18 @@
 #Specify the mode- could be either puresim or veloce
 #Always make sure that everything works fine in puresim before changing to veloce
 
-#MODE ?= veloce
-MODE ?= puresim
+MODE ?= veloce
+#MODE ?= puresim
 
 #make all does everything
-all: clean lib compile run
+
+all: 
+ifeq ($(MODE),puresim)
+	clean lib compile run
+else	
+     clean lib vmwclk compile run view  
+endif
+
 
 lib:
 ifeq ($(MODE),puresim)
@@ -18,14 +25,23 @@ else
 	velmap work work.$(MODE)
 endif
 
+#analyze:
+#	-velcomp
+#	@echo -e "\nMakeInfo: You may get an error informing vmw.clk.generated file is missing if you are running this the first time. \n\tThis is normal, do not panic! You will generate this file using GUI in the next step\n"
 
+     
+vmwclk: 
+	@echo -e "\nMakeInfo: Now Use velview to create vmw.clk clock/IO specification file. Follow steps from Standalone Flow guide. \n\t\tPress enter to continue....."
+	@read
+	velview 	
+     
+     
 compile:
 ifeq ($(MODE),puresim)
 	vlog -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/
 else
-	#velanalyze ../Packages.sv ../CellProcessor_int.sv ../CellProcessor.sv hdl/veloce_top.sv
-	#Note that the ImageProcessorTestBench.cxx file is passed to velcomp in veloce.config file. That way it knows this is the CoModel and compiles, then later runs on workstation
-	#velcomp
+	velanalyze  -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/velcomp
+     velcomp
 endif
                                                            
 run:
@@ -33,6 +49,8 @@ ifeq ($(MODE),puresim)
 	vsim synth_tb -do "run -all" | tee transcript.puresim
 else
 	#velrun $(RUNTIME_OPTS) | tee transcript.veloce
+     velrun -nac -c -do run.do
+	@echo -e "\nMakeInfo: Emulation run successful!"
 endif
                                                                                 
 clean:
