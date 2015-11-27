@@ -7,14 +7,14 @@
 //`define FILL_DEBUG
 
 //Defines for easy access to signals
-`define READ_ENABLE     bus.read_enable
-`define MEM_FINISHED    bus.mem_finished
-`define MEM_ADDRESS     bus.address
-`define MEM_VALID       bus.memory[`MEM_ADDRESS].valid
-`define MEM_READ_DATA   bus.read_data
-`define MEM_DATA        bus.memory[`MEM_ADDRESS].data
-`define MEM_WRITE_DATA  bus.write_data
-`define IR_REG          bus.curr_reg.ir
+`define READ_ENABLE     read_enable
+`define MEM_FINISHED    mem_finished
+`define MEM_ADDRESS     address
+`define MEM_VALID       memory[`MEM_ADDRESS].valid
+`define MEM_READ_DATA   read_data
+`define MEM_DATA        memory[`MEM_ADDRESS].data
+`define MEM_WRITE_DATA  write_data
+`define IR_REG          curr_reg.ir
 
 //Opcodes for instruction text
 `define OPCODE_AND     3'o0
@@ -82,7 +82,16 @@ module simulation_tb ();
     Controller_states_t CPU_State;
     logic [11:0] pc_temp;
     logic        cond_skip_flag = 0;
-    main_bus bus();
+    logic        read_data ;  
+    logic        mem_finished ;		  
+    memory_element [`PAGES * `WORDS_PER_PAGE] memory;    		  
+    PDP8_Registers_t curr_reg  ;   		  
+    Controller_states_t Curr_State;		  
+    logic [11:0] address;      		  
+    logic [11:0] write_data ;  		  
+    logic 	  write_enable; 		  
+    logic        read_enable ; 		  
+    logic        read_type ;
 
       
     /********************************* Instatiate Modules **********************************/
@@ -91,11 +100,11 @@ module simulation_tb ();
               .btnu(Step          ) ,
               .btnd(Deposit       ) ,
               .btnl(Load_PC       ) ,
-              .btnr(Load_AC       ) ,             
+              .btnr(Load_AC       ) ,
               .*);    
      
     /************************************** Main Body **************************************/
-    assign CPU_State = bus.Curr_State; 
+    assign CPU_State = Curr_State; 
      
     // Generate clock signal
     always #10 clk = ~clk;  
@@ -105,7 +114,7 @@ module simulation_tb ();
         $fclose(mem_trace_file);
         $fclose(reg_file);
         $fclose(branch_file);
-        $finish();
+        //$finish();
     end
 
     //Print contents of all registers after each instruction
@@ -115,8 +124,8 @@ module simulation_tb ();
         //Only print this 
         if(led[12]) begin
             //For non-micro instructions
-            if(bus.curr_reg.ir[11:9] < 3'o7) begin
-                unique case(bus.curr_reg.ir[11:9])
+            if(curr_reg.ir[11:9] < 3'o7) begin
+                unique case(curr_reg.ir[11:9])
                     `OPCODE_AND: instruction_text = "AND";
                     `OPCODE_TAD: instruction_text = "TAD";
                     `OPCODE_ISZ: instruction_text = "ISZ";
@@ -164,8 +173,8 @@ module simulation_tb ();
             end
 
             $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
-                      instruction_text, bus.curr_reg.ir[11:9], bus.curr_reg.ac, bus.curr_reg.lk,
-                      bus.curr_reg.mb, bus.curr_reg.pc, bus.curr_reg.ea);
+                      instruction_text, curr_reg.ir[11:9], curr_reg.ac, curr_reg.lk,
+                      curr_reg.mb, curr_reg.pc, curr_reg.ea);
         end
     end
 
@@ -177,7 +186,7 @@ module simulation_tb ();
                     $fdisplay(mem_trace_file, "ERROR: Attempting to read from invalid address %04o", `MEM_ADDRESS);
                 end
                 else begin
-                    if(bus.read_type === `DATA_READ) begin
+                    if(read_type === `DATA_READ) begin
                         $fdisplay(mem_trace_file, "DR %04o %04o %04o", `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);
                     end
                     else begin
@@ -185,7 +194,7 @@ module simulation_tb ();
                     end
                 end
             end
-            else if(bus.write_enable) begin
+            else if(write_enable) begin
                 $fdisplay(mem_trace_file, "DW %04o %04o %04o", `MEM_ADDRESS, `MEM_WRITE_DATA, `MEM_DATA);
             end
             else $display(mem_trace_file, "Neither read nor write");
@@ -196,16 +205,16 @@ module simulation_tb ();
     always_comb begin
         if (CPU_State === JMS_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Subroutine, Result: Taken",
-                      bus.curr_reg.pc, bus.curr_reg.ea + 1);
+                      curr_reg.pc, curr_reg.ea + 1);
         end
         if (CPU_State === JMP_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
-                      bus.curr_reg.pc, bus.curr_reg.ea);
+                      curr_reg.pc, curr_reg.ea);
         end
                     
         // If microcoded group2 or ISZ, record current PC to temp and set flag              
         if ((CPU_State === MIC_2) || (CPU_State === ISZ_1)) begin 
-            pc_temp = bus.curr_reg.pc;
+            pc_temp = curr_reg.pc;
             if( (`IR_REG === `MICRO_INSTRUCTION_OSR) ) cond_skip_flag = 0;
             else cond_skip_flag = 1;
         end 
@@ -215,7 +224,7 @@ module simulation_tb ();
             if(`IR_REG === `MICRO_INSTRUCTION_SKP) 
                 $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
                           pc_temp, pc_temp + 1);
-            else if ((bus.curr_reg.pc - pc_temp) !== 0) 
+            else if ((curr_reg.pc - pc_temp) !== 0) 
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
                       pc_temp, pc_temp + 1);
             else
@@ -253,7 +262,7 @@ module simulation_tb ();
                 `endif
             end
             else begin
-                write_data(word_value);
+                write_data2(word_value);
                 `ifdef FILL_DEBUG
                     $display("Memory value: %04o", word_value);
                 `endif
@@ -276,7 +285,7 @@ module simulation_tb ();
         repeat(10) @ (negedge clk); Load_PC = 0; 
     endtask
 
-    task write_data(input word data);
+    task write_data2(input word data);
         repeat(10) @ (negedge clk); sw[11:0] = data;
         repeat(10) @ (negedge clk); Deposit = 1;
         repeat(10) @ (negedge clk); Deposit = 0;
@@ -293,8 +302,8 @@ module simulation_tb ();
 		$fdisplay(file, "-------    --------");
 
 		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			if(bus.memory[i].valid === 1'b1) begin
-				$fdisplay(file, "%04o        %04o", i, bus.memory[i].data);
+			if(memory[i].valid === 1'b1) begin
+				$fdisplay(file, "%04o        %04o", i, memory[i].data);
 			end //if
 		end //for
 

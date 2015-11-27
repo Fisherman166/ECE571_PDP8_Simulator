@@ -384,16 +384,16 @@ interface main_bus;
                     input  halt         ,
                     input  CPU_idle     );
 				
-     modport top   (input  read_data    ,
-                    input  mem_finished ,
-				input  memory       ,
-				input  curr_reg     ,
-				input  Curr_State   ,
-                    output address      ,      
-                    output write_data   ,  
-                    output write_enable ,
-                    output read_enable  ,
-                    output read_type    );
+//     modport top   (output  read_data    ,
+//                    output  mem_finished ,
+//				  output  memory       ,
+//				  output  curr_reg     ,
+//				  output  Curr_State   ,
+//                    output  address      ,      
+//                    output  write_data   ,  
+//                    output  write_enable ,
+//                    output  read_enable  ,
+//                    output  read_type    );
 				  
 endinterface
 
