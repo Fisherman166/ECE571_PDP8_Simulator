@@ -12,7 +12,7 @@ all:
 ifeq ($(MODE),puresim)
 	clean lib compile run
 else	
-	clean lib vmwclk compile run view  
+	lib vmwclk compile run view  
 endif
 
 
@@ -43,7 +43,7 @@ else
 	velanalyze  -sv -mfcu ../src/Controller.sv ../src/CPU.sv ../src/Multiply.sv ../src/Divide.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Top.sv synth_tb.sv +incdir+../src/velcomp
 	velcomp
 endif
-                                                           
+
 run:
 ifeq ($(MODE),puresim)
 	vsim synth_tb -do "run -all" | tee transcript.puresim
@@ -52,7 +52,8 @@ else
 	velrun -nac -c -do run.do
 	@echo -e "\nMakeInfo: Emulation run successful!"
 endif
-                                                                                
+
+
 clean:
 	rm -rf edsenv transcript modelsim.ini transcript.veloce veloce.puresim transcript.puresim veloce.map veloce.wave velrunopts.ini work work.veloce veloce.out veloce.med veloce.log work.puresim
 
