@@ -36,18 +36,18 @@ Top TOP0 (.btnc(Display_Select) ,
 // Generate clock signal
     
 //tbx clkgen
-initial begin
-     clk = 0;
-     forever begin
-         #10 clk = ~clk;  
-     end
-end
+//initial begin
+//     clk = 0;
+//     forever begin
+//         #10 clk = ~clk;  
+//     end
+//end
 
 // Run test
 initial begin
      // Hold reset low on DUT for 5 clock cycles
-     btnCpuReset = 0;
-     repeat(5) @ (negedge clk); btnCpuReset = 1;
+     //btnCpuReset = 0;
+     //repeat(5) @ (negedge clk); btnCpuReset = 1;
      
      
      // Load test file to memory
@@ -55,9 +55,9 @@ initial begin
      
      
      // Set program counter to 0
-     repeat(10) @ (negedge clk); sw[11:0] = 0;
-     repeat(10) @ (negedge clk); Load_PC = 1;
-     repeat(10) @ (negedge clk); Load_PC = 0;  
+     //repeat(10) @ (negedge clk); sw[11:0] = 0;
+     //repeat(10) @ (negedge clk); Load_PC = 1;
+     //repeat(10) @ (negedge clk); Load_PC = 0;  
      
      
      // Copy memory image to PDP8
@@ -69,12 +69,12 @@ initial begin
      end
      
      // Set program counter to 200
-     repeat(10) @ (negedge clk); sw[11:0] = 12'o0200;
-     repeat(10) @ (negedge clk); Load_PC = 1;
-     repeat(10) @ (negedge clk); Load_PC = 0;
-     
-     // Run program
-     repeat(10) @ (negedge clk); sw[12] = 1;
+     //repeat(10) @ (negedge clk); sw[11:0] = 12'o0200;
+     //repeat(10) @ (negedge clk); Load_PC = 1;
+     //repeat(10) @ (negedge clk); Load_PC = 0;
+     //
+     //// Run program
+     //repeat(10) @ (negedge clk); sw[12] = 1;
      
      
 end 
