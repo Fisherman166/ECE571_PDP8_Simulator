@@ -91,10 +91,12 @@ module micro_instruction_decoder(
     logic group2_and_select = 1'b0;
     logic skip_or = 1'b0;
     logic skip_and = 1'b0;
-    logic [`SELECT_SIZE-1:0] instructions_dectected = {group2_instruction_bits.SMA,
-                                                       group2_instruction_bits.SZA,
-                                                       group2_instruction_bits.SNL};
-											
+    logic [`SELECT_SIZE-1:0] instructions_dectected;
+		
+assign  instructions_dectected = {group2_instruction_bits.SMA,
+                                  group2_instruction_bits.SZA,
+                                  group2_instruction_bits.SNL};
+		
     //Decode instruction register
     always_comb begin
         group1_instruction_bits.CLA = i_reg[`CLA_BIT];
