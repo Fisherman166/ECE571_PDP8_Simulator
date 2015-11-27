@@ -189,6 +189,8 @@ endpackage : CPU_Definitions
 
 import CPU_Definitions::*;
 
+`include "memory_utils.pkg"
+
 interface main_bus;
      // CPU
      PDP8_Registers_t curr_reg;    // Main PDP8 Registers
@@ -222,6 +224,7 @@ interface main_bus;
      logic        write_enable ;   // 1 - write write_data to address on next active clock edge.
      logic        read_enable  ;   // 1 - start read of RAM at address on next active clock edge
      logic        read_type    ;   // Data read or instruction fetch
+	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
      
      // CPU Controller
      logic skip                 ;  // skip instruction if apporopriate	
@@ -231,6 +234,7 @@ interface main_bus;
      logic micro_g3             ;  // when in group 3 micrododed
      logic srchange             ;  // when a change in the switch register is detected
      logic CPU_idle             ;  // High when in idle state
+	Controller_states_t Curr_State = CPU_IDLE; // Current state
      AC_ctrl_t AC_ctrl = AC_NC  ;  // mux selector for accumulator
      LK_ctrl_t LK_ctrl = LK_NC  ;  // mux selector for link bit
      MQ_ctrl_t MQ_ctrl = MQ_NC  ;  // mux selector for mq register
@@ -304,6 +308,7 @@ interface main_bus;
                     
      modport mem   (output read_data    ,
                     output mem_finished ,
+				output memory       ,
                     input  address      ,      
                     input  write_data   ,  
                     input  write_enable ,
@@ -322,6 +327,7 @@ interface main_bus;
                     output AD_ctrl      ,
                     output DO_ctrl      ,
                     output DT_ctrl      ,
+				output Curr_State   ,
                     input  skip         ,
                     input  ea_in_auto   ,
                     input  micro_g1     ,
@@ -376,8 +382,19 @@ interface main_bus;
                     input  dispout      ,
                     input  linkout      ,
                     input  halt         ,
-                    input  CPU_idle     );               
-                    
+                    input  CPU_idle     );
+				
+     modport top   (input  read_data    ,
+                    input  mem_finished ,
+				input  memory       ,
+				input  curr_reg     ,
+				input  Curr_State   ,
+                    output address      ,      
+                    output write_data   ,  
+                    output write_enable ,
+                    output read_enable  ,
+                    output read_type    );
+				  
 endinterface
 
 `endif

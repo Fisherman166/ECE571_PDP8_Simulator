@@ -13,7 +13,7 @@ module memory_controller(
 );
     states current_state = IDLE;
     states next_state;
-	memory_element memory[`PAGES * `WORDS_PER_PAGE];
+
 
     always_ff @(posedge clk) begin
         current_state <= next_state;
@@ -47,11 +47,11 @@ module memory_controller(
 	function word read_memory(input word address, input logic read_type);
 		word retval;
 		
-		if(memory[address].valid == `INVALID) begin
+		if(bus.memory[address].valid == `INVALID) begin
 			retval = 12'h0;
 		end
 		else if( (read_type == `DATA_READ) || (read_type == `INSTRUCTION_FETCH) ) begin
-			retval = memory[address].data;
+			retval = bus.memory[address].data;
 		end
 		else begin
 			retval = 12'h0;
@@ -61,8 +61,8 @@ module memory_controller(
 	endfunction
 
 	function void write_memory(input word address, input word data);
-		memory[address].data = data;
-		memory[address].valid = 1'b1;
+		bus.memory[address].data = data;
+		bus.memory[address].valid = 1'b1;
 	endfunction
 endmodule
 

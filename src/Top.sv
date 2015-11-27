@@ -17,7 +17,8 @@ module Top (input logic clk           ,
             input  logic        btnu  ,
             input  logic        btnd  ,
             input  logic        btnl  ,
-            input  logic        btnr              
+            input  logic        btnr  ,
+	       main_bus.top        bus
             );
             
             
@@ -25,16 +26,16 @@ module Top (input logic clk           ,
 
 
 // Interfaces for internal modules
-main_bus bus();
+main_bus wires();
 
  
 /********************************* Instatiate Modules **********************************/
 
-Front_Panel FP0 (.*,.clock(clk),.resetN(btnCpuReset),.bus);    
-CPU CPU0 (.clock(clk),.resetN(btnCpuReset),.bus);
-Controller FSM0 (.clock(clk),.resetN(btnCpuReset),.bus);
-EAE EAE0 (.clock(clk),.resetN(btnCpuReset),.bus);
-memory_controller MEM0 (.clk,.read_type('1),.bus);
+Front_Panel FP0 (.*,.clock(clk),.resetN(btnCpuReset),.bus(wires));    
+CPU CPU0 (.clock(clk),.resetN(btnCpuReset),.bus(wires));
+Controller FSM0 (.clock(clk),.resetN(btnCpuReset),.bus(wires));
+EAE EAE0 (.clock(clk),.resetN(btnCpuReset),.bus(wires));
+memory_controller MEM0 (.clk,.read_type('1),.bus(wires));
 
  
 endmodule

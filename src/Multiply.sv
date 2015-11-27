@@ -70,7 +70,7 @@ always_comb begin
                end
                
 		S1:  begin
-               en_cnt <= 1;
+               en_cnt = 1;
                if (doadd == 1) add = 1;
                else shift = 1;
                if (cntnm1 == 1) next_state = S2;     

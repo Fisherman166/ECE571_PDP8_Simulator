@@ -13,22 +13,22 @@ module Controller (input logic clock,
 
 /********************************** Declare Signals ************************************/
 
-Controller_states_t Curr_State = CPU_IDLE, Next_State, Inst_State;
+Controller_states_t Next_State, Inst_State;
 bit EA_Flag;
 
 /************************************** Main Body **************************************/                
                    
 // State register w/ asynchronous active-low reset                  
 always_ff @(posedge clock, negedge resetN)
-     if (!resetN) Curr_State <= REG_INIT;         // If reset, go to NORMAL state
-     else         Curr_State <= Next_State;       // Else current state gets next state
+     if (!resetN) bus.Curr_State <= REG_INIT;         // If reset, go to NORMAL state
+     else         bus.Curr_State <= Next_State;       // Else current state gets next state
      
      
 
 // Next state logic     
 always_comb begin: Next_State_Logic
-     Next_State = Curr_State;                     // Default to stay in current state
-     unique case (Curr_State)
+     Next_State = bus.Curr_State;                     // Default to stay in current state
+     unique case (bus.Curr_State)
           REG_INIT: Next_State = CPU_IDLE;
       
           CPU_IDLE: Next_State = 
@@ -186,7 +186,7 @@ always_comb begin: Output_Logic
      EA_Flag = EA_Flag       ;
      
 
-     unique case (Curr_State)
+     unique case (bus.Curr_State)
           REG_INIT: begin
                          bus.AC_ctrl = AC_CLEAR;
                          bus.LK_ctrl = LK_ZERO;

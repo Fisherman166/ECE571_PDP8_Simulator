@@ -7,14 +7,14 @@
 //`define FILL_DEBUG
 
 //Defines for easy access to signals
-`define READ_ENABLE     TOP0.bus.read_enable
-`define MEM_FINISHED    TOP0.bus.mem_finished
-`define MEM_ADDRESS     TOP0.bus.address
-`define MEM_VALID       TOP0.MEM0.memory[`MEM_ADDRESS].valid
-`define MEM_READ_DATA   TOP0.bus.read_data
-`define MEM_DATA        TOP0.MEM0.memory[`MEM_ADDRESS].data
-`define MEM_WRITE_DATA  TOP0.bus.write_data
-`define IR_REG          TOP0.bus.curr_reg.ir
+`define READ_ENABLE     bus.read_enable
+`define MEM_FINISHED    bus.mem_finished
+`define MEM_ADDRESS     bus.address
+`define MEM_VALID       bus.memory[`MEM_ADDRESS].valid
+`define MEM_READ_DATA   bus.read_data
+`define MEM_DATA        bus.memory[`MEM_ADDRESS].data
+`define MEM_WRITE_DATA  bus.write_data
+`define IR_REG          bus.curr_reg.ir
 
 //Opcodes for instruction text
 `define OPCODE_AND     3'o0
@@ -82,6 +82,7 @@ module simulation_tb ();
     Controller_states_t CPU_State;
     logic [11:0] pc_temp;
     logic        cond_skip_flag = 0;
+    main_bus bus();
 
       
     /********************************* Instatiate Modules **********************************/
@@ -94,12 +95,12 @@ module simulation_tb ();
               .*);    
      
     /************************************** Main Body **************************************/
-    assign CPU_State = TOP0.FSM0.Curr_State; 
+    assign CPU_State = bus.Curr_State; 
      
     // Generate clock signal
     always #10 clk = ~clk;  
 
-    always @(negedge TOP0.led[12]) begin
+    always @(negedge led[12]) begin
         print_valid_memory();
         $fclose(mem_trace_file);
         $fclose(reg_file);
@@ -114,8 +115,8 @@ module simulation_tb ();
         //Only print this 
         if(led[12]) begin
             //For non-micro instructions
-            if(TOP0.bus.curr_reg.ir[11:9] < 3'o7) begin
-                unique case(TOP0.bus.curr_reg.ir[11:9])
+            if(bus.curr_reg.ir[11:9] < 3'o7) begin
+                unique case(bus.curr_reg.ir[11:9])
                     `OPCODE_AND: instruction_text = "AND";
                     `OPCODE_TAD: instruction_text = "TAD";
                     `OPCODE_ISZ: instruction_text = "ISZ";
@@ -163,20 +164,20 @@ module simulation_tb ();
             end
 
             $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
-                      instruction_text, TOP0.bus.curr_reg.ir[11:9], TOP0.bus.curr_reg.ac, TOP0.bus.curr_reg.lk,
-                      TOP0.bus.curr_reg.mb, TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+                      instruction_text, bus.curr_reg.ir[11:9], bus.curr_reg.ac, bus.curr_reg.lk,
+                      bus.curr_reg.mb, bus.curr_reg.pc, bus.curr_reg.ea);
         end
     end
 
     //Generate memory trace file
     always @(posedge `MEM_FINISHED) begin
-        if(TOP0.led[12]) begin //This is high when the program is running
+        if(led[12]) begin //This is high when the program is running
             if(`READ_ENABLE) begin
                 if(`MEM_VALID === 1'b0) begin
                     $fdisplay(mem_trace_file, "ERROR: Attempting to read from invalid address %04o", `MEM_ADDRESS);
                 end
                 else begin
-                    if(TOP0.bus.read_type === `DATA_READ) begin
+                    if(bus.read_type === `DATA_READ) begin
                         $fdisplay(mem_trace_file, "DR %04o %04o %04o", `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);
                     end
                     else begin
@@ -184,7 +185,7 @@ module simulation_tb ();
                     end
                 end
             end
-            else if(TOP0.bus.write_enable) begin
+            else if(bus.write_enable) begin
                 $fdisplay(mem_trace_file, "DW %04o %04o %04o", `MEM_ADDRESS, `MEM_WRITE_DATA, `MEM_DATA);
             end
             else $display(mem_trace_file, "Neither read nor write");
@@ -195,16 +196,16 @@ module simulation_tb ();
     always_comb begin
         if (CPU_State === JMS_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Subroutine, Result: Taken",
-                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea + 1);
+                      bus.curr_reg.pc, bus.curr_reg.ea + 1);
         end
         if (CPU_State === JMP_1) begin
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
-                      TOP0.bus.curr_reg.pc, TOP0.bus.curr_reg.ea);
+                      bus.curr_reg.pc, bus.curr_reg.ea);
         end
                     
         // If microcoded group2 or ISZ, record current PC to temp and set flag              
         if ((CPU_State === MIC_2) || (CPU_State === ISZ_1)) begin 
-            pc_temp = TOP0.bus.curr_reg.pc;
+            pc_temp = bus.curr_reg.pc;
             if( (`IR_REG === `MICRO_INSTRUCTION_OSR) ) cond_skip_flag = 0;
             else cond_skip_flag = 1;
         end 
@@ -214,7 +215,7 @@ module simulation_tb ();
             if(`IR_REG === `MICRO_INSTRUCTION_SKP) 
                 $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Unconditional, Result: Taken",
                           pc_temp, pc_temp + 1);
-            else if ((TOP0.bus.curr_reg.pc - pc_temp) !== 0) 
+            else if ((bus.curr_reg.pc - pc_temp) !== 0) 
             $fdisplay(branch_file, "Current PC: %04o, Target: %04o, Type: Conditional, Result: Taken",
                       pc_temp, pc_temp + 1);
             else
@@ -292,8 +293,8 @@ module simulation_tb ();
 		$fdisplay(file, "-------    --------");
 
 		for(int i = 0; i < `PAGES * `WORDS_PER_PAGE; i++) begin
-			if(TOP0.MEM0.memory[i].valid === 1'b1) begin
-				$fdisplay(file, "%04o        %04o", i, TOP0.MEM0.memory[i].data);
+			if(bus.memory[i].valid === 1'b1) begin
+				$fdisplay(file, "%04o        %04o", i, bus.memory[i].data);
 			end //if
 		end //for
 
