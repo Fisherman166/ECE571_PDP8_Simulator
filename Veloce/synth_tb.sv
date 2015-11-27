@@ -51,7 +51,7 @@ initial begin
      
      
      // Load test file to memory
-     $readmemb("class3a.txt", mem_image);
+     $readmemh("init.mem", mem_image);
      
      
      // Set program counter to 0
@@ -62,6 +62,7 @@ initial begin
      
      // Copy memory image to PDP8
      for(m = 0; m < 4096; m++) begin 
+	  		 if(mem_image[m] == 0) continue;
           repeat(10) @ (negedge clk); sw[11:0] = mem_image[m];
           repeat(10) @ (negedge clk); Deposit = 1;
           repeat(10) @ (negedge clk); Deposit = 0;
@@ -80,8 +81,8 @@ end
     
 // When program completes
 always @(negedge led[12]) begin
-     $writememb("mem_out.txt", TOP0.MEM0.memory);
-    // $finish();
+     $writememh("mem_out.txt", TOP0.MEM0.memory);
+     $finish();
 end  
 
 endmodule
