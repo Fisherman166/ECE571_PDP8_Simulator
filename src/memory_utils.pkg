@@ -16,7 +16,7 @@ package memory_utils;
 
 	typedef logic [11:0] word;
 
-	typedef struct packed {
+	typedef struct {
 		word data;
 		logic valid;
 	} memory_element;
