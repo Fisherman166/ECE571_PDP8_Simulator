@@ -1,9 +1,6 @@
 // Transactor for PDP8 Project and Veloce Emulator
 // Jonathan Waldrip / Sean Koppenhafer
-<<<<<<< HEAD
 //
-=======
->>>>>>> origin/master
 
 `include "CPU_Definitions.pkg"
 `include "memory_utils.pkg"
