@@ -84,7 +84,7 @@ module simulation_tb ();
     logic        cond_skip_flag = 0;
     logic [11:0] read_data ;  
     logic        mem_finished ;		  
-    memory_element [`PAGES * `WORDS_PER_PAGE] memory;    		  
+    memory_element  memory[`PAGES * `WORDS_PER_PAGE];    		  
     PDP8_Registers_t curr_reg  ;   		  
     Controller_states_t Curr_State;		  
     logic [11:0] address;      		  
@@ -114,7 +114,7 @@ module simulation_tb ();
         $fclose(mem_trace_file);
         $fclose(reg_file);
         $fclose(branch_file);
-        //$finish();
+        $finish();
     end
 
     //Print contents of all registers after each instruction

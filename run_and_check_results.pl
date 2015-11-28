@@ -65,7 +65,7 @@ if(defined $compile_sv) {
 ## The real script starts here
 ##
 my $obj_file = &run_assembler($input_filename);
-my $sv_return = system("vsim -c simulation_tb -g INIT_MEM_FILENAME=$obj_file");
+my $sv_return = system("vsim -c -do \"run -all\" simulation_tb -g INIT_MEM_FILENAME=$obj_file");
 die "Sv run failed.\n" unless $sv_return == 0;
 
 my $c_diff = 0;
