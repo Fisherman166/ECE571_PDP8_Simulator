@@ -3,6 +3,7 @@
 
 `ifndef CPU_DEF_PKG
 `define CPU_DEF_PKG
+  
 
 package CPU_Definitions;
 
@@ -224,7 +225,7 @@ interface main_bus;
      logic        write_enable ;   // 1 - write write_data to address on next active clock edge.
      logic        read_enable  ;   // 1 - start read of RAM at address on next active clock edge
      logic        read_type    ;   // Data read or instruction fetch
-	memory_element [`PAGES * `WORDS_PER_PAGE] memory;
+	memory_element [`PAGES * `WORDS_PER_PAGE] memory  ;
      
      // CPU Controller
      logic skip                 ;  // skip instruction if apporopriate	

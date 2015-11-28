@@ -28,7 +28,7 @@ always_ff @(posedge clock, negedge resetN)
 // Next state logic     
 always_comb begin: Next_State_Logic
      Next_State = bus.Curr_State;                     // Default to stay in current state
-     unique case (bus.Curr_State)
+     case (bus.Curr_State)
           REG_INIT: Next_State = CPU_IDLE;
       
           CPU_IDLE: Next_State = 
@@ -154,7 +154,9 @@ always_comb begin: Next_State_Logic
                          Next_State = MIC_9;
           MIC_9:    Next_State = CPU_IDLE; 
 
-          HALT :    Next_State = CPU_IDLE;     
+          HALT :    Next_State = CPU_IDLE;
+
+          default:  Next_State = CPU_IDLE;
           
      endcase     
 end: Next_State_Logic
@@ -400,7 +402,9 @@ always_comb begin: Output_Logic
           HALT :    begin
                          bus.halt = 1; 
                          bus.CPU_idle = 1;
-                    end               
+                    end   
+
+          default:  begin end				
                     
      endcase
 end: Output_Logic

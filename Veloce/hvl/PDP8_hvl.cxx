@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#define WORD_MASK o7777
+#define WORD_MASK 07777
 #define MEM_SIZE 4096
 
 FILE* init_mem_file;
@@ -63,7 +63,7 @@ int init_tracefiles() {
 }
 
 int init_temp_mem() {
-    const char* init_mem_filename = "init.obj";
+    const char* init_mem_filename = "init_mem.obj";
     const uint8_t data_mask = 0x3F;
     const uint8_t address_mask = 0x40;
     const uint8_t high_shift = 6;
@@ -78,8 +78,8 @@ int init_temp_mem() {
     }
 
     for(;;) {
-        return1 = fscanf(init_mem_file, "%3" SCNo16, &high_byte);
-        return2 = fscanf(init_mem_file, "%3" SCNo16, &low_byte);
+        return1 = fscanf(init_mem_file, "%3", "o", &high_byte);
+        return2 = fscanf(init_mem_file, "%3", "o", &low_byte);
 
         if(return1 == EOF || return2 == EOF) break;
         word_value = ((high_byte & data_mask) << high_shift) | (low_byte & data_mask);
@@ -111,49 +111,49 @@ int init_temp_mem() {
 }
 
 // Asserts done when all memory locations have been written to in memory
-int send_word_to_hdl(svBitVecVal* address, svBitVecVal* data, svBitVecVal* done) {
+int send_word_to_hdl(svBitVecVal* mem_address, svBitVecVal* mem_data, svBitVecVal* mem_done) {
     static uint16_t mem_index = 0;
 
-    if(mem_index == max_index) *done = 1;
+    if(mem_index == max_index) *mem_done = 1;
     else {
-        *done = 0;
-        *address = temp_memory[mem_index].address & WORD_MASK;
-        *data = temp_memory[mem_index].data & WORD_MASK;
+        *mem_done = 0;
+        *mem_address = temp_memory[mem_index].address & WORD_MASK;
+        *mem_data = temp_memory[mem_index].data & WORD_MASK;
         mem_index++;
     }
 
     return 0;
 }
 
-int write_mem_trace(svLogicVecVal* type, svLogicVecVal* address, 
+int write_mem_trace(svLogicVecVal* mem_type, svLogicVecVal* address, 
                     svLogicVecVal* data_bus, svLogicVecVal* data_mem) {
     const uint8_t DR_value = 0;
     const uint8_t IF_value = 1;
     const uint8_t DW_value = 2;
-    char type_text[2];
+    char mem_type_text[2];
 
-    if(type->bval) {
-        print("MEM_TRACE ERROR: type is X or Z\n");
+    if(mem_type->bval) {
+        printf("MEM_TRACE ERROR: mem_type is X or Z\n");
         exit(-6);
     }
     if(address->bval) {
-        print("MEM_TRACE ERROR: address is X or Z\n");
+        printf("MEM_TRACE ERROR: address is X or Z\n");
         exit(-7);
     }
     if(data_bus->bval) {
-        print("MEM_TRACE ERROR: data_bus is X or Z\n");
+        printf("MEM_TRACE ERROR: data_bus is X or Z\n");
         exit(-8);
     }
     if(data_mem->bval) {
-        print("MEM_TRACE ERROR: data_mem is X or Z\n");
+        printf("MEM_TRACE ERROR: data_mem is X or Z\n");
         exit(-9);
     }
 
-    if(type->aval == DR_value) strcpy(type_text, "DR");
-    if(type->aval == IF_value) strcpy(type_text, "IF");
-    if(type->aval == DW_value) strcpy(type_text, "DW");
+    if(mem_type->aval == DR_value) strcpy(mem_type_text, "DR");
+    if(mem_type->aval == IF_value) strcpy(mem_type_text, "IF");
+    if(mem_type->aval == DW_value) strcpy(mem_type_text, "DW");
 
-    fprintf(memory_trace_file, "%s %04o %04o %04o\n", type_text, 
+    fprintf(memory_trace_file, "%s %04o %04o %04o\n", mem_type_text, 
             address->aval, data_bus->aval, data_mem->aval);
     return 0;
 }

@@ -18,9 +18,7 @@ endif
 
 compile:
 ifeq ($(MODE),puresim)
-	vlog -sv -mfcu ../src/memory_utils.pkg ../src/CPU_Definitions.pkg ../src/Controller.sv ../src/Divide.sv \ 
-	../src/CPU.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv \
-	../src/Multiply.sv hdl/veloce_top.sv -dpiheader tbxbindings.h +incdir+../src/
+	vlog -sv -mfcu ../src/memory_utils.pkg ../src/CPU_Definitions.pkg ../src/Controller.sv ../src/Divide.sv ../src/CPU.sv ../src/EAE.sv ../src/Front_Panel.sv ../src/memory_controller.sv ../src/micro_instruction_decoder.sv ../src/Multiply.sv hdl/veloce_top.sv -dpiheader tbxbindings.h +incdir+../src/
 	vlog hvl/PDP8_hvl.cxx
 else
 	velanalyze ../src/memory_utils.pkg ../src/CPU_Definitions.pkg ../src/Controller.sv ../src/Divide.sv \ 
