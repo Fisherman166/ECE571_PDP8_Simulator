@@ -1,0 +1,155 @@
+VERSION 10 1 1
+SYM_BEGIN 53
+41 16
+close_tracefiles
+0 16
+PDP8_Registers_t
+29 9
+DT_ctrl_t
+4 2
+ir
+44 15
+init_tracefiles
+3 2
+lk
+13 9
+MQ_ctrl_t
+7 2
+mb
+20 26
+CPU_Definitions::MB_ctrl_t
+5 2
+mq
+48 15
+write_mem_trace
+32 36
+CPU_Definitions::Controller_states_t
+39 4
+word
+40 18
+memory_utils::word
+17 9
+IR_ctrl_t
+42 13
+veloce_top.sv
+6 2
+pc
+52 8
+data_mem
+31 19
+Controller_states_t
+34 28
+memory_utils::memory_element
+49 8
+mem_type
+18 26
+CPU_Definitions::IR_ctrl_t
+50 13
+trace_address
+35 4
+data
+26 26
+CPU_Definitions::AD_ctrl_t
+33 14
+memory_element
+16 26
+CPU_Definitions::PC_ctrl_t
+43 13
+init_temp_mem
+24 26
+CPU_Definitions::WD_ctrl_t
+38 20
+memory_utils::states
+47 4
+done
+10 26
+CPU_Definitions::AC_ctrl_t
+22 26
+CPU_Definitions::EA_ctrl_t
+1 33
+CPU_Definitions::PDP8_Registers_t
+12 26
+CPU_Definitions::LK_ctrl_t
+37 6
+states
+36 5
+valid
+11 9
+LK_ctrl_t
+45 16
+send_word_to_hdl
+28 26
+CPU_Definitions::DO_ctrl_t
+21 9
+EA_ctrl_t
+25 9
+AD_ctrl_t
+27 9
+DO_ctrl_t
+2 2
+ac
+23 9
+WD_ctrl_t
+30 26
+CPU_Definitions::DT_ctrl_t
+9 9
+AC_ctrl_t
+46 7
+address
+14 26
+CPU_Definitions::MQ_ctrl_t
+19 9
+MB_ctrl_t
+8 2
+ea
+15 9
+PC_ctrl_t
+51 8
+data_bus
+SYM_END
+TYPEDEF_BEGIN 16
+0 429 
+0 -1 1 0x0 1 0 2 2 0 24 8 73 7 7 0 0 0x2 1 7 2 61 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 3 60 0x0 1 0 10 0 1 8 8 1 0 0 0 0 1 0x1 0 0 0 -1 4 48 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 5 36 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 6 24 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 7 12 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 8 0 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 0x3 0x1 1 0  
+9 48 
+9 -1 10 0x0 1 0 10 0 -1 8 9 4 0 3 3 0 4 0x1 2 0  
+11 49 
+11 -1 12 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 3 0  
+13 49 
+13 -1 14 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 4 0  
+15 49 
+15 -1 16 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 5 0  
+17 49 
+17 -1 18 0x0 1 0 10 0 -1 8 9 2 0 1 1 0 2 0x1 6 0  
+19 49 
+19 -1 20 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 7 0  
+21 49 
+21 -1 22 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 8 0  
+23 49 
+23 -1 24 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 9 0  
+25 50 
+25 -1 26 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 10 0  
+27 50 
+27 -1 28 0x0 1 0 10 0 -1 8 9 3 0 2 2 0 3 0x1 11 0  
+29 49 
+29 -1 30 0x0 1 0 10 0 1 8 8 1 0 0 0 0 1 0x1 12 0  
+31 50 
+31 -1 32 0x0 1 0 10 0 -1 8 9 6 0 5 5 0 6 0x1 13 0  
+33 162 
+33 -1 34 0x0 1 0 2 2 0 8 8 13 2 2 0 0 0x2 1 2 35 1 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 0 0 0 -1 36 0 0x0 1 0 10 0 1 8 8 1 0 0 0 0 1 0x1 0 0 0 -1 0x3 0x1 14 0  
+37 50 
+37 -1 38 0x0 1 0 10 0 -1 8 9 4 0 3 3 0 4 0x1 15 0  
+39 54 
+39 -1 40 0x0 1 0 10 0 -1 8 9 12 0 11 11 0 12 0x1 16 0  
+TYPEDEF_END 
+TF_BEGIN 5
+41 69 
+41 -1 -1 5 0 1 0 0x0 1 0 12 0 -1 4 16427 32 0 31 31 0 32 0x1 1 42 72  
+43 69 
+43 -1 -1 5 0 1 0 0x0 1 0 12 0 -1 4 16427 32 0 31 31 0 32 0x1 1 42 68  
+44 69 
+44 -1 -1 5 0 1 0 0x0 1 0 12 0 -1 4 16427 32 0 31 31 0 32 0x1 1 42 67  
+45 155 
+45 -1 -1 5 3 1 0 0x0 1 0 12 0 -1 4 16427 32 0 31 31 0 32 0x1 0 46 0x0 1 1 16 0x1 2 0 35 0x0 1 1 16 0x1 2 0 47 0x0 1 0 10 0 1 8 8 1 0 0 0 0 1 0x1 2 1 42 69  
+48 186 
+48 -1 -1 5 4 1 0 0x0 1 0 12 0 -1 4 16427 32 0 31 31 0 32 0x1 0 49 0x0 1 0 10 0 -1 8 16395 32 0 31 31 0 32 0x1 1 0 50 0x0 1 1 16 0x1 1 0 51 0x0 1 1 16 0x1 1 0 52 0x0 1 1 16 0x1 1 1 42 70  
+TF_END 
