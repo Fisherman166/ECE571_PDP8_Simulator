@@ -13,7 +13,7 @@ FILE* branch_trace_file;
 FILE* valid_memory_file;
 FILE* memory_trace_file;
 
-//For temp memory
+//For temp memory 
 typedef struct {
     uint16_t address;
     uint16_t data;
@@ -133,11 +133,7 @@ int write_mem_trace(svLogicVecVal* mem_type, svLogicVecVal* address,
     char mem_type_text[2];
 
     if(mem_type->bval) {
-<<<<<<< HEAD
         printf("MEM_TRACE ERROR: mem_type is X or Z\n");
-=======
-        print("MEM_TRACE ERROR: mem_type is X or Z\n");
->>>>>>> origin/master
         exit(-6);
     }
     if(address->bval) {
@@ -170,3 +166,5 @@ int close_tracefiles() {
 
     return 0;
 }
+
+//

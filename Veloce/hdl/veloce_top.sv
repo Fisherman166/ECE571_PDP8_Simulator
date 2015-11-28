@@ -1,6 +1,5 @@
 // Transactor for PDP8 Project and Veloce Emulator
 // Jonathan Waldrip / Sean Koppenhafer
-//
 
 `include "CPU_Definitions.pkg"
 `include "memory_utils.pkg"
@@ -29,15 +28,9 @@ logic        btnc             ;
 logic        btnu             ;
 logic        btnr             ;
 // Signals for send_word_to_HDL
-<<<<<<< HEAD
 word         mem_address      ;
 word         mem_data         ;
 logic        mem_done         ;
-=======
-word         address          ;
-word         data             ;
-logic        done             ;
->>>>>>> origin/master
 // Signal for write_mem_trace
 integer      mem_type         ;
  
@@ -72,11 +65,7 @@ end
 //DPI import functions
 import "DPI-C" task init_tracefiles();
 import "DPI-C" task init_temp_mem();
-<<<<<<< HEAD
 import "DPI-C" task send_word_to_hdl(output word mem_address, output word mem_data, output logic mem_done);
-=======
-import "DPI-C" task send_word_to_hdl(output word address, output word data, output logic done);
->>>>>>> origin/master
 import "DPI-C" task write_mem_trace(input integer mem_type, input word trace_address, 
                                     input word data_bus, input word data_mem);
 import "DPI-C" task close_tracefiles();
@@ -93,15 +82,9 @@ initial begin
      repeat(10) @(negedge clk); Load_PC(0); 
      
      // Copy memory image to PDP8
-<<<<<<< HEAD
      while (mem_done != 1) begin
           send_word_to_hdl(mem_address, mem_data, mem_done);
           Deposit(mem_data);
-=======
-     while (done != 1) begin
-          send_word_to_hdl(address, data, done);
-          Deposit(data);
->>>>>>> origin/master
      end
      
      // Set program counter to 200
@@ -147,3 +130,5 @@ endtask
      
 	
 endmodule
+
+//
