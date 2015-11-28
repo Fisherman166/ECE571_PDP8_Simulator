@@ -125,15 +125,15 @@ int send_word_to_hdl(svBitVecVal* address, svBitVecVal* data, svBitVecVal* done)
     return 0;
 }
 
-int write_mem_trace(svLogicVecVal* type, svLogicVecVal* address, 
+int write_mem_trace(svLogicVecVal* mem_type, svLogicVecVal* address, 
                     svLogicVecVal* data_bus, svLogicVecVal* data_mem) {
     const uint8_t DR_value = 0;
     const uint8_t IF_value = 1;
     const uint8_t DW_value = 2;
-    char type_text[2];
+    char mem_type_text[2];
 
-    if(type->bval) {
-        print("MEM_TRACE ERROR: type is X or Z\n");
+    if(mem_type->bval) {
+        print("MEM_TRACE ERROR: mem_type is X or Z\n");
         exit(-6);
     }
     if(address->bval) {
@@ -149,11 +149,11 @@ int write_mem_trace(svLogicVecVal* type, svLogicVecVal* address,
         exit(-9);
     }
 
-    if(type->aval == DR_value) strcpy(type_text, "DR");
-    if(type->aval == IF_value) strcpy(type_text, "IF");
-    if(type->aval == DW_value) strcpy(type_text, "DW");
+    if(mem_type->aval == DR_value) strcpy(mem_type_text, "DR");
+    if(mem_type->aval == IF_value) strcpy(mem_type_text, "IF");
+    if(mem_type->aval == DW_value) strcpy(mem_type_text, "DW");
 
-    fprintf(memory_trace_file, "%s %04o %04o %04o\n", type_text, 
+    fprintf(memory_trace_file, "%s %04o %04o %04o\n", mem_type_text, 
             address->aval, data_bus->aval, data_mem->aval);
     return 0;
 }

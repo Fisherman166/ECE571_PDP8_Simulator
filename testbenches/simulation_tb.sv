@@ -82,7 +82,7 @@ module simulation_tb ();
     Controller_states_t CPU_State;
     logic [11:0] pc_temp;
     logic        cond_skip_flag = 0;
-    logic        read_data ;  
+    logic [11:0] read_data ;  
     logic        mem_finished ;		  
     memory_element [`PAGES * `WORDS_PER_PAGE] memory;    		  
     PDP8_Registers_t curr_reg  ;   		  
