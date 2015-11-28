@@ -13,6 +13,7 @@ my $compile_c = undef;
 my $run_c = undef;
 my $compile_vhdl = undef;
 my $run_vhdl = undef;
+my $run_all = undef;
 my $print_help = undef;
 
 my $pwd = getcwd;
@@ -26,6 +27,7 @@ GetOptions(
     "sv",       \$compile_sv,
     "vhdl",     \$compile_vhdl,
     "runvhdl",  \$run_vhdl,
+    "all",      \$run_all,
     "h",        \$print_help,
 );
 
@@ -37,6 +39,7 @@ if(defined $print_help) {
     print "-sv      Compile SystemVerilog simulator\n";
     print "-vhdl    Compile vhdl simulator\n";
     print "-runvhdl Run vhdl simulator\n";
+    print "-all     Run all tests\n";
     print "-h       Print help information\n";
     exit(0);
 }
@@ -62,33 +65,78 @@ if(defined $compile_sv) {
     die "Failed to compile SystemVerilog simulator\n" unless (!$return);
 }
 
-## The real script starts here
+if(defined $run_all) {
+    my @simple_tests = glob "$pwd/test_cases/*.as";
+    my @nonmicro_tests = glob("$pwd/test_cases/non_micro_tests/*.as");
+    my @micro_tests = glob("$pwd/test_cases/micro_tests/*.as");
+
+    #print "Simple: @simple_tests\n\n";
+    #print "Nonmicro: @nonmicro_tests\n\n";
+    #print "Micro: @micro_tests\n\n";
+    #exit(0);
+
+    my $simple_return = &iterate_over_tests(@simple_tests);
+    my $nonmicro_return = &iterate_over_tests(@nonmicro_tests);
+    my $micro_return = &iterate_over_tests(@micro_tests);
+    my $combined_return = $simple_return + $nonmicro_return + $micro_return;
+    if($combined_return) {
+        print "FAIL: At least one test failed.\n";
+        print "Simple test failed\n" if $simple_return;
+        print "Nonmicro test failed\n" if $nonmicro_return;
+        print "Micro test failed\n" if $micro_return;
+        exit($combined_return);
+    }
+    else {
+        print "PASS: All tests passed.\n";
+        exit(0);
+    }
+}
+
+## With no options run this
 ##
-my $obj_file = &run_assembler($input_filename);
-my $sv_return = system("vsim -c -do \"run -all\" simulation_tb -g INIT_MEM_FILENAME=$obj_file");
-die "Sv run failed.\n" unless $sv_return == 0;
-
-my $c_diff = 0;
-my $vhdl_diff = 0;
-if(defined $run_c) {
-    my $tracename = "memory_trace_golden.txt";
-    my $PDP_name = "PDP8_sim";
-    my $C_return = system("./$C_PDP_path/$PDP_name $obj_file $tracename");
-    die "C PDP failed to run. Exiting.\n" unless $C_return == 0;
-    $c_diff = &diff_results();
-}
-
-if(defined $run_vhdl) {
-    chdir "$pwd/$VHDL_path";
-    my $VHDL_return = system("vsim -c -g data_file=$obj_file");
-    die "VHDL failed to run. Exiting.\n" unless $VHDL_return == 0;
-    $vhdl_diff = &diff_results();
-}
-
-exit($c_diff + $vhdl_diff);
+my $normal_return = &compile_and_run($input_filename);
+exit($normal_return);
 
 ## Functions start here
 ##
+sub iterate_over_tests() {
+    my @tests = @_;
+    my $return_code = 0;
+
+    foreach my $test (@tests) {
+        $return_code += &compile_and_run($test);
+        print "Test $test failed.\n" unless $return_code == 0;
+    }
+
+    return $return_code;
+}
+
+sub compile_and_run() {
+    my $obj_filename = shift;
+    my $obj_file = &run_assembler($obj_filename);
+    my $sv_return = system("vsim -c -do \"run -all\" simulation_tb -g INIT_MEM_FILENAME=$obj_file");
+    die "Sv run failed.\n" unless $sv_return == 0;
+
+    my $c_diff = 0;
+    my $vhdl_diff = 0;
+    if(defined $run_c) {
+        my $tracename = "memory_trace_golden.txt";
+        my $PDP_name = "PDP8_sim";
+        my $C_return = system("./$C_PDP_path/$PDP_name $obj_file $tracename");
+        die "C PDP failed to run. Exiting.\n" unless $C_return == 0;
+        $c_diff = &diff_results();
+    }
+
+    if(defined $run_vhdl) {
+        chdir "$pwd/$VHDL_path";
+        my $VHDL_return = system("vsim -c -g data_file=$obj_file");
+        die "VHDL failed to run. Exiting.\n" unless $VHDL_return == 0;
+        $vhdl_diff = &diff_results();
+    }
+
+    return ($c_diff + $vhdl_diff);
+}
+
 sub run_assembler() {
     my $filename = shift;
 
