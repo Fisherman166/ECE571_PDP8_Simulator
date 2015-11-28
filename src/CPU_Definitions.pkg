@@ -225,11 +225,7 @@ interface main_bus;
      logic        write_enable ;   // 1 - write write_data to address on next active clock edge.
      logic        read_enable  ;   // 1 - start read of RAM at address on next active clock edge
      logic        read_type    ;   // Data read or instruction fetch
-<<<<<<< HEAD
 	memory_element [`PAGES * `WORDS_PER_PAGE] memory  ;
-=======
-	memory_element memory [`PAGES * `WORDS_PER_PAGE] ;
->>>>>>> origin/master
      
      // CPU Controller
      logic skip                 ;  // skip instruction if apporopriate	
@@ -388,17 +384,7 @@ interface main_bus;
                     input  linkout      ,
                     input  halt         ,
                     input  CPU_idle     );
-				
-//     modport top   (output  read_data    ,
-//                    output  mem_finished ,
-//				  output  memory       ,
-//				  output  curr_reg     ,
-//				  output  Curr_State   ,
-//                    output  address      ,      
-//                    output  write_data   ,  
-//                    output  write_enable ,
-//                    output  read_enable  ,
-//                    output  read_type    );
+
 				  
 endinterface
 
