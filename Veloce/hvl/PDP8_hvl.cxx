@@ -30,7 +30,7 @@ int send_word_to_hdl(svBitVecVal*, svBitVecVal*, svBitVecVal*);
 int write_mem_trace(const svLogicVecVal*, const svLogicVecVal*, 
                     const svLogicVecVal*, const svLogicVecVal*);
 int write_branch_trace(const svLogicVecVal*, const svLogicVecVal*,
-                       const svBitVecVal*, const svBit*);
+                       const svBitVecVal*, svBit);
 int write_valid_memory(const svLogicVecVal*, const svLogicVecVal*);
 int write_opcode(const svLogicVecVal*, const svLogicVecVal*,
                  const svLogic*, const svLogicVecVal*,
@@ -178,7 +178,7 @@ int write_mem_trace(const svLogicVecVal* mem_type, const svLogicVecVal* address,
 }
 
 int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* target_pc,
-                       const svBitVecVal* branch_type, const svBit* taken) {
+                       const svBitVecVal* branch_type, svBit taken) {
     const uint8_t type_unconditional = 0;
     const uint8_t type_conditional = 1;
     const uint8_t type_subroutine = 2;
@@ -200,7 +200,7 @@ int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* tar
     else if(*branch_type == type_subroutine) strcpy(branch_type_text, "Subroutine");
     else strcpy(branch_type_text, "Error");
 
-    if(*taken == taken_no) strcpy(taken_text, "Not Taken");
+    if(taken == taken_no) strcpy(taken_text, "Not Taken");
     else strcpy(taken_text, "Taken");
 
     fprintf(branch_trace_file, "Current PC: %04o, Target: %04o, Type: %s, Result: %s\n",
