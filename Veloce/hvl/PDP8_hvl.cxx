@@ -235,10 +235,10 @@ int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
         printf("OPCODE ERROR: ac_reg is X or Z\n");
         exit(-15);
     }
-    if(link->bval) {
-        printf("OPCODE ERROR: link is X or Z\n");
-        exit(-16);
-    }
+    //if(link->bval) {
+    //    printf("OPCODE ERROR: link is X or Z\n");
+    //    exit(-16);
+    //}
     if(mb_reg->bval) {
         printf("OPCODE ERROR: mb_reg is X or Z\n");
         exit(-17);
@@ -253,7 +253,7 @@ int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
     }
 
     fprintf(opcode_file, "Opcode: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
-            ir_reg->aval, ac_reg->aval, link->aval, mb_reg->aval, pc_reg->aval, ea_reg->aval);
+            ir_reg->aval, ac_reg->aval, link, mb_reg->aval, pc_reg->aval, ea_reg->aval);
 
     return 0;
 }

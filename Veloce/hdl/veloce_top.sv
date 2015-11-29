@@ -81,9 +81,9 @@ import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace
 import "DPI-C" task write_branch_trace(input word current_pc, input word target_pc, 
                                        input bit [1:0] branch_type, input bit taken);
 import "DPI-C" task write_valid_memory(input word address, input word data);
-import "DPI-C" task write_opcode(input logic [2:0] ir_reg, input word ac_reg,
-                                 input logic link, input word mb_reg,
-                                 input word pc_reg, input word ea_reg);
+//import "DPI-C" task int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
+//                                     const svLogic* link, const svLogicVecVal* mb_reg,
+//                                     const svLogicVecVal* pc_reg, const svLogicVecVal* ea_reg)
 import "DPI-C" task close_tracefiles();
 
 initial begin
@@ -136,21 +136,21 @@ end
 
 // Generates branch trace file
 always_comb begin
-     if (bus.CPU_State === JMS_1)
+     if (bus.Curr_State === JMS_1)
           write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea + 1, Subroutine, Taken); 
-     if (bus.CPU_State === JMP_1)
+     if (bus.Curr_State === JMP_1)
           write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea,  Unconditional, Taken); 
-     if (bus.CPU_State === MIC_2 || bus.CPU_State === ISZ_1) begin
+     if (bus.Curr_State === MIC_2 || bus.Curr_State === ISZ_1) begin
           pc_temp = bus.curr_reg.pc;
           if (bus.curr_reg.ir[2]) cond_skip_flag = 0; // for OSR instruction
           else cond_skip_flag = 1;
      end     
      // If returned to idle state and flag is 1, print trace info
-     else if (((bus.CPU_State === CPU_IDLE) || (bus.CPU_State === HALT))  && cond_skip_flag && led[12]) begin
+     else if (((bus.Curr_State === CPU_IDLE) || (bus.Curr_State === HALT))  && cond_skip_flag && led[12]) begin
           cond_skip_flag = 0;
           if(bus.curr_reg.ir === 12'o7410) // skip instruction
                write_branch_trace(pc_temp, pc_temp + 1,  Unconditional, Taken); 
-          else if ((curr_reg.pc - pc_temp) !== 0)
+          else if ((bus.curr_reg.pc - pc_temp) !== 0)
                write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Taken); 
           else
                write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Not_Taken); 
