@@ -7,7 +7,7 @@
 
 #define WORD_MASK 07777
 #define MEM_SIZE 4096
-#define FILL_DEBUG
+//#define FILL_DEBUG
 
 FILE* init_mem_file;
 FILE* opcode_file;
@@ -61,6 +61,7 @@ int init_tracefiles() {
 
     fprintf(memory_trace_file, "OP Addr Bus  Mem \n");
     fprintf(memory_trace_file, "-- ---- ---- ----\n");
+    printf("Done opening trace files\n");
 
     return 0;
 }
@@ -110,6 +111,7 @@ int init_temp_mem() {
             #endif
         }
     }
+    printf("Done filling temp memory\n");
 
     fclose(init_mem_file);
     return 0;
@@ -119,7 +121,10 @@ int init_temp_mem() {
 int send_word_to_hdl(svBitVecVal* mem_address, svBitVecVal* mem_data, svBit* mem_done) {
     static uint16_t mem_index = 0;
 
-    if(mem_index == max_index) *mem_done = 1;
+    if(mem_index == max_index){
+        *mem_done = 1;
+        printf("Done sending words from temp memory to memory\n");
+    }
     else {
         *mem_done = 0;
         *mem_address = temp_memory[mem_index].address & WORD_MASK;

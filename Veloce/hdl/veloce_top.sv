@@ -73,7 +73,6 @@ import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace
 import "DPI-C" task close_tracefiles();
      
 initial begin
-
      // Initialize Front Panel Buttons to Inactive
      btnc  = 0;
      btnu  = 0;     
@@ -82,15 +81,11 @@ initial begin
      deposit_btn = 0;
      
      // Initalize files
-     $display("before reset");
      @(posedge rst); init_tracefiles();
-     $display("after reset");
      
      // Initialize temp memory image
      repeat(10) @(negedge clk); init_temp_mem();
-     $display("before init_temp_mem");
      repeat(10) @(negedge clk); Load_PC(12'o0200); 
-     $display("PC is %o", bus.curr_reg.pc);
      
      // Copy memory image to PDP8
      while (!mem_done) begin
@@ -98,7 +93,6 @@ initial begin
           Load_PC(mem_address);
           repeat(30) @(negedge clk); Deposit(mem_data);
      end
-     $display("after init_temp_mem");
      
      // Set program counter to 200
      repeat(10) @(negedge clk); Load_PC(12'o0200); 
@@ -126,18 +120,15 @@ end
 always @(negedge led[12]) begin
     close_tracefiles();
     print_valid_memory();
-    $display("after print memory");
     $finish();
 end
  
 task Load_PC(input bit [11:0] pc);
     static word pc_value;
     $cast(pc_value, pc);
-    $display("Before PC: %o, input: %o", bus.curr_reg.pc, pc);
     repeat(10) @ (negedge clk); sw[11:0] = pc_value;
     repeat(10) @ (negedge clk); load_pc_btn = 1;
     repeat(10) @ (negedge clk); load_pc_btn = 0; 
-    $display("After PC: %o", bus.curr_reg.pc);
 endtask
 
 task Deposit(input bit [11:0] data);
@@ -157,9 +148,9 @@ endtask
 		$fdisplay(file, "-------    --------");
 
 		for(int i = 0; i < 4096; i++) begin
-			//if(bus.memory[i].valid === 1'b1) begin
+			if(bus.memory[i].valid === 1'b1) begin
 				$fdisplay(file, "%04o        %04o", i, bus.memory[i].data);
-			//end //if
+			end //if
 		end //for
 
         $fclose(file);
