@@ -72,6 +72,7 @@ import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace
                                     input word data_bus, input word data_mem);
 import "DPI-C" task write_branch_trace(input word current_pc, input word target_pc, 
                                        input bit [1:0] branch_type, input bit taken);
+import "DPI-C" task write_valid_memory(input word address, input word data);
 import "DPI-C" task close_tracefiles();
 
 initial begin

@@ -31,6 +31,7 @@ int write_mem_trace(const svLogicVecVal*, const svLogicVecVal*,
                     const svLogicVecVal*, const svLogicVecVal*);
 int write_branch_trace(const svLogicVecVal*, const svLogicVecVal*,
                        const svBitVecVal*, const svBit*);
+int write_valid_memory(const svLogicVecVal*, const svLogicVecVal*);
 int close_tracefiles();
 
 //*******************************Start of functions*******************************
@@ -204,7 +205,22 @@ int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* tar
 
     return 0;
 }
+
+int write_valid_memory(const svLogicVecVal* address, const svLogicVecVal* data) {
+    if(address->bval) {
+        printf("VALID MEMORY ERROR: address is X or Z\n");
+        exit(-12);
+    }
+    if(data->bval) {
+        printf("VALID MEMORY ERROR: data is X or Z\n");
+        exit(-13);
+    }
     
+    fprintf(valid_memory_file, "%04o        %04o\n", address->aval, data->aval);
+
+    return 0;
+}
+
 int close_tracefiles() {
     fclose(opcode_file);
     fclose(branch_trace_file);
