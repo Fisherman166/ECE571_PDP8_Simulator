@@ -28,11 +28,11 @@ logic        btnc             ;
 logic        btnu             ;
 logic        btnr             ;
 // Signals for send_word_to_HDL
-word         mem_address      ;
-word         mem_data         ;
-logic        mem_done         ;
+bit [11:0]   mem_address      ;
+bit [11:0]   mem_data         ;
+bit          mem_done = 0     ;
 // Signal for write_mem_trace
-integer      mem_type         ;
+logic [1:0]  mem_type         ;
  
 /********************************* Instatiate Modules **********************************/
 
@@ -65,30 +65,37 @@ end
 //DPI import functions
 import "DPI-C" task init_tracefiles();
 import "DPI-C" task init_temp_mem();
-import "DPI-C" task send_word_to_hdl(output word mem_address, output word mem_data, output logic mem_done);
-import "DPI-C" task write_mem_trace(input integer mem_type, input word trace_address, 
+import "DPI-C" task send_word_to_hdl(output bit [11:0] mem_address,
+                                     output bit [11:0] mem_data,
+                                     output bit mem_done);
+import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace_address, 
                                     input word data_bus, input word data_mem);
 import "DPI-C" task close_tracefiles();
      
 initial begin
      
      // Initalize files
+     $display("before reset");
      @(negedge rst); init_tracefiles();
+     $display("after reset");
      
      // Initialize temp memory image
      repeat(10) @(negedge clk); init_temp_mem();
-     
-     // Set program counter to 0
-     repeat(10) @(negedge clk); Load_PC(0); 
+     $display("before init_temp_mem");
+     repeat(10) @(negedge clk); Load_PC(12'o0200); 
      
      // Copy memory image to PDP8
-     while (mem_done != 1) begin
+     while (!mem_done) begin
           send_word_to_hdl(mem_address, mem_data, mem_done);
-          Deposit(mem_data);
+          Load_PC(mem_address);
+          repeat(30) @(negedge clk); Deposit(mem_data);
      end
+     $display("after init_temp_mem");
+     print_valid_memory();
      
      // Set program counter to 200
      repeat(10) @(negedge clk); Load_PC(12'o0200); 
+    $finish();
      
      // Run program
      repeat(10) @(negedge clk); sw[12] = 1;
@@ -97,37 +104,61 @@ initial begin
      while (led[12] == 1) begin
      @(posedge bus.mem_finished);
           if (bus.read_enable) begin
-               if (bus.Curr_State == FETCH_2) mem_type = 1;   
-               else mem_type = 0;
-          write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address]);     
+               if (bus.Curr_State == FETCH_2) mem_type = 2'b01;   
+               else mem_type = '0;
+          write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address].data);     
           end
           if (bus.write_enable) begin
-          mem_type = 2;
-          write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address]);     
+          mem_type = 2'b10;
+          write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
           end
      end
      
      // End
-     @(negedge led[12]); close_tracefiles();
-     @(negedge clk);
-     $finish;
-     
+     //@(negedge led[12]); close_tracefiles();
+     //@(negedge clk);
+     //$finish;
+end
 
+always @(negedge led[12]) begin
+    close_tracefiles();
+    $finish();
 end
  
- 
-task Load_PC(input word pc);
-    repeat(10) @ (negedge clk); sw[11:0] = pc;
+task Load_PC(input bit [11:0] pc);
+    static word pc_value;
+    $cast(pc_value, pc);
+    $display("Before PC: %o, input: %o", bus.curr_reg.pc, pc);
+    repeat(10) @ (negedge clk); sw[11:0] = pc_value;
     repeat(10) @ (negedge clk); load_pc_btn = 1;
     repeat(10) @ (negedge clk); load_pc_btn = 0; 
+    $display("After PC: %o", bus.curr_reg.pc);
 endtask
 
-task Deposit(input word data);
-    repeat(10) @ (negedge clk); sw[11:0] = data;
+task Deposit(input bit [11:0] data);
+    static word data_value;
+    $cast(data_value, data);
+    repeat(10) @ (negedge clk); sw[11:0] = data_value;
     repeat(10) @ (negedge clk); deposit_btn = 1;
     repeat(10) @ (negedge clk); deposit_btn = 0;
 endtask 
-     
+
+ function void print_valid_memory();
+        automatic integer file = $fopen("valid_memory_sv.txt", "w");
+
+            if(!file) $display ("Error opening valid_memory_sv.txt file");
+
+		$fdisplay(file, "Address    Contents");
+		$fdisplay(file, "-------    --------");
+
+		for(int i = 0; i < 4096; i++) begin
+			//if(bus.memory[i].valid === 1'b1) begin
+				$fdisplay(file, "%04o        %04o", i, bus.memory[i].data);
+			//end //if
+		end //for
+
+        $fclose(file);
+	endfunction
 	
 endmodule
 

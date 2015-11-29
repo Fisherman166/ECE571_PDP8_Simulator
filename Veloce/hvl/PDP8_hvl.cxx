@@ -3,9 +3,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define WORD_MASK 07777
 #define MEM_SIZE 4096
+#define FILL_DEBUG
 
 FILE* init_mem_file;
 FILE* opcode_file;
@@ -25,7 +27,8 @@ static uint16_t max_index = 0;
 int init_tracefiles();
 int init_temp_mem();
 int send_word_to_hdl(svBitVecVal*, svBitVecVal*, svBitVecVal*);
-int write_mem_trace(svLogicVecVal*, svLogicVecVal*, svLogicVecVal*, svLogicVecVal*);
+int write_mem_trace(const svLogicVecVal*, const svLogicVecVal*, 
+                    const svLogicVecVal*, const svLogicVecVal*);
 int close_tracefiles();
 
 int init_tracefiles() {
@@ -69,17 +72,19 @@ int init_temp_mem() {
     const uint8_t high_shift = 6;
     uint16_t address = 0;
     int return1, return2;
-    uint16_t high_byte, low_byte, word_value;
+    uint32_t high_byte, low_byte;
+    uint16_t word_value;
 
     init_mem_file = fopen(init_mem_filename, "r");
     if(init_mem_file == NULL) {
         printf("Failed to open init file %s\n", init_mem_file);
         exit(-5);
     }
+    printf("Opened init memory sucessfully\n");
 
     for(;;) {
-        return1 = fscanf(init_mem_file, "%3", "o", &high_byte);
-        return2 = fscanf(init_mem_file, "%3", "o", &low_byte);
+        return1 = fscanf(init_mem_file, "%o", &high_byte);
+        return2 = fscanf(init_mem_file, "%o", &low_byte);
 
         if(return1 == EOF || return2 == EOF) break;
         word_value = ((high_byte & data_mask) << high_shift) | (low_byte & data_mask);
@@ -111,7 +116,7 @@ int init_temp_mem() {
 }
 
 // Asserts done when all memory locations have been written to in memory
-int send_word_to_hdl(svBitVecVal* mem_address, svBitVecVal* mem_data, svBitVecVal* mem_done) {
+int send_word_to_hdl(svBitVecVal* mem_address, svBitVecVal* mem_data, svBit* mem_done) {
     static uint16_t mem_index = 0;
 
     if(mem_index == max_index) *mem_done = 1;
@@ -125,8 +130,8 @@ int send_word_to_hdl(svBitVecVal* mem_address, svBitVecVal* mem_data, svBitVecVa
     return 0;
 }
 
-int write_mem_trace(svLogicVecVal* mem_type, svLogicVecVal* address, 
-                    svLogicVecVal* data_bus, svLogicVecVal* data_mem) {
+int write_mem_trace(const svLogicVecVal* mem_type, const svLogicVecVal* address, 
+                    const svLogicVecVal* data_bus, const svLogicVecVal* data_mem) {
     const uint8_t DR_value = 0;
     const uint8_t IF_value = 1;
     const uint8_t DW_value = 2;
