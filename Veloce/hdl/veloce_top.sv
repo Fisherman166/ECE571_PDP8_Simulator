@@ -58,8 +58,8 @@ end
 //tbx clkgen
 initial
 begin
-	rst = 1;
-	#20 rst = 0;
+	rst = 0;
+	#20 rst = 1;
 end
 
 //DPI import functions
