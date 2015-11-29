@@ -29,8 +29,12 @@ int init_temp_mem();
 int send_word_to_hdl(svBitVecVal*, svBitVecVal*, svBitVecVal*);
 int write_mem_trace(const svLogicVecVal*, const svLogicVecVal*, 
                     const svLogicVecVal*, const svLogicVecVal*);
+int write_branch_trace(const svLogicVecVal*, const svLogicVecVal*,
+                       const svBitVecVal*, const svBit*);
 int close_tracefiles();
 
+//*******************************Start of functions*******************************
+//
 int init_tracefiles() {
     const char* opcode_filename = "opcodes_sv.txt";
     const char* branch_trace_filename = "branch_trace_sv.txt";
@@ -140,7 +144,7 @@ int write_mem_trace(const svLogicVecVal* mem_type, const svLogicVecVal* address,
     const uint8_t DR_value = 0;
     const uint8_t IF_value = 1;
     const uint8_t DW_value = 2;
-    char mem_type_text[2];
+    char mem_type_text[3];
 
     if(mem_type->bval) {
         printf("MEM_TRACE ERROR: mem_type is X or Z\n");
@@ -160,11 +164,44 @@ int write_mem_trace(const svLogicVecVal* mem_type, const svLogicVecVal* address,
     }
 
     if(mem_type->aval == DR_value) strcpy(mem_type_text, "DR");
-    if(mem_type->aval == IF_value) strcpy(mem_type_text, "IF");
-    if(mem_type->aval == DW_value) strcpy(mem_type_text, "DW");
+    else if(mem_type->aval == IF_value) strcpy(mem_type_text, "IF");
+    else if(mem_type->aval == DW_value) strcpy(mem_type_text, "DW");
+    else strcpy(mem_type_text, "NA");
 
     fprintf(memory_trace_file, "%s %04o %04o %04o\n", mem_type_text, 
             address->aval, data_bus->aval, data_mem->aval);
+    return 0;
+}
+
+int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* target_pc,
+                       const svBitVecVal* branch_type, const svBit* taken) {
+    const uint8_t type_unconditional = 0;
+    const uint8_t type_conditional = 1;
+    const uint8_t type_subroutine = 2;
+    const uint8_t taken_no = 0;
+    char branch_type[15];
+    char taken_text[10];
+
+    if(current_pc->bval) {
+        printf("BRANCH TRACE ERROR: current_pc is X or Z\n");
+        exit(-10);
+    }
+    if(target_pc->bval) {
+        printf("BRANCH TRACE ERROR: target_pc is X or Z\n");
+        exit(-11);
+    }
+
+    if(*branch_type == type_unconditional) strcpy(branch_type, "Unconditional");
+    else if(*branch_type == type_conditional) strcpy(branch_type, "Conditional");
+    else if(*branch_type == type_subroutine) strcpy(branch_type, "Subroutine");
+    else strcpy(branch_type, "Error");
+
+    if(*taken == taken_no) strcpy(taken_text, "Not Taken");
+    else strcpy(taken_text, "Taken");
+
+    fprintf(branch_trace_file, "Current PC: %04o, Target: %04o, Type: %s, Result: %s\n",
+            current_pc->aval, target_pc->aval, branch_type, taken_text);
+
     return 0;
 }
     
@@ -177,4 +214,3 @@ int close_tracefiles() {
     return 0;
 }
 
-//
