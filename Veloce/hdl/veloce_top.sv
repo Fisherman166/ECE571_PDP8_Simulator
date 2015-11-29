@@ -73,16 +73,24 @@ import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace
 import "DPI-C" task close_tracefiles();
      
 initial begin
+
+     // Initialize Front Panel Buttons to Inactive
+     btnc  = 0;
+     btnu  = 0;     
+     btnr  = 0; 
+     load_pc_btn = 0;     
+     deposit_btn = 0;
      
      // Initalize files
      $display("before reset");
-     @(negedge rst); init_tracefiles();
+     @(posedge rst); init_tracefiles();
      $display("after reset");
      
      // Initialize temp memory image
      repeat(10) @(negedge clk); init_temp_mem();
      $display("before init_temp_mem");
      repeat(10) @(negedge clk); Load_PC(12'o0200); 
+     $display("PC is %o", bus.curr_reg.pc);
      
      // Copy memory image to PDP8
      while (!mem_done) begin
@@ -91,11 +99,9 @@ initial begin
           repeat(30) @(negedge clk); Deposit(mem_data);
      end
      $display("after init_temp_mem");
-     print_valid_memory();
      
      // Set program counter to 200
      repeat(10) @(negedge clk); Load_PC(12'o0200); 
-    $finish();
      
      // Run program
      repeat(10) @(negedge clk); sw[12] = 1;
@@ -114,14 +120,13 @@ initial begin
           end
      end
      
-     // End
-     //@(negedge led[12]); close_tracefiles();
-     //@(negedge clk);
-     //$finish;
 end
 
+// End
 always @(negedge led[12]) begin
     close_tracefiles();
+    print_valid_memory();
+    $display("after print memory");
     $finish();
 end
  

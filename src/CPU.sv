@@ -71,18 +71,18 @@ end
 // ac_reg (Accumulator)
 always_comb begin: AC
      unique case (bus.AC_ctrl)
-          AC_SWREG : next_reg.ac = bus.swreg;                         // load switch register 
-          AC_AND   : next_reg.ac = bus.curr_reg.ac & bus.curr_reg.mb;   // AND instruction
-          AC_TAD   : next_reg.ac = tad_sum                            ;   // TAD instruction
-          AC_CLEAR : next_reg.ac = 0                              		;   // Clear 
-          AC_MICRO : next_reg.ac = ac_micro                           ;   // Group 1 Microcoded Instruction
-          AC_OR_SR : next_reg.ac = bus.curr_reg.ac | bus.swreg        ;   // OR switch register into AC
-          AC_OR_MQ : next_reg.ac = bus.curr_reg.ac | bus.curr_reg.mq  ;   // OR MQ into AC
-          AC_OR_DI : next_reg.ac = bus.curr_reg.ac | {4'h0,bus.datain};   // OR datain from IOT into AC 
-          AC_LD_MQ : next_reg.ac = bus.curr_reg.mq                    ;   // Load MQ register (for swap) 
-          AC_MUL   : next_reg.ac = bus.ac_mul                     ;   // Result from EAE for multiply 
-          AC_DVI   : next_reg.ac = bus.ac_dvi                     ;   // Result from EAE for divide
-          AC_NC    : next_reg.ac = bus.curr_reg.ac                    ;   // No change
+          AC_SWREG : next_reg.ac = bus.swreg;                              // load switch register 
+          AC_AND   : next_reg.ac = bus.curr_reg.ac & bus.curr_reg.mb;      // AND instruction
+          AC_TAD   : next_reg.ac = tad_sum                            ;    // TAD instruction
+          AC_CLEAR : next_reg.ac = 0                                  ;    // Clear 
+          AC_MICRO : next_reg.ac = ac_micro                           ;    // Group 1 Microcoded Instruction
+          AC_OR_SR : next_reg.ac = bus.curr_reg.ac | bus.swreg        ;    // OR switch register into AC
+          AC_OR_MQ : next_reg.ac = bus.curr_reg.ac | bus.curr_reg.mq  ;    // OR MQ into AC
+          AC_OR_DI : next_reg.ac = bus.curr_reg.ac | {4'h0,bus.datain};    // OR datain from IOT into AC 
+          AC_LD_MQ : next_reg.ac = bus.curr_reg.mq                    ;    // Load MQ register (for swap) 
+          AC_MUL   : next_reg.ac = bus.ac_mul                         ;    // Result from EAE for multiply 
+          AC_DVI   : next_reg.ac = bus.ac_dvi                         ;    // Result from EAE for divide
+          AC_NC    : next_reg.ac = bus.curr_reg.ac                    ;    // No change
      endcase     
 end
 
@@ -106,11 +106,11 @@ end
 // mq_reg (For MUL and DVI instructions using EAE component)
 always_comb begin: MQ
      unique case (bus.MQ_ctrl)
-          MQ_AC    : next_reg.mq = bus.curr_reg.ac    ;    // For MQ/AC swap operation
-          MQ_MUL   : next_reg.mq = bus.mq_mul     ;    // For multiplication
-          MQ_DVI   : next_reg.mq = bus.mq_dvi     ;    // For divisiond
-          MQ_ZERO  : next_reg.mq = 0              ;    // Zero out   
-          MQ_NC    : next_reg.mq = bus.curr_reg.mq    ;    // Default, no change     
+          MQ_AC    : next_reg.mq = bus.curr_reg.ac     ;    // For MQ/AC swap operation
+          MQ_MUL   : next_reg.mq = bus.mq_mul          ;    // For multiplication
+          MQ_DVI   : next_reg.mq = bus.mq_dvi          ;    // For divisiond
+          MQ_ZERO  : next_reg.mq = 0                   ;    // Zero out   
+          MQ_NC    : next_reg.mq = bus.curr_reg.mq     ;    // Default, no change     
      endcase     
 end
 
@@ -121,7 +121,8 @@ always_comb begin: PC
           PC_EAP1  : next_reg.pc = bus.curr_reg.ea + 1     ;    // for JMS
           PC_SR    : next_reg.pc = bus.swreg               ;    // Load from front panel
           PC_EA    : next_reg.pc = bus.curr_reg.ea         ;    // Load from effective address 
-          PC_JMP   : next_reg.pc = bus.read_data           ;    
+          PC_JMP   : next_reg.pc = bus.read_data           ;    // Load from read data
+          PC_ZERO  : next_reg.pc = 0                       ;    // Initial Value
           PC_NC    : next_reg.pc = bus.curr_reg.pc         ;    // No change
      endcase     
 end
@@ -131,6 +132,7 @@ always_comb begin: IR
      unique case (bus.IR_ctrl)
           IR_LD    : next_reg.ir = bus.read_data           ;    // Load instruction from memory
           IR_MEM_P1: next_reg.ir = bus.curr_reg.mb + 1     ;    // for auto increment
+          IR_ZERO  : next_reg.ir = 0                       ;    // Initialize to 0
           IR_NC    : next_reg.ir = bus.curr_reg.ir         ;    // No change
      endcase     
 end
@@ -162,13 +164,14 @@ end
 // write data (Data to memory module)
 always_comb begin: WD
      unique case (bus.WD_ctrl)
-          WD_MB     : next_write_data = bus.curr_reg.mb         ;    // Contents of memory buffer
-          WD_RDP1   : next_write_data = bus.read_data + 1       ;    // Contents of memory buffer 
-          WD_AC     : next_write_data = bus.curr_reg.ac         ;    // Contents of accumulator
-          WD_EA     : next_write_data = bus.curr_reg.ea         ;    // Contents of effective address register
-          WD_PC   : next_write_data = bus.curr_reg.pc          ;    // Program counter 
-          WD_SR     : next_write_data = bus.swreg            ;   // Deposit switch reg into memory     
-          WD_NC     : next_write_data = bus.write_data      ;    // No change
+          WD_MB     : next_write_data = bus.curr_reg.mb          ;    // Contents of memory buffer
+          WD_RDP1   : next_write_data = bus.read_data + 1        ;    // Contents of memory buffer 
+          WD_AC     : next_write_data = bus.curr_reg.ac          ;    // Contents of accumulator
+          WD_EA     : next_write_data = bus.curr_reg.ea          ;    // Contents of effective address register
+          WD_PC     : next_write_data = bus.curr_reg.pc          ;    // Program counter 
+          WD_SR     : next_write_data = bus.swreg                ;    // Deposit switch reg into memory 
+          WD_ZERO   : next_write_data = 0                        ;    // Initialize to Zero  
+          WD_NC     : next_write_data = bus.write_data           ;    // No change
      endcase     
 end
 

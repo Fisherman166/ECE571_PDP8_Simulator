@@ -58,15 +58,17 @@ package CPU_Definitions;
           PC_P1   = 0,             // Normal PC increment
           PC_EAP1    ,             // Skip
           PC_SR      ,             // Load from front panel
-          PC_JMP     ,              
+          PC_JMP     ,             // Load from EA for Jump 
           PC_EA      ,             // Load from effective address
+          PC_ZERO    ,             // Zero out
           PC_NC                    // No change
                               } PC_ctrl_t;
      
      // IR control signal
-     typedef enum logic [1:0] {
+     typedef enum logic [2:0] {
           IR_LD   = 0,             // Load instruction from memory
           IR_MEM_P1  ,             // for auto increment
+          IR_ZERO    ,             // Zero out
           IR_NC                    // No change
                               } IR_ctrl_t;
      
@@ -95,8 +97,9 @@ package CPU_Definitions;
           WD_MB = 0,               // Contents of memory buffer
           WD_AC    ,               // Contents of accumulator
           WD_EA    ,               // Contents of effective address register
-          WD_PC  ,               // Program counter plus 1 
-          WD_RDP1  ,
+          WD_PC    ,               // Program counter plus 1 
+          WD_RDP1  ,               // Add one to Read Data
+          WD_ZERO  ,               // Zero Out
           WD_SR    ,               // Deposit Swith Register to memory     
           WD_NC                    // No change
                               } WD_ctrl_t;                          

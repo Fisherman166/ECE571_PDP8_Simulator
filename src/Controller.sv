@@ -195,8 +195,10 @@ always_comb begin: Output_Logic
                          bus.MQ_ctrl = MQ_ZERO;
                          bus.EA_ctrl = EA_ZERO;
                          bus.MB_ctrl = MB_ZERO;
-                         
-                         
+                         bus.PC_ctrl = PC_ZERO;
+                         bus.WD_ctrl = WD_ZERO;
+                         bus.IR_ctrl = IR_ZERO;
+
                     end
                     
           CPU_IDLE: begin
