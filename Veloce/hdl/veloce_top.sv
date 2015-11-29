@@ -101,25 +101,31 @@ initial begin
      $display("after init_temp_mem");
      
      // Set program counter to 200
-     repeat(10) @(negedge clk); Load_PC(12'o0200); 
+     repeat(10) @(negedge clk); Load_PC(12'o0200);
+     $display("pc set to %o"  , bus.curr_reg.pc);
      
      // Run program
      repeat(10) @(negedge clk); sw[12] = 1;
-     
-     // Write memory trace file
-     while (led[12] == 1) begin
-     @(posedge bus.mem_finished);
+     $display("run switch set to on");     
+ 
+end
+
+// Write memory trace file
+always @(posedge bus.mem_finished) begin
+     if (led[12] == 1) begin
+          $display("writing memory trace"); 
           if (bus.read_enable) begin
+               $display("writing memory trace for read"); 
                if (bus.Curr_State == FETCH_2) mem_type = 2'b01;   
                else mem_type = '0;
-          write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address].data);     
+               write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address].data);     
           end
           if (bus.write_enable) begin
-          mem_type = 2'b10;
-          write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
+               $display("writing memory trace for write"); 
+               mem_type = 2'b10;
+               write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
           end
-     end
-     
+     end     
 end
 
 // End
