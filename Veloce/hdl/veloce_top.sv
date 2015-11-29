@@ -70,6 +70,8 @@ import "DPI-C" task send_word_to_hdl(output bit [11:0] mem_address,
                                      output bit mem_done);
 import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace_address, 
                                     input word data_bus, input word data_mem);
+import "DPI-C" task write_branch_trace(input word current_pc, input word target_pc, 
+                                       input bit [1:0] branch_type, input bit taken);
 import "DPI-C" task close_tracefiles();
 
 initial begin
@@ -99,26 +101,21 @@ initial begin
      
      // Set program counter to 200
      repeat(10) @(negedge clk); Load_PC(12'o0200);
-     //$display("pc set to %o"  , bus.curr_reg.pc);
      
      // Run program
      repeat(10) @(negedge clk); sw[12] = 1;
-     //$display("run switch set to on");     
  
 end
 
 // Write memory trace file
 always @(posedge bus.mem_finished) begin
      if (led[12] == 1) begin
-          //$display("writing memory trace"); 
           if (bus.read_enable) begin
-               //$display("writing memory trace for read"); 
                if (bus.Curr_State == FETCH_2) mem_type = 2'b01;   
                else mem_type = '0;
                write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address].data);     
           end
           if (bus.write_enable) begin
-               //$display("writing memory trace for write"); 
                mem_type = 2'b10;
                write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
           end
@@ -128,7 +125,6 @@ end
 // End
 always @(negedge led[12]) begin
     close_tracefiles();
-    //print_valid_memory();
     $finish();
 end
  
@@ -148,23 +144,6 @@ task Deposit(input bit [11:0] data);
     repeat(10) @ (negedge clk); deposit_btn = 0;
 endtask 
 
-// function void print_valid_memory();
-//        automatic integer file = $fopen("valid_memory_sv.txt", "w");
-//
-//            if(!file) $display ("Error opening valid_memory_sv.txt file");
-//
-//		$fdisplay(file, "Address    Contents");
-//		$fdisplay(file, "-------    --------");
-//
-//		for(int i = 0; i < 4096; i++) begin
-//			if(bus.memory[i].valid == 1'b1) begin
-//				$fdisplay(file, "%04o        %04o", i, bus.memory[i].data);
-//			end //if
-//		end //for
-//
-//        $fclose(file);
-//	endfunction
-	
 endmodule
 
 //
