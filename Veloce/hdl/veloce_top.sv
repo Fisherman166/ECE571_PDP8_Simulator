@@ -4,6 +4,78 @@
 `include "CPU_Definitions.pkg"
 `include "memory_utils.pkg"
 
+//Defines for easy access to signals
+`define READ_ENABLE     bus.read_enable
+`define WRITE_ENABLE    bus.write_enable
+`define MEM_FINISHED    bus.mem_finished
+`define MEM_ADDRESS     bus.address
+`define MEM_VALID       bus.memory[bus.address].valid
+`define MEM_READ_DATA   bus.read_data
+`define MEM_DATA        bus.memory[bus.address].data
+`define MEM_WRITE_DATA  bus.write_data
+`define AC_REG          bus.curr_reg.ac
+`define PC_REG          bus.curr_reg.pc
+`define IR_REG          bus.curr_reg.ir
+`define MB_REG          bus.curr_reg.mb
+`define EA_REG          bus.curr_reg.ea
+`define LINK            bus.curr_reg.lk
+`define CURR_STATE      bus.Curr_State
+`define RUN_LED         led[12]
+`define IDLE_LED        led[13]
+`define RUN_SWITCH      sw[12]
+`define ON              1
+`define OFF             0
+
+//Opcodes for instruction text
+`define OPCODE_AND     3'o0
+`define OPCODE_TAD     3'o1
+`define OPCODE_ISZ     3'o2
+`define OPCODE_DCA     3'o3
+`define OPCODE_JMS     3'o4
+`define OPCODE_JMP     3'o5
+
+// Group 1 micro instructions
+`define MICRO_INSTRUCTION_CLA 12'o7200
+`define MICRO_INSTRUCTION_CLL 12'o7100
+`define MICRO_INSTRUCTION_CMA 12'o7040
+`define MICRO_INSTRUCTION_CML 12'o7020
+`define MICRO_INSTRUCTION_IAC 12'o7001
+`define MICRO_INSTRUCTION_RAR 12'o7010
+`define MICRO_INSTRUCTION_RTR 12'o7012
+`define MICRO_INSTRUCTION_RAL 12'o7004
+`define MICRO_INSTRUCTION_RTL 12'o7006
+
+// Group 2 micro instructions
+`define MICRO_INSTRUCTION_SMA 12'o7500
+`define MICRO_INSTRUCTION_SZA 12'o7440
+`define MICRO_INSTRUCTION_SNL 12'o7420
+`define MICRO_INSTRUCTION_SPA 12'o7510
+`define MICRO_INSTRUCTION_SNA 12'o7450
+`define MICRO_INSTRUCTION_SZL 12'o7430
+`define MICRO_INSTRUCTION_SKP 12'o7410
+`define MICRO_INSTRUCTION_CLA2 12'o7600
+`define MICRO_INSTRUCTION_OSR 12'o7404
+`define MICRO_INSTRUCTION_HLT 12'o7402
+
+//Group 3 micro instructions
+`define MICRO_INSTRUCTION_CLA3 12'o7601
+`define MICRO_INSTRUCTION_MQL 12'o7421
+`define MICRO_INSTRUCTION_MQA 12'o7501
+`define MICRO_INSTRUCTION_SWP 12'o7521
+`define MICRO_INSTRUCTION_CAM 12'o7621
+
+//Memory Trace
+`define D_READ      2'b00
+`define I_FETCH     2'b01 
+`define D_WRITE     2'b10
+
+//Write branch trace file
+`define UNCONDITIONAL    2'b00 
+`define CONDITIONAL      2'b01 
+`define SUBROUTINE       2'b10 
+`define TAKEN            1'b1  
+`define NOT_TAKEN        1'b1  
+
 /******************************** Declare Module Ports **********************************/
 
 module veloce_top ();
@@ -34,11 +106,6 @@ bit          mem_done = 0     ;
 // Signal for write_mem_trace
 logic [1:0]  mem_type         ;
 // Signals for write_branch_trace
-const bit [1:0] Unconditional = 2'b00   ;
-const bit [1:0] Conditional   = 2'b01   ;
-const bit [1:0] Subroutine    = 2'b10   ;
-const bit       Taken         = 1'b1    ;
-const bit       Not_Taken     = 1'b1    ;
 word            pc_temp                 ;
 bit             cond_skip_flag          ;
 
@@ -81,9 +148,9 @@ import "DPI-C" task write_mem_trace(input logic [1:0] mem_type, input word trace
 import "DPI-C" task write_branch_trace(input word current_pc, input word target_pc, 
                                        input bit [1:0] branch_type, input bit taken);
 import "DPI-C" task write_valid_memory(input word address, input word data);
-//import "DPI-C" task int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
-//                                     const svLogic* link, const svLogicVecVal* mb_reg,
-//                                     const svLogicVecVal* pc_reg, const svLogicVecVal* ea_reg)
+import "DPI-C" task write_opcode(input word ir_reg, input word ac_reg,
+                                 input bit link   , input word mb_reg,
+                                 input word pc_reg, input word ea_reg);
 import "DPI-C" task close_tracefiles();
 
 initial begin
@@ -115,46 +182,54 @@ initial begin
      repeat(10) @(negedge clk); Load_PC(12'o0200);
      
      // Run program
-     repeat(10) @(negedge clk); sw[12] = 1;
+     repeat(10) @(negedge clk); `RUN_SWITCH = `ON;
  
 end
 
 // Generates memory trace file
-always @(posedge bus.mem_finished) begin
-     if (led[12] == 1) begin
-          if (bus.read_enable) begin
-               if (bus.Curr_State == FETCH_2) mem_type = 2'b01;   
-               else mem_type = '0;
-               write_mem_trace(mem_type, bus.address, bus.read_data, bus.memory[bus.address].data);     
+always @(posedge `MEM_FINISHED) begin
+     if (`RUN_LED == `ON) begin
+          if (`READ_ENABLE) begin
+               if (`CURR_STATE == FETCH_2) mem_type = `I_FETCH;   
+               else mem_type = `D_READ;
+               write_mem_trace(mem_type, `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);     
           end
-          if (bus.write_enable) begin
-               mem_type = 2'b10;
-               write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
+          if (`WRITE_ENABLE) begin
+               mem_type = `D_WRITE;
+               write_mem_trace(mem_type, `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);      
           end
      end     
 end
 
 // Generates branch trace file
-always_comb begin
-     if (bus.Curr_State === JMS_1)
-          write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea + 1, Subroutine, Taken); 
-     if (bus.Curr_State === JMP_1)
-          write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea,  Unconditional, Taken); 
-     if (bus.Curr_State === MIC_2 || bus.Curr_State === ISZ_1) begin
-          pc_temp = bus.curr_reg.pc;
-          if (bus.curr_reg.ir[2]) cond_skip_flag = 0; // for OSR instruction
+always @(`CURR_STATE) begin
+     if (`CURR_STATE === JMS_1)
+          write_branch_trace(`PC_REG, (`EA_REG + 1), `SUBROUTINE, `TAKEN); 
+     if (`CURR_STATE === JMP_1)
+          write_branch_trace(`PC_REG, `EA_REG,  `UNCONDITIONAL, `TAKEN); 
+     if (`CURR_STATE === MIC_2 || `CURR_STATE === ISZ_1) begin
+          pc_temp = `PC_REG;
+          if (`IR_REG[2]) cond_skip_flag = 0; // for OSR instruction
           else cond_skip_flag = 1;
      end     
      // If returned to idle state and flag is 1, print trace info
-     else if (((bus.Curr_State === CPU_IDLE) || (bus.Curr_State === HALT))  && cond_skip_flag && led[12]) begin
+     else if (((`CURR_STATE === CPU_IDLE) || (`CURR_STATE === HALT))  && cond_skip_flag && `RUN_LED) begin
           cond_skip_flag = 0;
-          if(bus.curr_reg.ir === 12'o7410) // skip instruction
-               write_branch_trace(pc_temp, pc_temp + 1,  Unconditional, Taken); 
-          else if ((bus.curr_reg.pc - pc_temp) !== 0)
-               write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Taken); 
+          if(`IR_REG === `MICRO_INSTRUCTION_SKP) // skip instruction
+               write_branch_trace(pc_temp, pc_temp + 1,  `UNCONDITIONAL, `TAKEN); 
+          else if ((`PC_REG - pc_temp) !== 0)
+               write_branch_trace(pc_temp, pc_temp + 1,  `CONDITIONAL  , `TAKEN); 
           else
-               write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Not_Taken); 
+               write_branch_trace(pc_temp, pc_temp + 1,  `CONDITIONAL  , `NOT_TAKEN); 
     end     
+end
+
+// Print contents of all registers after each instruction
+always @(posedge `IDLE_LED) begin
+     //Only print this 
+     if(`RUN_LED === `ON) begin
+          write_opcode(`IR_REG, `AC_REG, `LINK, `MB_REG, `PC_REG, `EA_REG);
+     end
 end
 
 // End
