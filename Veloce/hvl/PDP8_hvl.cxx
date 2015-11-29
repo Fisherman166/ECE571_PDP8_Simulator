@@ -33,7 +33,7 @@ int write_branch_trace(const svLogicVecVal*, const svLogicVecVal*,
                        const svBitVecVal*, svBit);
 int write_valid_memory(const svLogicVecVal*, const svLogicVecVal*);
 int write_opcode(const svLogicVecVal*, const svLogicVecVal*,
-                 const svLogic*, const svLogicVecVal*,
+                 svLogic, const svLogicVecVal*,
                  const svLogicVecVal*, const svLogicVecVal*);
 int close_tracefiles();
 
@@ -225,7 +225,7 @@ int write_valid_memory(const svLogicVecVal* address, const svLogicVecVal* data) 
 }
 
 int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
-                 const svLogic* link, const svLogicVecVal* mb_reg,
+                 svLogic link, const svLogicVecVal* mb_reg,
                  const svLogicVecVal* pc_reg, const svLogicVecVal* ea_reg) {
     if(ir_reg->bval) {
         printf("OPCODE ERROR: ir_reg is X or Z\n");
@@ -235,10 +235,10 @@ int write_opcode(const svLogicVecVal* ir_reg, const svLogicVecVal* ac_reg,
         printf("OPCODE ERROR: ac_reg is X or Z\n");
         exit(-15);
     }
-    //if(link->bval) {
-    //    printf("OPCODE ERROR: link is X or Z\n");
-    //    exit(-16);
-    //}
+//    if(link.bval) {
+//        printf("OPCODE ERROR: link is X or Z\n");
+//        exit(-16);
+//    }
     if(mb_reg->bval) {
         printf("OPCODE ERROR: mb_reg is X or Z\n");
         exit(-17);

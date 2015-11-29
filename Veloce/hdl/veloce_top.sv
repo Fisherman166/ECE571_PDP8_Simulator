@@ -149,7 +149,7 @@ import "DPI-C" task write_branch_trace(input word current_pc, input word target_
                                        input bit [1:0] branch_type, input bit taken);
 import "DPI-C" task write_valid_memory(input word address, input word data);
 import "DPI-C" task write_opcode(input word ir_reg, input word ac_reg,
-                                 input bit link   , input word mb_reg,
+                                 input logic link, input word mb_reg,
                                  input word pc_reg, input word ea_reg);
 import "DPI-C" task close_tracefiles();
 
@@ -225,12 +225,12 @@ always @(posedge clk) begin
 end
 
 // Print contents of all registers after each instruction
-//always @(posedge `IDLE_LED) begin
-//     //Only print this 
-//     if(`RUN_LED === `ON) begin
-//          write_opcode(`IR_REG[11:9], `AC_REG, `LINK, `MB_REG, `PC_REG, `EA_REG);
-//     end
-//end
+always @(posedge `IDLE_LED) begin
+     //Only print this 
+     if(`RUN_LED === `ON) begin
+          write_opcode(`IR_REG[11:9], `AC_REG, `LINK, `MB_REG, `PC_REG, `EA_REG);
+     end
+end
 
 // End
 always @(negedge led[12]) begin
