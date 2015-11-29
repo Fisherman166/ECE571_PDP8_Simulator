@@ -74,7 +74,7 @@
 `define CONDITIONAL      2'b01 
 `define SUBROUTINE       2'b10 
 `define TAKEN            1'b1  
-`define NOT_TAKEN        1'b1  
+`define NOT_TAKEN        1'b0
 
 /******************************** Declare Module Ports **********************************/
 
@@ -202,7 +202,7 @@ always @(posedge `MEM_FINISHED) begin
 end
 
 // Generates branch trace file
-always @(`CURR_STATE) begin
+always @(posedge clk) begin
      if (`CURR_STATE === JMS_1)
           write_branch_trace(`PC_REG, (`EA_REG + 1), `SUBROUTINE, `TAKEN); 
      if (`CURR_STATE === JMP_1)
@@ -225,12 +225,12 @@ always @(`CURR_STATE) begin
 end
 
 // Print contents of all registers after each instruction
-always @(posedge `IDLE_LED) begin
-     //Only print this 
-     if(`RUN_LED === `ON) begin
-          write_opcode(`IR_REG, `AC_REG, `LINK, `MB_REG, `PC_REG, `EA_REG);
-     end
-end
+//always @(posedge `IDLE_LED) begin
+//     //Only print this 
+//     if(`RUN_LED === `ON) begin
+//          write_opcode(`IR_REG[11:9], `AC_REG, `LINK, `MB_REG, `PC_REG, `EA_REG);
+//     end
+//end
 
 // End
 always @(negedge led[12]) begin
