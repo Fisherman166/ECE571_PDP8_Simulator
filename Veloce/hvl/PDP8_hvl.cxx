@@ -183,7 +183,7 @@ int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* tar
     const uint8_t type_conditional = 1;
     const uint8_t type_subroutine = 2;
     const uint8_t taken_no = 0;
-    char branch_type[15];
+    char branch_type_text[15];
     char taken_text[10];
 
     if(current_pc->bval) {
@@ -195,16 +195,16 @@ int write_branch_trace(const svLogicVecVal* current_pc, const svLogicVecVal* tar
         exit(-11);
     }
 
-    if(*branch_type == type_unconditional) strcpy(branch_type, "Unconditional");
-    else if(*branch_type == type_conditional) strcpy(branch_type, "Conditional");
-    else if(*branch_type == type_subroutine) strcpy(branch_type, "Subroutine");
-    else strcpy(branch_type, "Error");
+    if(*branch_type == type_unconditional) strcpy(branch_type_text, "Unconditional");
+    else if(*branch_type == type_conditional) strcpy(branch_type_text, "Conditional");
+    else if(*branch_type == type_subroutine) strcpy(branch_type_text, "Subroutine");
+    else strcpy(branch_type_text, "Error");
 
     if(*taken == taken_no) strcpy(taken_text, "Not Taken");
     else strcpy(taken_text, "Taken");
 
     fprintf(branch_trace_file, "Current PC: %04o, Target: %04o, Type: %s, Result: %s\n",
-            current_pc->aval, target_pc->aval, branch_type, taken_text);
+            current_pc->aval, target_pc->aval, branch_type_text, taken_text);
 
     return 0;
 }
