@@ -33,7 +33,15 @@ bit [11:0]   mem_data         ;
 bit          mem_done = 0     ;
 // Signal for write_mem_trace
 logic [1:0]  mem_type         ;
- 
+// Signals for write_branch_trace
+const bit [1:0] Unconditional = 2'b00   ;
+const bit [1:0] Conditional   = 2'b01   ;
+const bit [1:0] Subroutine    = 2'b10   ;
+const bit       Taken         = 1'b1    ;
+const bit       Not_Taken     = 1'b1    ;
+word            pc_temp                 ;
+bit             cond_skip_flag          ;
+
 /********************************* Instatiate Modules **********************************/
 
 Front_Panel FP0 (.clock(clk),.resetN(rst),.btnd(deposit_btn),.btnl(load_pc_btn),.*);    
@@ -111,7 +119,7 @@ initial begin
  
 end
 
-// Write memory trace file
+// Generates memory trace file
 always @(posedge bus.mem_finished) begin
      if (led[12] == 1) begin
           if (bus.read_enable) begin
@@ -124,6 +132,29 @@ always @(posedge bus.mem_finished) begin
                write_mem_trace(mem_type, bus.address, bus.write_data, bus.memory[bus.address].data);     
           end
      end     
+end
+
+// Generates branch trace file
+always_comb begin
+     if (bus.CPU_State === JMS_1)
+          write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea + 1, Subroutine, Taken); 
+     if (bus.CPU_State === JMP_1)
+          write_branch_trace(bus.curr_reg.pc, bus.curr_reg.ea,  Unconditional, Taken); 
+     if (bus.CPU_State === MIC_2 || bus.CPU_State === ISZ_1) begin
+          pc_temp = bus.curr_reg.pc;
+          if (bus.curr_reg.ir[2]) cond_skip_flag = 0; // for OSR instruction
+          else cond_skip_flag = 1;
+     end     
+     // If returned to idle state and flag is 1, print trace info
+     else if (((bus.CPU_State === CPU_IDLE) || (bus.CPU_State === HALT))  && cond_skip_flag && led[12]) begin
+          cond_skip_flag = 0;
+          if(bus.curr_reg.ir === 12'o7410) // skip instruction
+               write_branch_trace(pc_temp, pc_temp + 1,  Unconditional, Taken); 
+          else if ((curr_reg.pc - pc_temp) !== 0)
+               write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Taken); 
+          else
+               write_branch_trace(pc_temp, pc_temp + 1,  Conditional, Not_Taken); 
+    end     
 end
 
 // End
