@@ -196,7 +196,7 @@ always @(posedge `MEM_FINISHED) begin
           end
           if (`WRITE_ENABLE) begin
                mem_type = `D_WRITE;
-               write_mem_trace(mem_type, `MEM_ADDRESS, `MEM_READ_DATA, `MEM_DATA);      
+               write_mem_trace(mem_type, `MEM_ADDRESS, `MEM_WRITE_DATA, `MEM_DATA);      
           end
      end     
 end
