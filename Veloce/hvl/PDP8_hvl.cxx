@@ -69,6 +69,8 @@ int init_tracefiles() {
 
     fprintf(memory_trace_file, "OP Addr Bus  Mem \n");
     fprintf(memory_trace_file, "-- ---- ---- ----\n");
+	fprintf(valid_memory_file, "Address    Contents\n");
+	fprintf(valid_memory_file, "-------    --------\n");
     printf("Done opening trace files\n");
 
     return 0;
