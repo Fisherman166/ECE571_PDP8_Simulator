@@ -149,7 +149,7 @@ import "DPI-C" task write_branch_trace(input word current_pc, input word target_
                                        input bit [1:0] branch_type, input bit taken);
 import "DPI-C" task write_valid_memory(input word address, input word data);
 import "DPI-C" task write_opcode(input word ir_reg, input word ac_reg,
-                                 input logic link, input word mb_reg,
+                                 input bit link   , input word mb_reg,
                                  input word pc_reg, input word ea_reg);
 import "DPI-C" task close_tracefiles();
 
@@ -233,7 +233,8 @@ always @(posedge `IDLE_LED) begin
 end
 
 // End
-always @(negedge led[12]) begin
+always @(negedge `RUN_LED) begin
+    print_valid_memory();
     close_tracefiles();
     $finish();
 end
@@ -253,6 +254,15 @@ task Deposit(input bit [11:0] data);
     repeat(10) @ (negedge clk); deposit_btn = 1;
     repeat(10) @ (negedge clk); deposit_btn = 0;
 endtask 
+
+task print_valid_memory();
+     for(int i = 0; i < 4096; i++) begin
+          `MEM_ADDRESS = i;
+          if(`MEM_VALID) begin
+               write_valid_memory(`MEM_ADDRESS, `MEM_DATA);
+		end // if
+	end //for
+endtask
 
 endmodule
 

@@ -35,4 +35,3 @@ endif
                                                                                 
 clean:
 	rm -rf edsenv transcript modelsim.ini transcript.veloce veloce.puresim transcript.puresim veloce.map veloce.wave velrunopts.ini work work.veloce veloce.out veloce.med veloce.log work.puresim tbxbindings.h
-
