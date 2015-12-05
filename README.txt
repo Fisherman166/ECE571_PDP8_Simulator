@@ -9,7 +9,9 @@ but there is still a few steps you have to walk through.
 
 **NOTE: For some reason the simulation version of the SystemVerilog and the C
 version golden model don't work very well on the veloce workstation. Running
-these builds on eve.ece.pdx.edu works much better.
+these builds on eve.ece.pdx.edu works much better. On Veloce, the C version
+seg faults, and the SystemVerilog compile requires you to manually run 'vlib
+work'. I'm not sure why this is.
 
 /******************************************************************************
 ** SIMULATION BUILD AND RUN FLOW
@@ -106,6 +108,42 @@ project):
 
 ./run_and_check_results.pl -c -sv -runc -all
 
+
+****NOTE: If you can't run the script you may need to do a chmod u+x
+run_and_check_results to get the permission to run the script.
+
 /******************************************************************************
 ** EMULATION BUILD AND RUN FLOW
 ******************************************************************************/
+
+This build flow obviously has to be ran on the velocesolo workstation. As
+stated above, the C model segmentation faults on when running on this server,
+so the SystemVerilog simulation model becomes the golden model when running on
+veloce.
+
+-------------------------------------------------------------------------------
+
+All of the emulation related collatoral is located in ROOT/Veloce. Inside of
+the Veloce folder there is a makefile you can edit to run either in puresim
+mode or veloce mode (it's as simple as uncommenting the one you want out and
+commenting the other one out). To compile and run simply type 'make' in the Veloce
+folder.
+
+-------------------------------------------------------------------------------
+
+Since C-dpi functions load the initial memory image on the emulator, I wasn't 
+able to figure out how to paramaterize the input filename. For this reason,
+the .obj file you want to run with MUST be called 'init_mem.obj' or the C-dpi
+function that loads memory will fail. Also, the 'init_mem.obj' file must be
+located in the ROOT/Veloce folder. After running the pal assembler as
+explained above in the simulation section, you will need to manually change
+the name of the test and move it to the Veloce folder. Annoying, I know, but
+it is what it is.
+
+-------------------------------------------------------------------------------
+
+Since the C model seg faults, you have to use the SystemVerilig simulation
+model as a 'golden' model. You can run the simulation model as explained
+above, but you may have to run 'vlib work' manually before doing 'make'. Once
+you have it running, you can do a diff between the *_sv.txt in ROOT/Veloce vs
+the *_sv.txt files in ROOT.
