@@ -13,6 +13,7 @@
 #include "debugger.h"
 //#define MEMORY_DEBUG
 #define OP_CODE_MASK 07000		// bits 0,1,2
+#define NO_OPCODE_TEXT
 
 static uint32_t clock_cycles = 0;
 static uint32_t opcode_freq[OPCODE_NUM];
@@ -343,9 +344,15 @@ void* run_program(void* keyboard_object){
 				clock_cycles += opcode_cycles[registers.IR] + 2;
 			}
 
+        #ifndef NO_OPCODE_TEXT
 			fprintf(opcode_file, "Opcode %s: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
                     instruct_text, registers.IR, registers.AC & CUTOFF_MASK, 
 					registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
+        #else
+			fprintf(opcode_file, "Opcode: %03o, AC: %04o, Link: %01o, MB: %04o, PC: %04o, CPMA: %04o\n",
+                    registers.IR, registers.AC & CUTOFF_MASK, 
+					registers.link_bit, registers.MB & CUTOFF_MASK, registers.PC, registers.CPMA);
+        #endif
 
 		} // while(running)
 		if (debugger_running()){

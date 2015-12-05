@@ -5,6 +5,7 @@
 `include "memory_utils.pkg"
 
 //`define FILL_DEBUG
+`define NO_OPCODE_TEXT
 
 //Defines for easy access to signals
 `define READ_ENABLE     read_enable
@@ -172,9 +173,15 @@ module simulation_tb ();
                 end
             end
 
-            $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
-                      instruction_text, curr_reg.ir[11:9], curr_reg.ac, curr_reg.lk,
-                      curr_reg.mb, curr_reg.pc, curr_reg.ea);
+            `ifndef NO_OPCODE_TEXT
+                $fdisplay(reg_file, "Opcode %s: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
+                          instruction_text, curr_reg.ir[11:9], curr_reg.ac, curr_reg.lk,
+                          curr_reg.mb, curr_reg.pc, curr_reg.ea);
+            `else
+                $fdisplay(reg_file, "Opcode: %03o, AC: %o, Link: %b, MB: %o, PC: %o, CPMA: %o", 
+                          curr_reg.ir[11:9], curr_reg.ac, curr_reg.lk,
+                          curr_reg.mb, curr_reg.pc, curr_reg.ea);
+            `endif
         end
     end
 
