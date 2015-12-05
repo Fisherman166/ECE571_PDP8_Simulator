@@ -234,7 +234,7 @@ end
 
 // End
 always @(negedge `RUN_LED) begin
-    print_valid_memory();
+    //print_valid_memory();
     close_tracefiles();
     $finish();
 end
@@ -255,14 +255,14 @@ task Deposit(input bit [11:0] data);
     repeat(10) @ (negedge clk); deposit_btn = 0;
 endtask 
 
-task print_valid_memory();
-     for(int i = 0; i < 4096; i++) begin
-          `MEM_ADDRESS = i;
-          if(`MEM_VALID) begin
-               write_valid_memory(`MEM_ADDRESS, `MEM_DATA);
-		end // if
-	end //for
-endtask
+//task print_valid_memory();
+//     for(int i = 0; i < 4096; i++) begin
+//          `MEM_ADDRESS = i;
+//          if(`MEM_VALID) begin
+//               write_valid_memory(`MEM_ADDRESS, `MEM_DATA);
+//		end // if
+//	end //for
+//endtask
 
 endmodule
 
